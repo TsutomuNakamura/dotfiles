@@ -169,6 +169,10 @@ function deploy() {
     do
         [[ "$f" == ".git" ]] && continue
         [[ "$f" == ".DS_Store" ]] && continue
+        [[ "$f" == ".gitignore" ]] && continue
+        [[ "$f" == ".gitmodules" ]] && continue
+        [[ "$f" == "*.swp" ]] && continue
+
         dotfiles+=($f)
     done
     popd
@@ -176,7 +180,7 @@ function deploy() {
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
-        # ln -s ${dotfiles[i]}
+        ln -s ${DOTDIR}/${dotfiles[i]}
     }
     popd
 }
