@@ -3,8 +3,6 @@ set -eu
 
 trap 'echo "SIG INT was received. This program will be terminated." && exit 1' INT
 
-export HOME="/home/tsutomu"    # TODO: testing
-
 # URI of dotfiles repository
 REPO_URI="https://github.com/TsutomuNakamura/dotfiles"
 # The directory whom dotfiles resources will be installed
