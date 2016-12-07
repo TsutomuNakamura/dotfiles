@@ -123,13 +123,13 @@ function install_patched_fonts() {
     pushd ${HOME}/${DOTDIR}
     mkdir -p ./resources/tmp
     pushd ./resources/tmp
-    # git clone https://github.com/powerline/fonts      # TODO
-    # pushd fonts                                       # TODO
-    # bash ./install.sh                                 # TODO: TODO: error handling
+    git clone https://github.com/powerline/fonts      # TODO
+    pushd fonts                                       # TODO
+    bash ./install.sh                                 # TODO: TODO: error handling
 
     popd
     popd
-    # popd                                              # TODO:
+    popd                                              # TODO:
 }
 
 function install_packages_with_apt() {
@@ -202,15 +202,15 @@ function init_repo() {
     pushd ${HOME}/${DOTDIR}
     if is_here_git_repo; then
         echo "The repository ${REPO_URI} is already existed. Pulling from \"origin master\""
-        # git pull origin master    # TODO: testing
+        git pull origin master    # TODO: testing
         # TODO: error handling
     else
         echo "The repository is not existed. Cloning from ${REPO_URI}"
         git clone $REPO_URI
-        git submodule init
     fi
 
     echo "Updating submodules..."
+    git submodule init
     git submodule update
 
     popd
@@ -223,14 +223,14 @@ function init_vim_environment() {
 
     # Install pathogen.vim
     mkdir -p ./.vim/autoload
-    # curl -LSso ./.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim    # TODO
+    curl -LSso ./.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
 
     # update vim's submodules
     # Link color theme
 
     mkdir -p .vim/colors/
     pushd .vim/colors
-    # ln -s ../../resources/etc/config/vim/colors/molokai.vim    # TODO
+    ln -s ../../resources/etc/config/vim/colors/molokai.vim
 
     popd
     popd
