@@ -112,11 +112,11 @@ function init() {
 # Install packages
 function install_packages() {
     if [ "$(get_distribution_name)" == "debian" ]; then
-        install_packages_with_apt vim vim-gtk ctags tmux
+        install_packages_with_apt git vim vim-gtk ctags tmux
     elif [ "$(get_distribution_name)" == "fedora" ]; then
-        install_packages_with_dnf vim vim-gtk ctags tmux
+        install_packages_with_dnf git vim vim-gtk ctags tmux
     elif [ "$(get_distribution_name)" == "arch" ]; then
-        install_packages_with_pacman gvim ctags tmux
+        install_packages_with_pacman git gvim ctags tmux
     fi
 }
 
