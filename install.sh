@@ -122,14 +122,15 @@ function install_packages() {
 
 # Installe patched powerline fonts
 function install_patched_fonts() {
-    pushd ${HOME}/${DOTDIR}
-    mkdir -p ./resources/tmp
-    pushd ./resources/tmp
-    git clone https://github.com/powerline/fonts      # TODO
-    pushd fonts                                       # TODO
+    pushd /var/tmp
+
+    local tmp_font_dir="install_font"    # TODO:
+
+    mkdir -p ${tmp_font_dir}
+    pushd ${tmp_font_dir}
+    git clone https://github.com/powerline/fonts .    # TODO
     bash ./install.sh                                 # TODO: TODO: error handling
 
-    popd
     popd
     popd                                              # TODO:
 }
