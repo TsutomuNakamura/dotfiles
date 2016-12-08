@@ -87,6 +87,8 @@ function init() {
 
     local flag_no_install_packages=${1:-0}
 
+    mkdir -p ${HOME}/${DOTDIR}
+
     if [ "$flag_no_install_packages" == 0 ]; then
         # Am I root? Or, am I in the sudoers?
         if do_i_have_admin_privileges; then
@@ -152,7 +154,7 @@ function install_packages_with_pacman() {
             echo "The package ${packages[i]} is already installed."
         else
             echo "pacman -Sy --noconfirm ${packages[i]}"
-            # pacman -Sy --noconfirm ${packages[i]}    # TODO
+            pacman -Sy --noconfirm ${packages[i]}
         fi
     }
 }
