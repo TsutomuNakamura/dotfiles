@@ -208,7 +208,7 @@ function init_repo() {
         # TODO: error handling
     else
         echo "The repository is not existed. Cloning from ${REPO_URI}"
-        git clone $REPO_URI
+        git clone $REPO_URI .
     fi
 
     echo "Updating submodules..."
