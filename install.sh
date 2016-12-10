@@ -121,16 +121,10 @@ function install_packages() {
 
 # Installe patched powerline fonts
 function install_patched_fonts() {
-
-    local font_tmp_dir="/var/tmp/install_font"
-    mkdir -p ${font_tmp_dir}
+    local font_tmp_dir="${HOME}/${DOTDIR}/resources/dependencies/fonts"
     pushd ${font_tmp_dir}
-
-    git clone https://github.com/powerline/fonts .    # TODO
     bash ./install.sh                                 # TODO: error handling
     popd
-
-    rm -rf ${font_tmp_dir}
 }
 
 function install_packages_with_apt() {
