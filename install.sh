@@ -9,7 +9,7 @@ REPO_URI="https://github.com/TsutomuNakamura/dotfiles"
 DOTDIR=".dotfiles"
 # Base directory for running this script
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-#
+# Distribution of this environment
 DISTRIBUTION=
 
 cd $BASE_DIR
@@ -61,8 +61,6 @@ function main() {
             init "$flag_no_install_packages"
         elif [ "$flag_deploy" == "1" ]; then
             deploy
-        elif [ "$flag_only_install_packages" == "1" ]; then
-            install_packages
         elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
             init && deploy
         fi
