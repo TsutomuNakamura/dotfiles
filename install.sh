@@ -101,6 +101,7 @@ function init() {
         fi
     fi
 
+    cleanup_current_dotfiles
     # Install patched fonts in your home environment
     install_patched_fonts
     # Cloe the repository if it's not existed
@@ -154,12 +155,13 @@ function install_packages_with_pacman() {
 
 function should_the_dotfile_be_skipped() {
     local target="$1"
-    [[ "$target" == ".git" ]] ||                \
-            [[ "$target" == ".DS_Store" ]] ||   \
-            [[ "$target" == ".gitignore" ]] ||  \
-            [[ "$target" == ".gitmodules" ]] || \
-            [[ "$target" == "*.swp" ]] ||       \
-            [[ "$target" == ".dotfiles" ]]
+    [[ "$target" == ".git" ]] ||                        \
+            [[ "$target" == ".DS_Store" ]] ||           \
+            [[ "$target" == ".gitignore" ]] ||          \
+            [[ "$target" == ".gitmodules" ]] ||         \
+            [[ "$target" == "*.swp" ]] ||               \
+            [[ "$target" == ".dotfiles" ]] ||           \
+            [[ "$target" == ".backup_of_dotfiles" ]]
 }
 
 function get_target_dotfiles() {
@@ -180,14 +182,14 @@ function get_target_dotfiles() {
 
 # BAckup current backup files
 function cleanup_current_dotfiles() {
-    local backup_dir="${HOME}/${DOTDIR}/.backup_of_backup/$(date "+%Y%m%d%H%M%S")"
+    local backup_dir="${HOME}/${DOTDIR}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
     declare -a dotfiles=($(get_target_dotfiles "${HOME}"))
 
     mkdir -p ${backup_dir}
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
-        echo "Backup dotfiles...: cp -pr ${dotfiles[i]} ${backup_dir}"
-        cp -pr ${dotfiles[i]} ${backup_dir}
+        echo "Backup dotfiles...: cp -Lpr ${dotfiles[i]} ${backup_dir}"
+        cp -Lpr ${dotfiles[i]} ${backup_dir}
 
         if [ -L ${dotfiles[i]} ]; then
             unlink ${dotfiles[i]}
