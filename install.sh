@@ -182,7 +182,8 @@ function get_target_dotfiles() {
 
 # BAckup current backup files
 function cleanup_current_dotfiles() {
-    local backup_dir="${HOME}/${DOTDIR}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
+    #local backup_dir="${HOME}/${DOTDIR}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
+    local backup_dir="${HOME}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
     declare -a dotfiles=($(get_target_dotfiles "${HOME}"))
 
     mkdir -p ${backup_dir}
