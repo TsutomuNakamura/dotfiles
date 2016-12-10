@@ -169,9 +169,7 @@ function get_target_dotfiles() {
 
     for f in .??*
     do
-	echo "###### $f" 1>&2
         (should_the_dotfile_be_skipped "$f") || {
-	    echo ">>>>> $f" 1>&2
             dotfiles+=($f)
         }
     done
