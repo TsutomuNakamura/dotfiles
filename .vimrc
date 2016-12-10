@@ -36,6 +36,33 @@ set wildmode=longest:full,full
 " Change leader for vim plugins
 let mapleader = ";"
 
+if &diff                             " only for diff mode/vimdiff
+  set diffopt=filler,context:1000000 " filler is default and inserts empty lines for sync
+endif
+
+" TODO: Test settingf from here
+let g:airline_powerline_fonts = 1
+let g:airline_theme = 'simple'
+let g:airline#extensions#tmuxline#enabled = 0
+" let g:tmuxline_theme = 'powerline'
+
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+let g:airline_left_sep = '⮀'
+let g:airline_left_alt_sep = '⮁'
+let g:airline_right_sep = '⮂'
+let g:airline_right_alt_sep = '⮃'
+""let g:airline_symbols_branch = '⭠'
+" let g:airline_symbols_readonly = '⭤'
+" let g:airline_symbols_linenr = '⭡'
+
+let g:tmuxline_preset = {
+      \'c'    : '#H',
+      \'win'  : '#I.#W',
+      \'cwin' : '#I.#W',
+      \'z'    : '%a %m/%d/%Y %R'}
+
 " Paste from clipboard/yanked text in command line mode
 cnoremap <C-v><C-v> <C-r>+
 inoremap <C-v><C-v> <C-r>+
@@ -126,8 +153,6 @@ function! XTermPasteBegin()
 endfunction
 
 " open NERDTree
-"nnoremap <silent> nt  :<C-u>NERDTree<CR>
-"'jt' means 'Jumti nerdTree'
 nnoremap <silent> tr  :<C-u>NERDTree<CR>
 
 " ----------------------------------------------------------------------------------
@@ -184,8 +209,6 @@ endfunction
 " その表示の前に %N というところでタブ番号を表示させています
 set guitablabel=%N:\ %{GuiTabLabel()}
 
-"" lightline https://github.com/itchyny/lightline.vim
-source ~/.vim/myconf/lightline.conf
 "" nerdcommenter https://github.com/scrooloose/nerdcommenter
 source ~/.vim/myconf/nerdcommenter.conf
 
