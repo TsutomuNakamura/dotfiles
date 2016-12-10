@@ -164,22 +164,26 @@ function should_the_dotfile_be_skipped() {
 
 function get_target_dotfiles() {
     local dir="$1"
+    declare -a dotfiles=()
     pushd ${dir}
 
     for f in .??*
     do
+	echo "###### $f" 1>&2
         (should_the_dotfile_be_skipped "$f") || {
+	    echo ">>>>> $f" 1>&2
             dotfiles+=($f)
         }
     done
 
     popd
+    echo ${dotfiles[@]}
 }
 
 # BAckup current backup files
 function cleanup_current_dotfiles() {
     local backup_dir="${HOME}/${DOTDIR}/.backup_of_backup/$(date "+%Y%m%d%H%M%S")"
-    declare -a dotfiles=(get_target_dotfiles "${HOME}")
+    declare -a dotfiles=($(get_target_dotfiles "${HOME}"))
 
     mkdir -p ${backup_dir}
     pushd ${HOME}
@@ -200,7 +204,7 @@ function cleanup_current_dotfiles() {
 
 # Deploy dotfiles on user's home directory
 function deploy() {
-    declare -a dotfiles=(get_target_dotfiles "${HOME}/${DOTDIR}")
+    declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
@@ -255,7 +259,7 @@ function init_vim_environment() {
 
     mkdir -p .vim/colors/
     pushd .vim/colors
-    ln -s ../../resources/etc/config/vim/colors/molokai.vim
+    ln -sf ../../resources/etc/config/vim/colors/molokai.vim
 
     popd
     popd
