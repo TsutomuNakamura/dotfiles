@@ -152,25 +152,55 @@ function install_packages_with_pacman() {
     }
 }
 
+function should_the_dotfile_be_skipped() {
+    local target="$1"
+    [[ "$target" == ".git" ]] ||                \
+            [[ "$target" == ".DS_Store" ]] ||   \
+            [[ "$target" == ".gitignore" ]] ||  \
+            [[ "$target" == ".gitmodules" ]] || \
+            [[ "$target" == "*.swp" ]] ||       \
+            [[ "$target" == ".dotfiles" ]]
+}
 
+function get_target_dotfiles() {
+    local dir="$1"
+    pushd ${dir}
 
+    for f in .??*
+    do
+        (should_the_dotfile_be_skipped "$f") || {
+            dotfiles+=($f)
+        }
+    done
+
+    popd
+}
+
+# BAckup current backup files
+function cleanup_current_dotfiles() {
+    local backup_dir="${HOME}/${DOTDIR}/.backup_of_backup/$(date "+%Y%m%d%H%M%S")"
+    declare -a dotfiles=(get_target_dotfiles "${HOME}")
+
+    mkdir -p ${backup_dir}
+    pushd ${HOME}
+    for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
+        echo "Backup dotfiles...: cp -pr ${dotfiles[i]} ${backup_dir}"
+        cp -pr ${dotfiles[i]} ${backup_dir}
+
+        if [ -L ${dotfiles[i]} ]; then
+            unlink ${dotfiles[i]}
+        elif [ -d ${dotfiles[i]} ]; then
+            rm -rf ${dotfiles[i]}
+        else
+            rm -f ${dotfiles[i]}
+        fi
+    }
+    popd
+}
 
 # Deploy dotfiles on user's home directory
 function deploy() {
-    declare -a dotfiles=()
-
-    pushd ${HOME}/${DOTDIR}
-    for f in .??*
-    do
-        [[ "$f" == ".git" ]] && continue
-        [[ "$f" == ".DS_Store" ]] && continue
-        [[ "$f" == ".gitignore" ]] && continue
-        [[ "$f" == ".gitmodules" ]] && continue
-        [[ "$f" == "*.swp" ]] && continue
-
-        dotfiles+=($f)
-    done
-    popd
+    declare -a dotfiles=(get_target_dotfiles "${HOME}/${DOTDIR}")
 
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
