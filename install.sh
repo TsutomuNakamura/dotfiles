@@ -103,7 +103,6 @@ function init() {
 
     # Install patched fonts in your home environment
     install_patched_fonts
-
     # Cloe the repository if it's not existed
     init_repo
     init_vim_environment
@@ -122,17 +121,16 @@ function install_packages() {
 
 # Installe patched powerline fonts
 function install_patched_fonts() {
-    pushd /var/tmp
 
-    local tmp_font_dir="install_font"    # TODO:
+    local font_tmp_dir="/var/tmp/install_font"
+    mkdir -p ${font_tmp_dir}
+    pushd ${font_tmp_dir}
 
-    mkdir -p ${tmp_font_dir}
-    pushd ${tmp_font_dir}
     git clone https://github.com/powerline/fonts .    # TODO
-    bash ./install.sh                                 # TODO: TODO: error handling
-
+    bash ./install.sh                                 # TODO: error handling
     popd
-    popd                                              # TODO:
+
+    rm -rf ${font_tmp_dir}
 }
 
 function install_packages_with_apt() {
