@@ -7,12 +7,12 @@ trap 'echo "SIG INT was received. This program will be terminated." && exit 1' I
 REPO_URI="https://github.com/TsutomuNakamura/dotfiles"
 # The directory whom dotfiles resources will be installed
 DOTDIR=".dotfiles"
-# Base directory for running this script
-BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+## # Base directory for running this script
+## BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Distribution of this environment
 DISTRIBUTION=
 
-cd $BASE_DIR
+## cd $BASE_DIR
 
 function main() {
     opts=$(
