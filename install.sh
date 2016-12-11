@@ -16,7 +16,7 @@ cd $BASE_DIR
 
 function main() {
     opts=$(
-        getopt -o "idon" --long "init,deploy,only-install-packages,no-install-packages" -- "$@"
+        getopt -o "idonb:" --long "init,deploy,only-install-packages,no-install-packages,branch:" -- "$@"
     )
 
     [ $? != 0 ] && {
@@ -31,6 +31,7 @@ function main() {
     local flag_deploy=0
     local flag_only_install_packages=0
     local flag_no_install_packages=0
+    local branch=
 
     while true; do
         case "$1" in
@@ -42,6 +43,8 @@ function main() {
                 flag_only_install_packages=1; shift ;;
             -n | --no-install-packages )
                 flag_no_install_packages=1; shift ;;
+            -b | --branch )
+                branch=$2; shift 2 ;;
             -h | --help )
                 usage && return 0 ;;
             -- )
@@ -51,6 +54,10 @@ function main() {
         esac
     done
 
+    branch=${branch:-master}
+    echo "Branch name: ${branch}"
+    exit        # TODO: test
+
     if [ "$flag_only_install_packages" == "1" ] && [ "$flag_no_install_packages" == "1" ]; then
         echo "Some contradictional options were found. (-o|--only-install-packages and -n|--no-install-packages)"
         return 1
@@ -58,11 +65,11 @@ function main() {
 
     if [ "$flag_only_install_packages" == "0" ]; then
         if [ "$flag_init" == "1" ]; then
-            init "$flag_no_install_packages"
+            init "$branch" "$flag_no_install_packages"
         elif [ "$flag_deploy" == "1" ]; then
             deploy
         elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
-            init && deploy
+            init "$branch" && deploy
         fi
     else
         if do_i_have_admin_privileges; then
@@ -83,7 +90,8 @@ function usage() {
 # Initialize dotfiles repo
 function init() {
 
-    local flag_no_install_packages=${1:-0}
+    local branch=${1:-master}
+    local flag_no_install_packages=${2:-0}
 
     mkdir -p ${HOME}/${DOTDIR}
 
@@ -103,7 +111,7 @@ function init() {
     # Install patched fonts in your home environment
     install_patched_fonts
     # Cloe the repository if it's not existed
-    init_repo
+    init_repo "$branch"
     init_vim_environment
 }
 
@@ -221,6 +229,8 @@ function do_i_have_admin_privileges() {
 # Initialize dotfiles repo
 function init_repo() {
 
+    local branch="$1"
+
     [ -d "${HOME}/${DOTDIR}" ] && {
         echo "Creating a directory -> mkdir -p ${HOME}/${DOTDIR}"
         mkdir -p ${HOME}/${DOTDIR}
@@ -230,11 +240,11 @@ function init_repo() {
     pushd ${HOME}/${DOTDIR}
     if is_here_git_repo; then
         echo "The repository ${REPO_URI} is already existed. Pulling from \"origin master\""
-        git pull origin master    # TODO: testing
+        git pull origin $branch    # TODO: testing
         # TODO: error handling
     else
-        echo "The repository is not existed. Cloning from ${REPO_URI}"
-        git clone $REPO_URI .
+        echo "The repository is not existed. Cloning branch from ${REPO_URI} then checkout branch ${branch}"
+        git clone -b $branch $REPO_URI .
     fi
 
     echo "Updating submodules..."
