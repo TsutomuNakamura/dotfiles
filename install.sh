@@ -55,8 +55,6 @@ function main() {
     done
 
     branch=${branch:-master}
-    echo "Branch name: ${branch}"
-    exit        # TODO: test
 
     if [ "$flag_only_install_packages" == "1" ] && [ "$flag_no_install_packages" == "1" ]; then
         echo "Some contradictional options were found. (-o|--only-install-packages and -n|--no-install-packages)"
