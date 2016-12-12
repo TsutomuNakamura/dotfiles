@@ -94,8 +94,10 @@ function init() {
     mkdir -p ${HOME}/${DOTDIR}
 
     if [ "$flag_no_install_packages" == 0 ]; then
-        # Am I root? Or, am I in the sudoers?
-        if do_i_have_admin_privileges; then
+        if ! (command -v sudo > /dev/null 2>&1) && [ "$(id -u)" != 0 ]; then
+            install_packages
+        elif do_i_have_admin_privileges; then
+            # Am I root? Or, am I in the sudoers?
             install_packages
         else
             echo "= NOTICE ========================================================"
