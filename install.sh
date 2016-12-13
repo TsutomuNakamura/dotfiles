@@ -97,13 +97,12 @@ function init() {
     mkdir -p ${HOME}/${DOTDIR}
 
     if [ "$flag_no_install_packages" == 0 ]; then
-        echo "#####"
         if ! (command -v sudo > /dev/null 2>&1) && [ "$(id -u)" == 0 ]; then
             echo ">>> sudo command is not found"
             install_packages
         elif do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
-            echo ">>> sudo command is found"
+            echo "sudo command is found"
             install_packages
         else
             echo "= NOTICE ========================================================"
@@ -123,7 +122,6 @@ function init() {
 
 # Install packages
 function install_packages() {
-    echo ">>> $(get_distribution_name)"
     if [ "$(get_distribution_name)" == "debian" ]; then
         install_packages_with_apt git vim vim-gtk ctags tmux
     elif [ "$(get_distribution_name)" == "fedora" ]; then
@@ -297,6 +295,17 @@ function get_distribution_name() {
         # Like debian
         DISTRIBUTION="debian"
     elif (grep -i "arch linux" <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="arch"
+    fi
+
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    # Check the distribution from command for package management
+    if (command -v apt-get > /dev/null 2>&1); then
+        DISTRIBUTION="debian"
+    elif (command -v dnf > /dev/null 2>&1); then
+        DISTRIBUTION="fedora"
+    elif (command -v pacman > /dev/null 2>&1); then
         DISTRIBUTION="arch"
     fi
 
