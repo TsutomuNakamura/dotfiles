@@ -151,7 +151,7 @@ function install_packages_with_dnf() {
 function install_packages_with_pacman() {
     declare -a packages=($@)
 
-    local installed_list="$(sudo pacman -Qe)"
+    local installed_list="$(pacman -Qe)"
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         if (grep "^${packages[i]} " <<< "$installed_list" > /dev/null); then
