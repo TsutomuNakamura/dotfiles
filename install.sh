@@ -16,7 +16,7 @@ DISTRIBUTION=
 
 function main() {
     opts=$(
-        getopt -o "idonb:" --long "init,deploy,only-install-packages,no-install-packages,branch:" -- "$@"
+        getopt -o "idonb:c" --long "init,deploy,only-install-packages,no-install-packages,branch:,cleanup" -- "$@"
     )
 
     [ $? != 0 ] && {
@@ -32,6 +32,7 @@ function main() {
     local flag_only_install_packages=0
     local flag_no_install_packages=0
     local branch=
+    local flag_cleanup=0
 
     while true; do
         case "$1" in
@@ -45,6 +46,8 @@ function main() {
                 flag_no_install_packages=1; shift ;;
             -b | --branch )
                 branch=$2; shift 2 ;;
+            -c | --cleanup )
+                flag_cleanup=1; shift ;;
             -h | --help )
                 usage && return 0 ;;
             -- )
@@ -61,21 +64,21 @@ function main() {
         return 1
     fi
 
-    if [ "$flag_only_install_packages" == "0" ]; then
-        if [ "$flag_init" == "1" ]; then
-            init "$branch" "$flag_no_install_packages"
-        elif [ "$flag_deploy" == "1" ]; then
-            deploy
-        elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
-            init "$branch" && deploy
-        fi
-    else
+    if [ "$flag_only_install_packages" == "1" ]; then
         if do_i_have_admin_privileges; then
             install_packages
         else
             echo "Sorry, you don't have privileges to install packages."
             return 1
         fi
+    elif [ "$flag_cleanup" == "1" ]; then
+        cleanup_current_dotfiles
+    elif [ "$flag_init" == "1" ]; then
+        cleanup_current_dotfiles && init "$branch" "$flag_no_install_packages"
+    elif [ "$flag_deploy" == "1" ]; then
+        cleanup_current_dotfiles && deploy
+    elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
+        cleanup_current_dotfiles && init "$branch" && deploy
     fi
 
     return 0
@@ -110,7 +113,7 @@ function init() {
         fi
     fi
 
-    cleanup_current_dotfiles
+    ## cleanup_current_dotfiles
     # Install patched fonts in your home environment
     install_patched_fonts
     # Cloe the repository if it's not existed
@@ -202,6 +205,7 @@ function cleanup_current_dotfiles() {
         echo "Backup dotfiles...: cp -Lpr ${dotfiles[i]} ${backup_dir}"
         cp -Lpr ${dotfiles[i]} ${backup_dir}
 
+        echo "Removing ${dotfiles[i]} ..."
         if [ -L ${dotfiles[i]} ]; then
             unlink ${dotfiles[i]}
         elif [ -d ${dotfiles[i]} ]; then
