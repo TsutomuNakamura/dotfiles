@@ -94,10 +94,13 @@ function init() {
     mkdir -p ${HOME}/${DOTDIR}
 
     if [ "$flag_no_install_packages" == 0 ]; then
-        if ! (command -v sudo > /dev/null 2>&1) && [ "$(id -u)" != 0 ]; then
+        echo "#####"
+        if ! (command -v sudo > /dev/null 2>&1) && [ "$(id -u)" == 0 ]; then
+            echo ">>> sudo command is not found"
             install_packages
         elif do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
+            echo ">>> sudo command is found"
             install_packages
         else
             echo "= NOTICE ========================================================"
@@ -117,6 +120,7 @@ function init() {
 
 # Install packages
 function install_packages() {
+    echo ">>> $(get_distribution_name)"
     if [ "$(get_distribution_name)" == "debian" ]; then
         install_packages_with_apt git vim vim-gtk ctags tmux
     elif [ "$(get_distribution_name)" == "fedora" ]; then
@@ -277,13 +281,11 @@ function init_vim_environment() {
 # Get your OS distribution name
 function get_distribution_name() {
     # TODO
-    if [ ! -z $DISTRIBUTION ]; then
-        echo "${DISTRIBUTION}"
-        return
-    fi
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
 
     local release_info="$(cat /etc/*-release)"
 
+    # Check the distribution from release-infos
     if (grep -i fedora <<< "$release_info" > /dev/null 2>&1); then
         DISTRIBUTION="fedora"
     elif (grep -i ubuntu <<< "$release_info" > /dev/null 2>&1) || \
@@ -292,11 +294,21 @@ function get_distribution_name() {
         DISTRIBUTION="debian"
     elif (grep -i "arch linux" <<< "$release_info" > /dev/null 2>&1); then
         DISTRIBUTION="arch"
-    else
-        DISTRIBUTION="unknown"
     fi
 
-    echo "$DISTRIBUTION"
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    # Check the distribution from /proc/version file
+    local proc_version="$(cat /proc/version)"
+
+    if (grep -i arch <<< "$proc_version" > /dev/null 2>&1); then
+        DISTRIBUTION="arch"
+        # TODO: Check for fedora, debian, ubuntu etc...
+    fi
+
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    echo "unknown"
 }
 
 # Check current directory is whether git repo or not.
