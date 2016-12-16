@@ -72,13 +72,13 @@ function main() {
             return 1
         fi
     elif [ "$flag_cleanup" == "1" ]; then
-        cleanup_current_dotfiles
+        backup_current_dotfiles
     elif [ "$flag_init" == "1" ]; then
-        cleanup_current_dotfiles && init "$branch" "$flag_no_install_packages"
+        init "$branch" "$flag_no_install_packages"
     elif [ "$flag_deploy" == "1" ]; then
-        cleanup_current_dotfiles && deploy
+        deploy
     elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
-        cleanup_current_dotfiles && init "$branch" && deploy
+        init "$branch" && deploy
     fi
 
     return 0
@@ -107,7 +107,7 @@ function init() {
         fi
     fi
 
-    ## cleanup_current_dotfiles
+    ## backup_current_dotfiles
     # Install patched fonts in your home environment
     install_patched_fonts
     # Cloe the repository if it's not existed
@@ -187,8 +187,13 @@ function get_target_dotfiles() {
 }
 
 # BAckup current backup files
-function cleanup_current_dotfiles() {
-    #local backup_dir="${HOME}/${DOTDIR}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
+function backup_current_dotfiles() {
+
+    [ ! -d "${HOME}/${DOTDIR}" ] && {
+        echo "There are no dotfiles to backup."
+        return
+    }
+
     local backup_dir="${HOME}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
@@ -204,7 +209,6 @@ function cleanup_current_dotfiles() {
         elif [ -d ${dotfiles[i]} ]; then
             rm -rf ${dotfiles[i]}
         else
-            # If the file is not existed, this command has no effect
             rm -f ${dotfiles[i]}
         fi
     }
@@ -213,6 +217,9 @@ function cleanup_current_dotfiles() {
 
 # Deploy dotfiles on user's home directory
 function deploy() {
+
+    backup_current_dotfiles
+
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
     pushd ${HOME}
