@@ -257,6 +257,9 @@ function init_repo() {
         git clone -b $branch $REPO_URI .
     fi
 
+    # Freeze .gitconfig for not to push username and email
+    [ -f .gitconfig ] && git update-index --assume-unchanged .gitconfig
+
     echo "Updating submodules..."
     git submodule init
     git submodule update
