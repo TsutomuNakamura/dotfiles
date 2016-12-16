@@ -200,6 +200,8 @@ function backup_current_dotfiles() {
     mkdir -p ${backup_dir}
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
+        [ -e ${dotfiles[i]} ] || continue
+
         echo "Backup dotfiles...: cp -Lpr ${dotfiles[i]} ${backup_dir}"
         cp -Lpr ${dotfiles[i]} ${backup_dir}
 
