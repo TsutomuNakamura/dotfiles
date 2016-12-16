@@ -190,7 +190,7 @@ function get_target_dotfiles() {
 function cleanup_current_dotfiles() {
     #local backup_dir="${HOME}/${DOTDIR}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
     local backup_dir="${HOME}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
-    declare -a dotfiles=($(get_target_dotfiles "${HOME}"))
+    declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
     mkdir -p ${backup_dir}
     pushd ${HOME}
@@ -204,6 +204,7 @@ function cleanup_current_dotfiles() {
         elif [ -d ${dotfiles[i]} ]; then
             rm -rf ${dotfiles[i]}
         else
+            # If the file is not existed, this command has no effect
             rm -f ${dotfiles[i]}
         fi
     }
