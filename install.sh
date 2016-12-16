@@ -94,13 +94,8 @@ function init() {
     local branch=${1:-master}
     local flag_no_install_packages=${2:-0}
 
-    mkdir -p ${HOME}/${DOTDIR}
-
     if [ "$flag_no_install_packages" == 0 ]; then
-        if ! (command -v sudo > /dev/null 2>&1) && [ "$(id -u)" == 0 ]; then
-            echo ">>> sudo command is not found"
-            install_packages
-        elif do_i_have_admin_privileges; then
+        if do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
             echo "sudo command is found"
             install_packages
@@ -237,18 +232,27 @@ function init_repo() {
 
     local branch="$1"
 
-    [ -d "${HOME}/${DOTDIR}" ] && {
-        echo "Creating a directory -> mkdir -p ${HOME}/${DOTDIR}"
-        mkdir -p ${HOME}/${DOTDIR}
+    mkdir -p "${HOME}/${DOTDIR}"
+    [ -d "${HOME}/${DOTDIR}" ] || {
+        echo "Failed to create the directory ${HOME}/${DOTDIR}."
+        return 1
     }
 
     # Is here the git repo?
     pushd ${HOME}/${DOTDIR}
     if is_here_git_repo; then
-        echo "The repository ${REPO_URI} is already existed. Pulling from \"origin master\""
+        echo "The repository ${REPO_URI} is already existed. Pulling from \"origin $branch\""
         git pull origin $branch    # TODO: testing
         # TODO: error handling
     else
+
+        local files=$(shopt -s nullglob dotglob; echo ${HOME}/${DOTDIR}/*)
+        if (( ${#files} )); then
+            # Contains some files
+            echo "Couldn't clone the dotfiles repository because of the directory ${HOME}/${DOTDIR}/ is not empty"
+            return 1
+        fi
+
         echo "The repository is not existed. Cloning branch from ${REPO_URI} then checkout branch ${branch}"
         git clone -b $branch $REPO_URI .
     fi
@@ -336,7 +340,6 @@ function pushd() {
 function popd() {
     command popd "$@" > /dev/null
 }
-
 
 main "$@"
 
