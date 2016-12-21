@@ -136,7 +136,7 @@ function install_patched_fonts() {
 
 function install_packages_with_apt() {
     declare -a packages=($@)
-    local prefix=$( (command -v apt-get > /dev/null 2>&1) && echo "sudo" )
+    local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
 
     ${prefix} apt-get update
     for (( i = 0; i < ${#packages[@]}; i++ )) {
@@ -145,8 +145,12 @@ function install_packages_with_apt() {
 }
 
 function install_packages_with_dnf() {
-    # TODO
-    true
+    declare -a packages=($@)
+    local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
+
+    for (( i = 0; i < ${#packages[@]}; i++ )) {
+        ${prefix} dnf install -y ${packages[i]}
+    }
 }
 
 function install_packages_with_pacman() {
