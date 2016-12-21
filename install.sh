@@ -135,6 +135,12 @@ function install_patched_fonts() {
 }
 
 function install_packages_with_apt() {
+#    declare -a packages=($@)
+#
+#    for (( i = 0; i < ${#packages[@]}; i++ )) {
+#        apt-get install 
+#    }
+
     # TODO
     true
 }
@@ -148,6 +154,9 @@ function install_packages_with_pacman() {
     declare -a packages=($@)
 
     local installed_list="$(pacman -Qe)"
+
+# TODO: sudo
+#    local prefix=(  )
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         if (grep "^${packages[i]} " <<< "$installed_list" > /dev/null); then
@@ -234,7 +243,7 @@ function deploy() {
 
 # Check whether I have admin privileges or not
 function do_i_have_admin_privileges() {
-    [ "$(whoami)" == "root" ] || (sudo -v 2> /dev/null)
+    [ "$(whoami)" == "root" ] ||  ((command -v apt-get > /dev/null 2>&1) && (sudo -v 2> /dev/null))
 }
 
 # Initialize dotfiles repo
