@@ -136,8 +136,9 @@ function install_patched_fonts() {
 
 function install_packages_with_apt() {
     declare -a packages=($@)
-    local prefix=((command -v apt-get > /dev/null 2>&1) && echo "sudo")
+    local prefix=$( (command -v apt-get > /dev/null 2>&1) && echo "sudo" )
 
+    ${prefix} apt-get update
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         ${prefix} apt-get install -y ${packages[i]}
     }
@@ -152,7 +153,7 @@ function install_packages_with_pacman() {
     declare -a packages=($@)
 
     local installed_list="$(pacman -Qe)"
-    local prefix=((command -v apt-get > /dev/null 2>&1) && echo "sudo")
+    local prefix=$( (command -v apt-get > /dev/null 2>&1) && echo "sudo" )
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         if (grep "^${packages[i]} " <<< "$installed_list" > /dev/null); then
