@@ -97,7 +97,6 @@ function init() {
     if [ "$flag_no_install_packages" == 0 ]; then
         if do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
-            echo "sudo command is found"
             install_packages
         else
             echo "= NOTICE ========================================================"
