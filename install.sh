@@ -253,7 +253,7 @@ function deploy() {
 
 # Check whether I have admin privileges or not
 function do_i_have_admin_privileges() {
-    [ "$(whoami)" == "root" ] ||  ((command -v apt-get > /dev/null 2>&1) && (sudo -v 2> /dev/null))
+    [ "$(whoami)" == "root" ] || ((command -v sudo > /dev/null 2>&1) && (sudo -v 2> /dev/null))
 }
 
 # Initialize dotfiles repo
