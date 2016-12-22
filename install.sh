@@ -141,7 +141,7 @@ function install_packages_with_apt() {
     ${prefix} apt-get update
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         echo "Installing ${packages[i]}..."
-        output="$(${prefix} apt-get install -y ${packages[i]})" || {
+        output="$(${prefix} apt-get install -y ${packages[i]} 2>&1)" || {
             echo "ERROR: Some error occured when installing ${packages[i]}"
             echo "${output}"
         }
@@ -155,7 +155,7 @@ function install_packages_with_dnf() {
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         echo "Installing ${packages[i]}..."
-        output="$(${prefix} dnf install -y ${packages[i]})" || {
+        output="$(${prefix} dnf install -y ${packages[i]} 2>&1)" || {
             echo "ERROR: Some error occured when installing ${packages[i]}"
             echo "${output}"
         }
@@ -180,9 +180,13 @@ function install_packages_with_pacman() {
 
 function install_packages_with_homebrew() {
     declare -a packages=($@)
+    local output=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        brew install ${packages[i]}
+        output="$(brew install ${packages[i]} 2>&1)" || {
+            echo "ERROR: Some error occured when installing ${packages[i]}"
+            echo "${output}"
+        }
     }
 }
 
