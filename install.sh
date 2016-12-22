@@ -136,19 +136,29 @@ function install_patched_fonts() {
 function install_packages_with_apt() {
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
+    local output=
 
     ${prefix} apt-get update
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        ${prefix} apt-get install -y ${packages[i]}
+        echo "Installing ${packages[i]}..."
+        output="$(${prefix} apt-get install -y ${packages[i]})" || {
+            echo "ERROR: Some error occured when installing ${packages[i]}"
+            echo "${output}"
+        }
     }
 }
 
 function install_packages_with_dnf() {
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
+    local output=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        ${prefix} dnf install -y ${packages[i]}
+        echo "Installing ${packages[i]}..."
+        output="$(${prefix} dnf install -y ${packages[i]})" || {
+            echo "ERROR: Some error occured when installing ${packages[i]}"
+            echo "${output}"
+        }
     }
 }
 
