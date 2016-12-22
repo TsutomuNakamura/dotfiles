@@ -122,6 +122,8 @@ function install_packages() {
         install_packages_with_dnf git vim vim-gtk ctags tmux
     elif [ "$(get_distribution_name)" == "arch" ]; then
         install_packages_with_pacman git gvim ctags tmux
+    elif [ "$(get_distribution_name)" == "mac" ]; then
+        install_packages_with_homebrew vim ctags tmux
     fi
 }
 
@@ -165,6 +167,14 @@ function install_packages_with_pacman() {
             echo "${prefix} pacman -Sy --noconfirm ${packages[i]}"
             ${prefix} pacman -Sy --noconfirm ${packages[i]}
         fi
+    }
+}
+
+function install_packages_with_homebrew() {
+    declare -a packages=($@)
+
+    for (( i = 0; i < ${#packages[@]}; i++ )) {
+        brew install ${packages[i]}
     }
 }
 
@@ -311,7 +321,13 @@ function get_distribution_name() {
     # TODO
     [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
 
-    local release_info="$(cat /etc/*-release)"
+    # Is Mac OS?
+    if [ "$(uname)" == "Darwin" ] || (command -v brew > /dev/null 2>&1); then
+        DISTRIBUTION="mac"
+    fi
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    local release_info="$(cat /etc/*-release 2> /dev/null)"
 
     # Check the distribution from release-infos
     if (grep -i fedora <<< "$release_info" > /dev/null 2>&1); then
@@ -323,7 +339,6 @@ function get_distribution_name() {
     elif (grep -i "arch linux" <<< "$release_info" > /dev/null 2>&1); then
         DISTRIBUTION="arch"
     fi
-
     [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
 
     # Check the distribution from command for package management
@@ -334,7 +349,6 @@ function get_distribution_name() {
     elif (command -v pacman > /dev/null 2>&1); then
         DISTRIBUTION="arch"
     fi
-
     [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
 
     # Check the distribution from /proc/version file
@@ -344,7 +358,6 @@ function get_distribution_name() {
         DISTRIBUTION="arch"
         # TODO: Check for fedora, debian, ubuntu etc...
     fi
-
     [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
 
     echo "unknown"
