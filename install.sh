@@ -77,7 +77,7 @@ function main() {
     elif [ "$flag_deploy" == "1" ]; then
         deploy
     elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
-        init "$branch" && deploy
+        init "$branch" "$flag_no_install_packages" && deploy
     fi
 
     return 0
