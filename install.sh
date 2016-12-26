@@ -15,17 +15,7 @@ DISTRIBUTION=
 ## cd $BASE_DIR
 
 function main() {
-    opts=$(
-        getopt -o "idonb:c" --long "init,deploy,only-install-packages,no-install-packages,branch:,cleanup" -- "$@"
-    )
 
-    [ $? != 0 ] && {
-        echo "Unknown options have been detected."
-        usage
-        return 1
-    }
-
-    eval set -- "$opts"
     local flag_init=0
     local flag_deploy=0
     local flag_only_install_packages=0
@@ -33,26 +23,22 @@ function main() {
     local branch=
     local flag_cleanup=0
 
-    while true; do
-        case "$1" in
-            -i | --init )
+    while getopts "idonb:ch" opts; do
+        case $opts in
+            i)
                 flag_init=1;    shift ;;
-            -d | --deploy )
+            d)
                 flag_deploy=1;  shift ;;
-            -o | --only-install-packages )
+            o)
                 flag_only_install_packages=1; shift ;;
-            -n | --no-install-packages )
+            n)
                 flag_no_install_packages=1; shift ;;
-            -b | --branch )
+            b)
                 branch=$2; shift 2 ;;
-            -c | --cleanup )
+            c)
                 flag_cleanup=1; shift ;;
-            -h | --help )
+            h)
                 usage && return 0 ;;
-            -- )
-                shift; break ;;
-            * )
-                break ;;
         esac
     done
 
@@ -82,6 +68,8 @@ function main() {
 
     return 0
 }
+
+
 
 function usage() {
     echo "usage"
