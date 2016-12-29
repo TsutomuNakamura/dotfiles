@@ -1,3 +1,6 @@
+scriptencoding utf-8
+set encoding=utf-8
+
 set number			" show line number
 set incsearch		" Enable incremental
 set hlsearch		" Enable search highlight
@@ -135,8 +138,9 @@ if has('syntax')
 endif
 
 " Keep zenkaku width
-set ambiwidth=double
-
+if &encoding != 'utf-8'
+    set ambiwidth=double
+endif
 " ----------------------------------------------------------------------------------
 " Set pasting tric. Thanks for nice tric.
 " https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode
