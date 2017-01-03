@@ -47,6 +47,7 @@ endif
 let g:airline_powerline_fonts = 1
 let g:airline_theme = 'simple'
 let g:airline#extensions#tmuxline#enabled = 0
+let g:airline#extensions#tabline#enabled = 1
 " let g:tmuxline_theme = 'powerline'
 
 if !exists('g:airline_symbols')
