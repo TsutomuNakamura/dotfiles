@@ -154,7 +154,7 @@ function install_packages_with_pacman() {
     declare -a packages=($@)
 
     local installed_list="$(pacman -Qe)"
-    local prefix=$( (command -v apt-get > /dev/null 2>&1) && echo "sudo" )
+    local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         if (grep "^${packages[i]} " <<< "$installed_list" > /dev/null); then
