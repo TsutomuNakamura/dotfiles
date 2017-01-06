@@ -53,13 +53,6 @@ let g:airline#extensions#tabline#enabled = 1
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
 endif
-let g:airline_left_sep = '⮀'
-let g:airline_left_alt_sep = '⮁'
-let g:airline_right_sep = '⮂'
-let g:airline_right_alt_sep = '⮃'
-""let g:airline_symbols_branch = '⭠'
-" let g:airline_symbols_readonly = '⭤'
-" let g:airline_symbols_linenr = '⭡'
 
 let g:tmuxline_preset = {
       \'c'    : '#H',
@@ -138,10 +131,6 @@ if has('syntax')
   call ZenkakuSpace()
 endif
 
-" Keep zenkaku width
-if &encoding != 'utf-8'
-    set ambiwidth=double
-endif
 " ----------------------------------------------------------------------------------
 " Set pasting tric. Thanks for nice tric.
 " https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode
@@ -213,6 +202,10 @@ endfunction
 " guitablabel に上の関数を設定します
 " その表示の前に %N というところでタブ番号を表示させています
 set guitablabel=%N:\ %{GuiTabLabel()}
+
+if !filereadable(".vimrc_do_not_use_ambiwidth")
+  source ~/.vim/myconf/ambiwidth.conf
+endif
 
 "" nerdcommenter https://github.com/scrooloose/nerdcommenter
 source ~/.vim/myconf/nerdcommenter.conf
