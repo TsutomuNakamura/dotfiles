@@ -26,20 +26,20 @@ function main() {
     while getopts "idonb:cgh" opts; do
         case $opts in
             i)
-                flag_init=1;    shift ;;
+                flag_init=1;;
             d)
-                flag_deploy=1;  shift ;;
+                flag_deploy=1;;
             o)
-                flag_only_install_packages=1; shift ;;
+                flag_only_install_packages=1;;
             n)
-                flag_no_install_packages=1; shift ;;
+                flag_no_install_packages=1;;
             b)
-                branch=$2; shift 2 ;;
+                branch="$OPTARG";;
             c)
-                flag_cleanup=1; shift ;;
+                flag_cleanup=1;;
             g)
-                REPO_URI="git@github.com:TsutomuNakamura/dotfiles.git"; shift ;;
-            h)
+                REPO_URI="git@github.com:TsutomuNakamura/dotfiles.git";;
+            h | \?)
                 usage && return 0 ;;
         esac
     done
