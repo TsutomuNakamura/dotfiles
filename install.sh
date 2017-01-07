@@ -23,7 +23,7 @@ function main() {
     local branch=
     local flag_cleanup=0
 
-    while getopts "idonb:ch" opts; do
+    while getopts "idonb:cgh" opts; do
         case $opts in
             i)
                 flag_init=1;    shift ;;
@@ -37,6 +37,8 @@ function main() {
                 branch=$2; shift 2 ;;
             c)
                 flag_cleanup=1; shift ;;
+            g)
+                REPO_URI="git@github.com:TsutomuNakamura/dotfiles.git"; shift ;;
             h)
                 usage && return 0 ;;
         esac
