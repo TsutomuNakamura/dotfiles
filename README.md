@@ -44,7 +44,7 @@ E834: Conflicts with value of 'listchars': ambiwidth=double
 + Lose shape powerline of vim.
 ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/lose_shape_powerline00.png)
 
-If you want to avoid these options, then you can disable "ambiwidth=double" by creating .vimrc_do_not_use_ambiwidth in your home directory.
+If you want to eliminate the causes of defects, then you can disable the options by creating .vimrc_do_not_use_ambiwidth in your home directory.
 
 ```
 touch ~/.vimrc_do_not_use_ambiwidth
