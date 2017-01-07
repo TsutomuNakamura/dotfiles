@@ -6,14 +6,14 @@ When you run the install script, you can make this customized environment onto a
 You can install and setup the environment by using a command like below.
 
 ```
-curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/develop/install.sh | bash
+curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash
 ```
 
 It will install dependency packages if you have root privileges or belong to sudoers.
 If you want not to install dependency packages, you can specify the option "-n" like below.
 
 ```
-curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/develop/install.sh | bash -s -- -n
+curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -n
 ```
 
 This script will clone this repository at ~/.dotfiles then create symbolic links to .vim .tmux etc in ~/.dotfiles.
