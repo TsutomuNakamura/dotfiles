@@ -33,6 +33,20 @@ This dotfiles tested on the environment like below, but on arch the most suitabl
 This dotfiles is made on the concept as simple and visibility but utilities satisfactory.
 Customizing these files are now under ongoing and will commit new customizations for continuously.
 
+# Bug
+On some environment, these dotfiles may occur errors due to be specified "ambiwidth=double" and some font aliases in ~/.vim/myconf/ambiwidth.conf that is called from .vimrc.
+For instance, errors that I have met are like below.
+
+```
+E834: Conflicts with value of 'listchars': ambiwidth=double
+```
+
+If you want not to enable these options, then you can disable them by creating the file .vimrc_do_not_use_ambiwidth in your home directory.
+
+```
+touch ~/.vimrc_do_not_use_ambiwidth
+```
+
 # License
 The code is available under the MIT license.
 

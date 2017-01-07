@@ -20,29 +20,29 @@ function main() {
     local flag_deploy=0
     local flag_only_install_packages=0
     local flag_no_install_packages=0
-    local branch=
+    local branch="master"
     local flag_cleanup=0
 
-    while getopts "idonb:ch" opts; do
+    while getopts "idonb:cgh" opts; do
         case $opts in
             i)
-                flag_init=1;    shift ;;
+                flag_init=1;;
             d)
-                flag_deploy=1;  shift ;;
+                flag_deploy=1;;
             o)
-                flag_only_install_packages=1; shift ;;
+                flag_only_install_packages=1;;
             n)
-                flag_no_install_packages=1; shift ;;
+                flag_no_install_packages=1;;
             b)
-                branch=$2; shift 2 ;;
+                branch="$OPTARG";;
             c)
-                flag_cleanup=1; shift ;;
-            h)
+                flag_cleanup=1;;
+            g)
+                REPO_URI="git@github.com:TsutomuNakamura/dotfiles.git";;
+            h | \?)
                 usage && return 0 ;;
         esac
     done
-
-    branch=${branch:-master}
 
     if [ "$flag_only_install_packages" == "1" ] && [ "$flag_no_install_packages" == "1" ]; then
         echo "Some contradictional options were found. (-o|--only-install-packages and -n|--no-install-packages)"
@@ -77,7 +77,6 @@ function usage() {
 
 # Initialize dotfiles repo
 function init() {
-
     local branch=${1:-master}
     local flag_no_install_packages=${2:-0}
 
