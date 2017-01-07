@@ -18,6 +18,10 @@ curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/insta
 
 This script will clone this repository at ~/.dotfiles then create symbolic links to .vim .tmux etc in ~/.dotfiles.
 
++ Images
+![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy00.png)
+
+
 # Tested distribution and OS
 These dotfiles tested on the environment like below, but on arch the most suitable for because I usually use arch linux and use them.
 
