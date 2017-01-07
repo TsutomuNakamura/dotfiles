@@ -35,7 +35,7 @@ Customizing these files are now under ongoing and will commit new customizations
 
 # Bug
 On some environment, these dotfiles may occur errors due to be specified "ambiwidth=double" and some font aliases in ~/.vim/myconf/ambiwidth.conf that is called from .vimrc.
-For instance, errors that I have met are like below.
+For instance, errors which I have met are like below.
 
 + The error message appears when command vim executed.
 ```
