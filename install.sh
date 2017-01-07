@@ -20,7 +20,7 @@ function main() {
     local flag_deploy=0
     local flag_only_install_packages=0
     local flag_no_install_packages=0
-    local branch=
+    local branch="master"
     local flag_cleanup=0
 
     while getopts "idonb:cgh" opts; do
@@ -43,8 +43,6 @@ function main() {
                 usage && return 0 ;;
         esac
     done
-
-    branch=${branch:-master}
 
     if [ "$flag_only_install_packages" == "1" ] && [ "$flag_no_install_packages" == "1" ]; then
         echo "Some contradictional options were found. (-o|--only-install-packages and -n|--no-install-packages)"
@@ -79,7 +77,6 @@ function usage() {
 
 # Initialize dotfiles repo
 function init() {
-
     local branch=${1:-master}
     local flag_no_install_packages=${2:-0}
 
