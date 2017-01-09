@@ -1,5 +1,4 @@
 #!/bin/bash
-####height=$(tput lines)
 set -eu
 width=$(tput cols)
 
@@ -23,10 +22,4 @@ for code in {0..255}; do
 done
 
 echo
-
-
-# myarchecho $PROMPT
-# %F{214}%K{125}%m%k%f
-# myarchecho $RPROMPT
-# %(?..[%?])
 
