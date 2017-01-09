@@ -248,6 +248,19 @@ function deploy() {
         echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
         ln -s ${DOTDIR}/${dotfiles[i]}
     }
+
+    # Create symbolic links to commands that is customized.
+    if [ -d ${DOTDIR}/bin ]; then
+        mkdir -p bin
+        pushd ./bin
+
+        while read f; do
+            ln -s $f
+        done < <(find ../${DOTDIR}/bin -type f)
+
+        popd
+    fi
+
     popd
 }
 
