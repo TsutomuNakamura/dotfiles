@@ -18,7 +18,7 @@ else
 fi
 
 for code in {0..255}; do
-    [ $(( $code % $capacity )) -eq 0 ] && echo
+    [ $(( $code % $capacity )) -eq 0 ] && [ $code -ne 0 ] && echo
     printf "\e[38;05;00${code}m code[%3s]" ${code}
 done
 
