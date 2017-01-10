@@ -1,25 +1,12 @@
 #!/bin/bash
 set -eu
-width=$(tput cols)
 
-raw_capacity=$(( $width / 10 ))         # width / length of text
-
-if [ $raw_capacity -lt 8 ]; then
-    capacity=4
-elif [ $raw_capacity -lt 16 ]; then
-    capacity=8
-elif [ $raw_capacity -lt 32 ]; then
-    capacity=16
-elif [ $raw_capacity -lt 64 ]; then
-    capacity=32
-else
-    capacity=64
-fi
+# $width / 10 -> width of your console / length of per text that will be printed.
+[ $(( $(tput cols) / 10 )) -lt 8 ] && capacity=4 || capacity=8
 
 for code in {0..255}; do
     [ $(( $code % $capacity )) -eq 0 ] && [ $code -ne 0 ] && echo
-    printf "\e[38;05;00${code}m code[%3s]" ${code}
+    printf "\e[38;05;00${code}m code[%3s]" $code
 done
-
 echo
 
