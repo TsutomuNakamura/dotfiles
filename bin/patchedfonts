@@ -1,0 +1,31 @@
+#!/bin/bash
+
+width=${1:-3}
+
+function list_glyphs() {
+    local title=$1
+    local start=$2
+    local end=$3
+    local count=0
+
+    echo "= ${title} ================="
+    for i in $(seq ${start} 1 ${end}); do
+        code="$(printf '%x' $i)"
+        echo -en "$code ->  \u${code}\t"
+        [[ $(( ++count % width )) -eq 0 ]] && echo
+    done
+    [[ $(( count % width )) -ne 0 ]] && echo
+}
+
+list_glyphs "Seti-UI + Custom" 58608 58667
+list_glyphs "Devicons" 59136 59343
+list_glyphs "Font Awesome" 61438 62185
+list_glyphs "Font Awesome Extension" 57341 57527
+list_glyphs "Octicons" 61434 61685
+list_glyphs "powerline extra fonts" 57504 57559
+list_glyphs "IEC Power Symbols 1" 9197 9230
+list_glyphs "IEC Power Symbols 2" 11084 11100
+list_glyphs "Font Linux" 61696 61727
+list_glyphs "Vim-powerline font 1" 11104 11108
+list_glyphs "Vim-powerline font 2" 11136 11139
+
