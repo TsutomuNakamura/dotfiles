@@ -7,6 +7,8 @@ HISTSIZE=10000
 SAVEHIST=100000
 # End of lines configured by zsh-newuser-install
 
+setopt nonomatch
+
 # Style and color of prompt
 # http://unix.stackexchange.com/questions/25319/256-colour-prompt-in-zsh
 # https://web.archive.org/web/20120905043337/http://lucentbeing.com/blog/that-256-color-thing
