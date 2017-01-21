@@ -95,7 +95,7 @@ function init() {
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
     init_repo "$branch"
-    install_patched_fonts
+    install_fonts
     init_vim_environment
 }
 
@@ -112,11 +112,41 @@ function install_packages() {
     fi
 }
 
-# Installe patched powerline fonts
-function install_patched_fonts() {
-    local font_tmp_dir="${HOME}/${DOTDIR}/resources/dependencies/fonts"
-    pushd ${font_tmp_dir}
-    bash ./install.sh                                 # TODO: error handling
+# Installe font
+function install_fonts() {
+
+    if [[ "$(get_distribution_name)" == "mac" ]]; then
+        local font_dir=${HOME}/Library/Fonts
+    else
+        local font_dir=${HOME}/.local/share/fonts
+    fi
+
+    mkdir -p $font_dir
+    pushd $font_dir
+
+    # Inconsolata for Powerline in https://github.com/powerline/fonts
+    curl -O https://raw.githubusercontent.com/powerline/fonts/blob/master/Inconsolata/Inconsolata%20for%20Powerline.otf
+    # Inconsolata for Powerline Nerd Font Complete Mono.otf
+    curl -fLo "Inconsolata for Powerline Nerd Font Complete Mono.otf" \
+            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete%20Mono.otf
+
+    # M+ and Takao for express Japanese characters
+    if [ "$(get_distribution_name)" == "debian" ]; then
+        install_packages_with_apt fonts-takao fonts-mplus
+    elif [ "$(get_distribution_name)" == "fedora" ]; then
+        true    # TODO:
+    elif [ "$(get_distribution_name)" == "arch" ]; then
+
+        install_packages_with_pacman otf-ipafont
+
+        git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git
+        pushd ttf-mplus
+        makepkg -si
+        popd
+    elif [ "$(get_distribution_name)" == "mac" ]; then
+        true    # TODO:
+    fi
+
     popd
 }
 
