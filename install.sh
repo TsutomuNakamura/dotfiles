@@ -132,22 +132,38 @@ function install_fonts() {
 
     # M+ and Takao for express Japanese characters
     if [ "$(get_distribution_name)" == "debian" ]; then
-        install_packages_with_apt fonts-takao fonts-mplus
+        if do_i_have_admin_privileges; then
+            install_packages_with_apt fonts-takao fonts-mplus
+        else
+            echo "Installing fonts-takao and fonts-mplus have skipped because of you don't have priviledges to install them."
+        fi
     elif [ "$(get_distribution_name)" == "fedora" ]; then
         true    # TODO:
     elif [ "$(get_distribution_name)" == "arch" ]; then
+        if do_i_have_admin_privileges; then
+            install_packages_with_pacman base-devel otf-ipafont
+        else
+            echo "Installing fonts-takao and fonts-mplus have skipped because of you don't have priviledges to install them."
+        fi
 
-        install_packages_with_pacman otf-ipafont
-
-        git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git
-        pushd ttf-mplus
-        makepkg -si
-        popd
+        if [[ $(id -u) -ne 0 ]]; then
+            pushd ${HOME}
+            git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git
+            pushd ttf-mplus
+            makepkg -si --noconfirm
+            popd
+            rm -rf ttf-mplus
+            popd
+        else
+            echo "Installing ttf-mplus has skipped because of building AUR packages with makepkg doesn't permit to be run as root."
+        fi
     elif [ "$(get_distribution_name)" == "mac" ]; then
         true    # TODO:
     fi
 
     popd
+    echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
+    fc-cache -f $font_dir
 }
 
 function install_packages_with_apt() {
