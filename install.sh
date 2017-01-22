@@ -130,22 +130,23 @@ function install_fonts() {
     curl -fLo "Inconsolata for Powerline Nerd Font Complete Mono.otf" \
             https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete%20Mono.otf
 
-    # M+ and Takao for express Japanese characters
+    # M+ and IPAFonts for express Japanese characters
     if [ "$(get_distribution_name)" == "debian" ]; then
         if do_i_have_admin_privileges; then
-            install_packages_with_apt fonts-takao fonts-mplus
+            install_packages_with_apt fonts-ipafont fonts-mplus
         else
-            echo "Installing fonts-takao and fonts-mplus have skipped because of you don't have priviledges to install them."
+            echo "Installing fonts-ipafont and fonts-mplus have skipped because of you don't have priviledges to install them."
         fi
     elif [ "$(get_distribution_name)" == "fedora" ]; then
-        true    # TODO:
+        install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts mplus-1m-fonts
     elif [ "$(get_distribution_name)" == "arch" ]; then
         if do_i_have_admin_privileges; then
             install_packages_with_pacman base-devel otf-ipafont
         else
-            echo "Installing fonts-takao and fonts-mplus have skipped because of you don't have priviledges to install them."
+            echo "Installing otf-ipafont has skipped because of you don't have priviledges to install it."
         fi
 
+        # TODO: Do I have makepkg?
         if [[ $(id -u) -ne 0 ]]; then
             pushd ${HOME}
             git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git
