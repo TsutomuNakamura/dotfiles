@@ -148,13 +148,28 @@ function install_fonts() {
 
         # TODO: Do I have makepkg?
         if [[ $(id -u) -ne 0 ]]; then
-            pushd ${HOME}
-            git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git
-            pushd ttf-mplus
-            makepkg -si --noconfirm
-            popd
-            rm -rf ttf-mplus
-            popd
+
+            if ! (pacman -Qe ttf-mplus > /dev/null 2>&1); then
+                pushd ${HOME}
+                git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git
+                pushd ttf-mplus
+                makepkg -si --noconfirm || {
+                    echo "==============================================================================================="
+                    echo "ERROR: Installing ttf-mplus has failed due to previous error and installing it will be skipped."
+                    echo "       If you want to install it for certain, please run the command manually like below:"
+                    echo "       \$ pacman -Sy base-devel"
+                    echo "       \$ git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git"
+                    echo "       \$ cd ttf-mplus"
+                    echo "       \$ makepkg -si --noconfirm"
+                    echo "==============================================================================================="
+                }
+                popd
+                rm -rf ttf-mplus
+                popd
+            else
+                echo "The font ttf-mplus is already installed."
+            fi
+
         else
             echo "Installing ttf-mplus has skipped because of building AUR packages with makepkg doesn't permit to be run as root."
         fi
