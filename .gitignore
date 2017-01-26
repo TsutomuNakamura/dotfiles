@@ -1,3 +1,4 @@
 .vim/autoload/pathogen.vim
 *.swp
 .vim/colors/molokai.vim
+bats/
