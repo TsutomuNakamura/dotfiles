@@ -301,8 +301,32 @@ function deploy() {
 
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
-        echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
-        ln -s ${DOTDIR}/${dotfiles[i]}
+
+        if should_it_make_deep_link_directory "${dotfiles[i]}"; then
+            # Link only files in dotdirectory
+            declare link_of_destinations=()
+            [[ -e "${dotfiles[i]}" ]] && mkidr ${dotfiles[i]}
+            [[ ! -d "${dotfiles[i]}" ]] && {
+                echo "ERROR: ${dotfiles[i]} is already exists and cannot make directory"
+                return 1
+            }
+            pushd ${DOTDIR}/${dotfiles[i]}
+            for f in $(find . -type f); do
+                link_of_destinations+=( ${f#./} )
+            done
+            popd
+
+            for f in ${link_of_destinations}; do
+                # Count depth of directory and append "../" in front of the target
+                local depth=$(( $(tr -cd / <<< $f | wc -c) - 1 ))
+                local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${f##*/}"
+                echo "ln -s ${destination} -t ${f%/*}"
+                ln -s ${destination} -t ${f%/*}
+            done
+        else
+            echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
+            ln -s ${DOTDIR}/${dotfiles[i]}
+        fi
     }
 
     # Create symbolic links to commands that is customized.
@@ -318,6 +342,18 @@ function deploy() {
     fi
 
     popd
+}
+
+function should_it_make_deep_link_directory() {
+    local directory="$1"
+
+    # [[ ! -d ${directory} ]] && return 1
+
+    if [[ "$cirectory" = ".config" ]]; then
+        return 0
+    fi
+
+    return 1
 }
 
 # Check whether I have admin privileges or not
