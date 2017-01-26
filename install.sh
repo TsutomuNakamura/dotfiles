@@ -481,5 +481,8 @@ function popd() {
     command popd "$@" > /dev/null
 }
 
-main "$@"
+if [[ "${1}" != "--load-functions" ]]; then
+    # Call this script as ". ./script --load-functions" if you want to load functions only
+    main "$@"
+fi
 
