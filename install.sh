@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -eu
 trap 'echo "SIG INT was received. This program will be terminated." && exit 1' INT
 
 # URI of dotfiles repository
@@ -481,8 +480,9 @@ function popd() {
     command popd "$@" > /dev/null
 }
 
-if [[ "$1" != "--load-functions" ]]; then
+if [[ "$#" -ne 0 ]] && [[ "$1" != "--load-functions" ]]; then
     # Call this script as ". ./script --load-functions" if you want to load functions only
+    set -eu
     main "$@"
 fi
 
