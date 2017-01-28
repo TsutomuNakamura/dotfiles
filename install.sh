@@ -349,14 +349,7 @@ function deploy() {
 
 function should_it_make_deep_link_directory() {
     local directory="$1"
-
-    # [[ ! -d ${directory} ]] && return 1
-
-    if [[ "$cirectory" = ".config" ]]; then
-        return 0
-    fi
-
-    return 1
+    [[ "$directory" = ".config" ]]
 }
 
 # Check whether I have admin privileges or not
