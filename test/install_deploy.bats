@@ -1,0 +1,113 @@
+#!/usr/bin/env bats
+
+load helpers
+
+function setup() {
+    pushd ${HOME}
+    mkdir -p .dotfiles
+    function backup_current_dotfiles() { return 0; }
+    function should_it_make_deep_link_directory() {
+        [[ "$1" = ".config" ]] && return 0
+        [[ "$1" = ".config2" ]] && return 0
+        return 1
+    }
+}
+
+function teardown() {
+    rm -rf ${HOME}/.dotfiles
+    rm -rf ${HOME}/.config
+    rm -rf ${HOME}/.config2
+    popd
+}
+
+@test '#deploy should create a link .vim into .dotfiles' {
+
+    touch ${DOTDIR}/.vim
+    function get_target_dotfiles() { echo ".vim"; }
+
+    run deploy
+    [[ "$status" -eq 0 ]]
+    [[ -L "${HOME}/.vim" ]]
+    [[ "$(readlink ${HOME}/.vim)" = "${DOTDIR}/.vim" ]]
+}
+
+@test '#deploy should create links .vim, .tmux.conf, .dir0 and .dir1 into .dotfiles' {
+    touch ${DOTDIR}/.vim
+    touch ${DOTDIR}/.tmux.conf
+    mkdir ${DOTDIR}/.dir0
+    mkdir ${DOTDIR}/.dir1
+    function get_target_dotfiles() { echo ".vim .tmux.conf .dir0 .dir1"; }
+
+    run deploy
+    [[ "$status" -eq 0 ]]
+    [[ -L "${HOME}/.vim" ]]
+    [[ -L "${HOME}/.tmux.conf" ]]
+    [[ -L "${HOME}/.dir0" ]]
+    [[ -L "${HOME}/.dir1" ]]
+    [[ "$(readlink ${HOME}/.vim)" = "${DOTDIR}/.vim" ]]
+    [[ "$(readlink ${HOME}/.tmux.conf)" = "${DOTDIR}/.tmux.conf" ]]
+    [[ "$(readlink ${HOME}/.dir0)" = "${DOTDIR}/.dir0" ]]
+    [[ "$(readlink ${HOME}/.dir1)" = "${DOTDIR}/.dir1" ]]
+}
+
+@test '#deploy should create a link .config deeply' {
+    mkdir -p ${DOTDIR}/.config/fontconfig
+    touch ${DOTDIR}/.config/fontconfig/fonts.conf
+    function get_target_dotfiles() { echo ".config"; }
+
+    run deploy
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ -d "${HOME}/.config" ]]
+    [[ -d "${HOME}/.config/fontconfig" ]]
+    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]
+    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
+}
+
+@test '#deploy should create some links .config deeply' {
+    mkdir -p ${DOTDIR}/.config/fontconfig/foo
+    touch ${DOTDIR}/.config/fontconfig/fonts.conf
+    touch ${DOTDIR}/.config/fontconfig/foo/foo.conf
+    function get_target_dotfiles() { echo ".config"; }
+
+    run deploy
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ -d "${HOME}/.config" ]]
+    [[ -d "${HOME}/.config/fontconfig" ]]
+    [[ -d "${HOME}/.config/fontconfig/foo" ]]
+    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]
+    [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]
+    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
+    [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config/fontconfig/foo/foo.conf" ]]
+}
+
+@test '#deploy should create some links from some source directory deeply' {
+    mkdir -p ${DOTDIR}/.config/fontconfig/foo
+    touch ${DOTDIR}/.config/fontconfig/fonts.conf
+    touch ${DOTDIR}/.config/fontconfig/foo/foo.conf
+    mkdir -p ${DOTDIR}/.config2/fontconfig/foo
+    touch ${DOTDIR}/.config2/fontconfig/fonts.conf
+    touch ${DOTDIR}/.config2/fontconfig/foo/foo.conf
+    function get_target_dotfiles() { echo ".config .config2"; }
+
+    run deploy
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ -d "${HOME}/.config" ]]
+    [[ -d "${HOME}/.config/fontconfig" ]]
+    [[ -d "${HOME}/.config/fontconfig/foo" ]]
+    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]
+    [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]
+    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
+    [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config/fontconfig/foo/foo.conf" ]]
+    [[ -d "${HOME}/.config2" ]]
+    [[ -d "${HOME}/.config2/fontconfig" ]]
+    [[ -d "${HOME}/.config2/fontconfig/foo" ]]
+    [[ -L "${HOME}/.config2/fontconfig/fonts.conf" ]]
+    [[ -L "${HOME}/.config2/fontconfig/foo/foo.conf" ]]
+    [[ "$(readlink ${HOME}/.config2/fontconfig/fonts.conf)" = "../../.dotfiles/.config2/fontconfig/fonts.conf" ]]
+    [[ "$(readlink ${HOME}/.config2/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config2/fontconfig/foo/foo.conf" ]]
+
+}
+
