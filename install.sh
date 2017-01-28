@@ -271,7 +271,11 @@ function backup_current_dotfiles() {
     pushd ${HOME}
 
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
-        [ -e ${dotfiles[i]} ] || continue
+        [[ -e "${dotfiles[i]}" ]] || continue
+        # FIXME: Skip .config directory because of copying .config directory always failes with errors like below.
+        #           cp: cannot stat '.config/chromium/SingletonLock': No such file or directory
+        #           cp: cannot stat '.config/chromium/SingletonCookie': No such file or directory
+        [[ "${dotfiles[i]}" = ".config" ]] || continue
 
         echo "Backup dotfiles...: cp -RLp ${dotfiles[i]} ${backup_dir}"
         cp -RLp ${dotfiles[i]} ${backup_dir}
