@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 set -eu
-
 trap 'echo "SIG INT was received. This program will be terminated." && exit 1' INT
 
 # URI of dotfiles repository
 REPO_URI="https://github.com/TsutomuNakamura/dotfiles"
 # The directory whom dotfiles resources will be installed
 DOTDIR=".dotfiles"
-## # Base directory for running this script
-## BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Distribution of this environment
 DISTRIBUTION=
 
@@ -305,7 +302,7 @@ function deploy() {
         if should_it_make_deep_link_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
             declare link_of_destinations=()
-            [[ -e "${dotfiles[i]}" ]] && mkidr ${dotfiles[i]}
+            [[ ! -e "${dotfiles[i]}" ]] && mkdir ${dotfiles[i]}
             [[ ! -d "${dotfiles[i]}" ]] && {
                 echo "ERROR: ${dotfiles[i]} is already exists and cannot make directory"
                 return 1
@@ -316,12 +313,15 @@ function deploy() {
             done
             popd
 
-            for f in ${link_of_destinations}; do
+            for f in ${link_of_destinations[@]}; do
+
                 # Count depth of directory and append "../" in front of the target
-                local depth=$(( $(tr -cd / <<< $f | wc -c) - 1 ))
-                local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${f##*/}"
-                echo "ln -s ${destination} -t ${f%/*}"
-                ln -s ${destination} -t ${f%/*}
+                local depth=$(( $(tr -cd / <<< "${dotfiles[i]}/$f" | wc -c) ))
+                local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${dotfiles[i]}/${f}"
+                mkdir -p ${dotfiles[i]}/${f%/*}
+                echo "ln -s ${destination} -t ${dotfiles[i]}/${f%/*}"
+                # ln -s ../../.dotfiles/.config/fontconfig/fonts.conf -t .config/fontconfig
+                ln -s ${destination} -t ${dotfiles[i]}/${f%/*}
             done
         else
             echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
@@ -481,7 +481,7 @@ function popd() {
     command popd "$@" > /dev/null
 }
 
-if [[ "${1}" != "--load-functions" ]]; then
+if [[ "$1" != "--load-functions" ]]; then
     # Call this script as ". ./script --load-functions" if you want to load functions only
     main "$@"
 fi
