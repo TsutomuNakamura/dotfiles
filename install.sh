@@ -3,8 +3,10 @@ trap 'echo "SIG INT was received. This program will be terminated." && exit 1' I
 
 # URI of dotfiles repository
 REPO_URI="https://github.com/TsutomuNakamura/dotfiles"
-# The directory whom dotfiles resources will be installed
+# The directory that dotfiles resources will be installed
 DOTDIR=".dotfiles"
+# The directory that dotfiles resources will be backuped
+BACKUPDIR=".backup_of_dotfiles"
 # Distribution of this environment
 DISTRIBUTION=
 
@@ -236,8 +238,8 @@ function should_the_dotfile_be_skipped() {
             [[ "$target" == ".gitignore" ]] ||          \
             [[ "$target" == ".gitmodules" ]] ||         \
             [[ "$target" == "*.swp" ]] ||               \
-            [[ "$target" == ".dotfiles" ]] ||           \
-            [[ "$target" == ".backup_of_dotfiles" ]]
+            [[ "$target" == "$DOTDIR" ]] ||             \
+            [[ "$target" == "$BACKUPDIR" ]]
 }
 
 function get_target_dotfiles() {
@@ -264,7 +266,7 @@ function backup_current_dotfiles() {
         return
     }
 
-    local backup_dir="${HOME}/.backup_of_dotfiles/$(date "+%Y%m%d%H%M%S")"
+    local backup_dir="${HOME}/${BACKUPDIR}/$(date "+%Y%m%d%H%M%S")"
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
     mkdir -p ${backup_dir}
@@ -275,21 +277,44 @@ function backup_current_dotfiles() {
         # FIXME: Skip .config directory because of copying .config directory always failes with errors like below.
         #           cp: cannot stat '.config/chromium/SingletonLock': No such file or directory
         #           cp: cannot stat '.config/chromium/SingletonCookie': No such file or directory
-        [[ "${dotfiles[i]}" =~ ^\.config/.* ]] || continue
+        #[[ "${dotfiles[i]}" =~ ^\.config/.* ]] || continue
+        local dir_name=${dotfiles[i]#./}
+        dir_name=${dir_name%%/*}
+        if (should_it_make_deep_link_directory "$dir_name"); then
+            # Backup deeplink
+            pushd ${HOME}/${DOTDIR}/${dotfiles[i]}
+            while read target; do
+                # Backup only files or symlinks
+                target=${target#./}
+                local directory=$(dirname $target)
 
-        echo "Backup dotfiles...: cp -RLp ${dotfiles[i]} ${backup_dir}"
-        cp -RLp ${dotfiles[i]} ${backup_dir}
-
-        echo "Removing ${dotfiles[i]} ..."
-        if [ -L ${dotfiles[i]} ]; then
-            unlink ${dotfiles[i]}
-        elif [ -d ${dotfiles[i]} ]; then
-            rm -rf ${dotfiles[i]}
+                echo "mkdir -p ${backup_dir}/${dir_name}/${directory}"
+                mkdir -p ${backup_dir}/${dir_name}/${directory}
+                echo "cp -RLp ${HOME}/${DOTDIR}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}"
+                cp -RLp ${HOME}/${DOTDIR}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}
+                remove_an_object "${HOME}/${dir_name}/${target}"
+            done < <(find . -mindepth 1 \( -type f -or -type l \))
+            popd
         else
-            rm -f ${dotfiles[i]}
+            echo "cp -RLp ${dotfiles[i]} ${backup_dir}"
+            cp -RLp ${dotfiles[i]} ${backup_dir}
+            remove_an_object ${dotfiles[i]}
         fi
     }
     popd
+}
+
+function remove_an_object() {
+    local object=$1
+
+    echo "Removing $object ..."
+    if [ -L $object ]; then
+        unlink $object
+    elif [ -d $object ]; then
+        rm -rf $object
+    else
+        rm -f $object
+    fi
 }
 
 # Deploy dotfiles on user's home directory
@@ -349,7 +374,15 @@ function deploy() {
 
 function should_it_make_deep_link_directory() {
     local directory="$1"
-    [[ "$directory" = ".config" ]]
+    pushd ${HOME}/${DOTDIR}
+
+    [[ -d $directory ]] && \
+            [[ "$directory" = ".config" ]]
+
+    local result=$?
+    popd
+
+    return $result
 }
 
 # Check whether I have admin privileges or not
