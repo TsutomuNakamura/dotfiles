@@ -1,7 +1,7 @@
 # Build and run this image with command like below
 #
-#   docker build -t="yourname/arch-dot-test" .
-#   docker run --name arch-dot-test --hostname arch-dot-test --volume ... -ti yourname/arch-dot-test /bin/bash
+#   docker build -t="tsutomu/arch-dot-test" .
+#   docker run --name arch-dot-test --hostname arch-dot-test --volume ... -ti tsutomu/arch-dot-test /bin/bash
 #
 FROM dock0/arch:latest
 
