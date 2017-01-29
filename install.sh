@@ -102,7 +102,7 @@ function install_packages() {
     if [ "$(get_distribution_name)" == "debian" ]; then
         install_packages_with_apt git vim vim-gtk ctags tmux
     elif [ "$(get_distribution_name)" == "fedora" ]; then
-        install_packages_with_dnf git vim vim-gtk ctags tmux
+        install_packages_with_dnf git vim ctags tmux
     elif [ "$(get_distribution_name)" == "arch" ]; then
         install_packages_with_pacman git gvim ctags tmux
     elif [ "$(get_distribution_name)" == "mac" ]; then
