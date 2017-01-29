@@ -19,5 +19,11 @@ if ! (command -v bats > /dev/null); then
     cd ../
 fi
 
-bats ./test/*.bats
+if [[ "$#" -ne 0 ]]; then
+    for f in "$@"; do
+        bats $f
+    done
+else
+    bats ./test/*.bats
+fi
 
