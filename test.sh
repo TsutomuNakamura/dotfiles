@@ -1,12 +1,17 @@
 #!/bin/bash
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
-HOST="$(hostname)"
+if (command -v hostname); then
+    HOST="$(hostname)"
+elif (command -v uname); then
+    HOST="$(uname -n)"
+fi
+
 [[ "${HOST}" = "arch-dot-test" ]] \
         || [[ "${HOST}" = "fedora-dot-test" ]] \
         || {
     echo "ERROR: This test script is not allowed executing on unexpected host because of some instruction make destructive."
-    echo "ERROR: It is able to that running this script on the hostname \"arch-dot-test\"."
+    echo "ERROR: It is able to that running this script on the hostname \"arch-dot-test\" and \"fedora-dot-test\"."
     exit 1
 }
 
