@@ -133,7 +133,7 @@ function install_fonts() {
         if do_i_have_admin_privileges; then
             install_packages_with_apt fonts-ipafont fonts-mplus
         else
-            echo "Installing fonts-ipafont and fonts-mplus have skipped because of you don't have priviledges to install them."
+            echo "Installing fonts-ipafont and fonts-mplus have skipped because you don't have priviledges to install them."
         fi
     elif [ "$(get_distribution_name)" == "fedora" ]; then
         install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts mplus-1m-fonts
@@ -233,13 +233,15 @@ function install_packages_with_homebrew() {
 
 function should_the_dotfile_be_skipped() {
     local target="$1"
-    [[ "$target" == ".git" ]] ||                        \
-            [[ "$target" == ".DS_Store" ]] ||           \
-            [[ "$target" == ".gitignore" ]] ||          \
-            [[ "$target" == ".gitmodules" ]] ||         \
-            [[ "$target" == "*.swp" ]] ||               \
-            [[ "$target" == "$DOTDIR" ]] ||             \
-            [[ "$target" == "$BACKUPDIR" ]]
+
+    [[ "$target" = ".git" ]] ||                        \
+            [[ "$target" =  ".DS_Store" ]] ||           \
+            [[ "$target" =  ".gitignore" ]] ||          \
+            [[ "$target" =  ".gitmodules" ]] ||         \
+            [[ "$target" =~ \..*.swp ]] ||              \
+            [[ "$target" =~ \..*.swo ]] ||              \
+            [[ "$target" =  "$DOTDIR" ]] ||             \
+            [[ "$target" =  "$BACKUPDIR" ]]
 }
 
 function get_target_dotfiles() {
@@ -247,14 +249,15 @@ function get_target_dotfiles() {
     declare -a dotfiles=()
     pushd ${dir}
 
-    for f in .??*
-    do
-        (should_the_dotfile_be_skipped "$f") || {
-            dotfiles+=($f)
-        }
-    done
-
+    while read f; do
+        f=${f#./}
+         (should_the_dotfile_be_skipped "$f") || {
+             dotfiles+=($f)
+         }
+    done < <(find . -mindepth 1 -maxdepth 1 -name ".*")
+    [[ -d "bin" ]] && dotfiles+=("bin")
     popd
+
     echo ${dotfiles[@]}
 }
 
@@ -290,9 +293,11 @@ function backup_current_dotfiles() {
 
                 echo "mkdir -p ${backup_dir}/${dir_name}/${directory}"
                 mkdir -p ${backup_dir}/${dir_name}/${directory}
-                echo "cp -RLp ${HOME}/${DOTDIR}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}"
-                cp -RLp ${HOME}/${DOTDIR}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}
-                remove_an_object "${HOME}/${dir_name}/${target}"
+                [[ -f ${HOME}/${dir_name}/${target} ]] || [[ -L ${HOME}/${dir_name}/${target} ]] && {
+                    echo "cp -RLp ${HOME}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}"
+                    cp -RLp ${HOME}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}
+                    remove_an_object "${HOME}/${dir_name}/${target}"
+                }
             done < <(find . -mindepth 1 \( -type f -or -type l \))
             popd
         else
