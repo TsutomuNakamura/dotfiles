@@ -3,7 +3,7 @@
 load helpers
 
 # This test case must be run the user that has root privileges or belong to sudoers.
-@test 'do_i_have_admin_privileges' {
+@test '#do_i_have_admin_privileges' {
 
     run do_i_have_admin_privileges
     [[ "$status" -eq 0 ]]

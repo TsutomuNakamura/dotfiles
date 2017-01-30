@@ -28,7 +28,6 @@ function teardown() {
 
     run backup_current_dotfiles
 
-    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ ! -e ${HOME}/.vimrc ]]
@@ -211,7 +210,6 @@ function teardown() {
 
     run backup_current_dotfiles
 
-    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 2 ]]
     [[ -d ${HOME}/.config/fontconfig ]]
@@ -229,5 +227,272 @@ function teardown() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config2/foo.conf" ]]
 
     rm -rf ${HOME}/.config ${HOME}/.config2
+}
+
+@test '#backup_current_dotfiles should backup a file under bin deeply' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    mkdir -p ${HOME}/bin
+    touch ${HOME}/bin/foo
+    touch ${HOME}/bin/bar
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+    [[ -f ${HOME}/bin/bar ]]
+
+    rm -rf ${HOME}/bin
+}
+
+@test '#backup_current_dotfiles should backup some files under bin deeply' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    touch ${HOME}/${DOTDIR}/bin/bar
+    mkdir -p ${HOME}/bin
+    touch ${HOME}/bin/foo
+    touch ${HOME}/bin/bar
+    touch ${HOME}/bin/baz
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/bar ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+    [[ ! -e ${HOME}/bin/bar ]]
+    [[ -f ${HOME}/bin/baz ]]
+
+    rm -rf ${HOME}/bin
+}
+
+@test '#backup_current_dotfiles should backup a symlink as a file' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    mkdir -p ${HOME}/bin
+    echo "foo" > ${HOME}/foo
+    ln -s ../foo -t ${HOME}/bin
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 1 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/foo)" = "foo" ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+
+    rm -rf ${HOME}/bin ${HOME}/foo
+}
+
+@test '#backup_current_dotfiles should backup some symlinks as a file' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    touch ${HOME}/${DOTDIR}/bin/bar
+    mkdir -p ${HOME}/bin
+    echo "foo" > ${HOME}/foo
+    echo "bar" > ${HOME}/bar
+    ln -s ../foo -t ${HOME}/bin
+    ln -s ../bar -t ${HOME}/bin
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 2 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/bar ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/foo)" = "foo" ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/bar)" = "bar" ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+    [[ ! -e ${HOME}/bin/bar ]]
+
+    rm -rf ${HOME}/bin ${HOME}/{foo,bar}
+}
+
+@test '#backup_current_dotfiles should backup one symlink and one file as a file' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    touch ${HOME}/${DOTDIR}/bin/bar
+    mkdir -p ${HOME}/bin
+    echo "foo" > ${HOME}/foo
+    ln -s ../foo -t ${HOME}/bin
+    echo "bar" > ${HOME}/bin/bar
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 2 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/bar ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/foo)" = "foo" ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/bar)" = "bar" ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+    [[ ! -e ${HOME}/bin/bar ]]
+
+    rm -rf ${HOME}/bin ${HOME}/{foo,bar}
+}
+
+@test '#backup_current_dotfiles should backup some symlinks and some files as a file' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    touch ${HOME}/${DOTDIR}/bin/bar
+    touch ${HOME}/${DOTDIR}/bin/baz
+    touch ${HOME}/${DOTDIR}/bin/pee
+    mkdir -p ${HOME}/bin
+    echo "foo" > ${HOME}/foo
+    echo "bar" > ${HOME}/bar
+    ln -s ../foo -t ${HOME}/bin
+    ln -s ../bar -t ${HOME}/bin
+    echo "baz" > ${HOME}/bin/baz
+    echo "pee" > ${HOME}/bin/pee
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 4 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/bar ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/baz ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/pee ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/foo)" = "foo" ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/bar)" = "bar" ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/baz)" = "baz" ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/pee)" = "pee" ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+    [[ ! -e ${HOME}/bin/bar ]]
+    [[ ! -e ${HOME}/bin/baz ]]
+    [[ ! -e ${HOME}/bin/pee ]]
+
+    rm -rf ${HOME}/bin ${HOME}/{foo,bar}
+}
+
+
+
+
+
+@test '#backup_current_dotfiles should backup some symlinks and some files as a file' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    touch ${HOME}/${DOTDIR}/bin/bar
+    mkdir -p ${HOME}/bin
+    echo "foo" > ${HOME}/foo
+    echo "bar" > ${HOME}/bar
+    ln -s ../foo -t ${HOME}/bin
+    ln -s ../bar -t ${HOME}/bin
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    find ${HOME}/${BACKUPDIR}/19700101000000/bin -ls
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 2 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/bar ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/foo)" = "foo" ]]
+    [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/bar)" = "bar" ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+    [[ ! -e ${HOME}/bin/bar ]]
+
+    rm -rf ${HOME}/bin ${HOME}/{foo,bar}
+}
+
+
+
+
+@test '#backup_current_dotfiles should not remove bin directory after the file backupped' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    mkdir -p ${HOME}/bin
+    touch ${HOME}/bin/foo
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
+    [[ -f ${HOME}/${BACKUPDIR}/19700101000000/bin/foo ]]
+    [[ -d ${HOME}/bin ]]
+    [[ ! -e ${HOME}/bin/foo ]]
+    [[ "$(count ${HOME}/bin)" -eq 0 ]]
+
+    rm -rf ${HOME}/bin
+}
+
+@test '#backup_current_dotfiles should do nothing when the ${HOME}/bin directory has no target files' {
+    rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
+    mkdir -p ${HOME}/${DOTDIR}/bin
+    touch ${HOME}/${DOTDIR}/bin/foo
+    mkdir -p ${HOME}/bin
+    touch ${HOME}/bin/bar
+
+    function get_target_dotfiles() { echo "bin"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    echo "$output"
+    find ${HOME}/${BACKUPDIR}/19700101000000 -ls
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 0 ]]
+    [[ -d ${HOME}/bin ]]
+    [[ "$(count ${HOME}/bin)" -eq 1 ]]
+    [[ -f ${HOME}/bin/bar ]]
+    [[ -f ${HOME}/${DOTDIR}/bin/foo ]]
+
+    rm -rf ${HOME}/bin
 }
 
