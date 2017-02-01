@@ -4,9 +4,7 @@ load helpers
 function setup() {
     mkdir ${HOME}/${DOTDIR}
     function should_it_make_deep_link_directory() { return 1; };
-
     function date() { echo "19700101000000"; }
-    function count() { find $1 -maxdepth 1 -mindepth 1 \( -type f -or -type d \) | wc -l; }
 }
 
 function teardown() {

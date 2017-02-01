@@ -14,9 +14,9 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf ${HOME}/.dotfiles
-    rm -rf ${HOME}/.config
-    rm -rf ${HOME}/.config2
+    rm -rf ${HOME}/.dotfiles ${HOME}/.config ${HOME}/.config2
+    [[ -L ${HOME}/.dir0 ]] && unlink ${HOME}/.dir0
+    [[ -L ${HOME}/.dir1 ]] && unlink ${HOME}/.dir1
     popd
 }
 
@@ -56,7 +56,6 @@ function teardown() {
     function get_target_dotfiles() { echo ".config"; }
 
     run deploy
-    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
@@ -71,7 +70,6 @@ function teardown() {
     function get_target_dotfiles() { echo ".config"; }
 
     run deploy
-    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
@@ -92,7 +90,6 @@ function teardown() {
     function get_target_dotfiles() { echo ".config .config2"; }
 
     run deploy
-    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
@@ -109,5 +106,37 @@ function teardown() {
     [[ "$(readlink ${HOME}/.config2/fontconfig/fonts.conf)" = "../../.dotfiles/.config2/fontconfig/fonts.conf" ]]
     [[ "$(readlink ${HOME}/.config2/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config2/fontconfig/foo/foo.conf" ]]
 
+}
+
+@test '#deploy should create the symlink to the file under the .dotfiles/bin directory' {
+    rm -rf ${HOME}/bin
+    mkdir -p ${DOTDIR}/bin
+    touch ${DOTDIR}/bin/foo
+
+    function get_target_dotfiles() { echo; }
+
+    run deploy
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ -d "${HOME}/bin" ]]
+    [[ -L "${HOME}/bin/foo" ]]
+    [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
+}
+
+@test '#deploy should create some symlinks to the files under the .dotfiles/bin directory' {
+    rm -rf ${HOME}/bin
+    mkdir -p ${DOTDIR}/bin
+    touch ${DOTDIR}/bin/foo
+    touch ${DOTDIR}/bin/bar
+
+    function get_target_dotfiles() { echo; }
+
+    run deploy
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ -d "${HOME}/bin" ]]
+    [[ -L "${HOME}/bin/foo" ]]
+    [[ -L "${HOME}/bin/bar" ]]
+    [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
 }
 
