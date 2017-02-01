@@ -255,7 +255,6 @@ function get_target_dotfiles() {
              dotfiles+=($f)
          }
     done < <(find . -mindepth 1 -maxdepth 1 -name ".*")
-    [[ -d "bin" ]] && dotfiles+=("bin")
     popd
 
     echo ${dotfiles[@]}
@@ -363,9 +362,9 @@ function deploy() {
     }
 
     # Create symbolic links to commands that is customized.
-    if [ -d ${DOTDIR}/bin ]; then
-        mkdir -p bin
-        pushd ./bin
+    if [ -d ${HOME}/${DOTDIR}/bin ]; then
+        mkdir -p ${HOME}/bin
+        pushd ${HOME}/bin
 
         while read f; do
             ln -s $f
@@ -382,7 +381,7 @@ function should_it_make_deep_link_directory() {
     pushd ${HOME}/${DOTDIR}
 
     [[ -d $directory ]] && \
-            [[ "$directory" = ".config" ]]
+        ( [[ "$directory" = ".config" ]] || [[ "$directory" = "bin" ]] )
 
     local result=$?
     popd
