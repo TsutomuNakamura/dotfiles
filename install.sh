@@ -123,7 +123,8 @@ function install_fonts() {
     pushd $font_dir
 
     # Inconsolata for Powerline in https://github.com/powerline/fonts
-    curl -O https://raw.githubusercontent.com/powerline/fonts/blob/master/Inconsolata/Inconsolata%20for%20Powerline.otf
+    curl -fLo "Inconsolata for Powerline.otf" \
+            https://raw.githubusercontent.com/powerline/fonts/master/Inconsolata/Inconsolata%20for%20Powerline.otf
     # Inconsolata for Powerline Nerd Font Complete Mono.otf
     curl -fLo "Inconsolata for Powerline Nerd Font Complete Mono.otf" \
             https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete%20Mono.otf
