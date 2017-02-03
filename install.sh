@@ -126,8 +126,8 @@ function install_fonts() {
     curl -fLo "Inconsolata for Powerline.otf" \
             https://raw.githubusercontent.com/powerline/fonts/master/Inconsolata/Inconsolata%20for%20Powerline.otf
     # Inconsolata for Powerline Nerd Font Complete Mono.otf
-    curl -fLo "Inconsolata for Powerline Nerd Font Complete Mono.otf" \
-            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete%20Mono.otf
+    curl -fLo "Inconsolata for Powerline Nerd Font Complete.otf" \
+            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete.otf
 
     # M+ and IPAFonts for express Japanese characters
     if [ "$(get_distribution_name)" == "debian" ]; then
