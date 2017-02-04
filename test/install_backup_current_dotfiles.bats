@@ -151,6 +151,9 @@ function teardown() {
 @test '#backup_current_dotfiles should backup files deeply if they should be deep copied' {
     mkdir -p ${HOME}/${DOTDIR}/.config/fontconfig
     touch ${HOME}/${DOTDIR}/.config/fontconfig/fonts.conf
+    mkdir -p ${HOME}/${DOTDIR}/.config/fontconfig/conf.d
+    touch ${HOME}/${DOTDIR}/.config/fontconfig/conf.d/65-something.conf
+    touch ${HOME}/${DOTDIR}/.config/fontconfig/conf.d/70-something.conf
     mkdir -p ${HOME}/${DOTDIR}/.config/someconfig
     touch ${HOME}/${DOTDIR}/.config/someconfig/some.conf
     touch ${HOME}/${DOTDIR}/.config/foo.conf
@@ -158,6 +161,9 @@ function teardown() {
     rm -rf ${HOME}/.config
     mkdir -p ${HOME}/.config/fontconfig
     touch ${HOME}/.config/fontconfig/fonts.conf
+    mkdir -p ${HOME}/.config/fontconfig/conf.d
+    touch ${HOME}/.config/fontconfig/conf.d/65-something.conf
+    ## touch ${HOME}/.config/fontconfig/conf.d/70-something.conf
     mkdir -p ${HOME}/.config/someconfig
     touch ${HOME}/.config/someconfig/some.conf
     touch ${HOME}/.config/foo.conf
@@ -171,12 +177,18 @@ function teardown() {
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ -d ${HOME}/.config/fontconfig ]]
     [[ ! -e "${HOME}/.config/fontconfig/fonts.conf" ]]
+    [[ -d ${HOME}/.config/fontconfig/conf.d ]]
+    [[ ! -e "${HOME}/.config/fontconfig/conf.d/65-something.conf" ]]
+    [[ ! -e "${HOME}/.config/fontconfig/conf.d/70-something.conf" ]]
     [[ -d ${HOME}/.config/someconfig ]]
     [[ ! -e "${HOME}/.config/someconfig/some.conf" ]]
     [[ ! -e "${HOME}/.config/foo.conf" ]]
 
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig/fonts.conf" ]]
+    [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig/conf.d" ]]
+    [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig/conf.d/65-something.conf" ]]
+    [[ ! -e "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig/conf.d/70-something.conf" ]]
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config/someconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/someconfig/some.conf" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/foo.conf" ]]
