@@ -100,19 +100,18 @@ function init() {
 # Install packages
 function install_packages() {
     if [ "$(get_distribution_name)" == "debian" ]; then
-        install_packages_with_apt git vim vim-gtk ctags tmux
+        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip
     elif [ "$(get_distribution_name)" == "fedora" ]; then
-        install_packages_with_dnf git vim ctags tmux
+        install_packages_with_dnf git vim ctags tmux zsh unzip
     elif [ "$(get_distribution_name)" == "arch" ]; then
-        install_packages_with_pacman git gvim ctags tmux
+        install_packages_with_pacman git gvim ctags tmux zsh unzip
     elif [ "$(get_distribution_name)" == "mac" ]; then
-        install_packages_with_homebrew vim ctags tmux
+        install_packages_with_homebrew vim ctags tmux zsh unzip
     fi
 }
 
 # Installe font
 function install_fonts() {
-
     if [[ "$(get_distribution_name)" == "mac" ]]; then
         local font_dir=${HOME}/Library/Fonts
     else
@@ -125,55 +124,32 @@ function install_fonts() {
     # Inconsolata for Powerline in https://github.com/powerline/fonts
     curl -fLo "Inconsolata for Powerline.otf" \
             https://raw.githubusercontent.com/powerline/fonts/master/Inconsolata/Inconsolata%20for%20Powerline.otf
+
     # Inconsolata for Powerline Nerd Font Complete Mono.otf
     curl -fLo "Inconsolata for Powerline Nerd Font Complete.otf" \
             https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete.otf
 
-    # M+ and IPAFonts for express Japanese characters
-    if [ "$(get_distribution_name)" == "debian" ]; then
-        if do_i_have_admin_privileges; then
-            install_packages_with_apt fonts-ipafont fonts-mplus
-        else
-            echo "Installing fonts-ipafont and fonts-mplus have skipped because you don't have priviledges to install them."
-        fi
-    elif [ "$(get_distribution_name)" == "fedora" ]; then
-        install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts mplus-1m-fonts
-    elif [ "$(get_distribution_name)" == "arch" ]; then
-        if do_i_have_admin_privileges; then
-            install_packages_with_pacman base-devel otf-ipafont
-        else
-            echo "Installing otf-ipafont has skipped because of you don't have priviledges to install it."
-        fi
+    # Migu 1M for Japanese font
+    curl -fLo "migu-1m-20150712.zip" \
+        https://ja.osdn.net/projects/mix-mplus-ipa/downloads/63545/migu-1m-20150712.zip
 
-        # TODO: Do I have makepkg?
-        if [[ $(id -u) -ne 0 ]]; then
+    unzip migu-1m-20150712.zip
+    pushd migu-1m-20150712
+    mv ./*.ttf ../
+    popd
+    rm -rf migu-1m-20150712 migu-1m-20150712.zip
 
-            if ! (pacman -Qe ttf-mplus > /dev/null 2>&1); then
-                pushd ${HOME}
-                git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git
-                pushd ttf-mplus
-                makepkg -si --noconfirm || {
-                    echo "==============================================================================================="
-                    echo "ERROR: Installing ttf-mplus has failed due to previous error and installing it will be skipped."
-                    echo "       If you want to install it for certain, please run the command manually like below:"
-                    echo "       \$ pacman -Sy base-devel"
-                    echo "       \$ git clone --depth 1 https://aur.archlinux.org/ttf-mplus.git"
-                    echo "       \$ cd ttf-mplus"
-                    echo "       \$ makepkg -si --noconfirm"
-                    echo "==============================================================================================="
-                }
-                popd
-                rm -rf ttf-mplus
-                popd
-            else
-                echo "The font ttf-mplus is already installed."
-            fi
-
-        else
-            echo "Installing ttf-mplus has skipped because of building AUR packages with makepkg doesn't permit to be run as root."
+    # IPAFonts for express Japanese characters
+    if do_i_have_admin_privileges; then
+        if [ "$(get_distribution_name)" == "debian" ]; then
+            install_packages_with_apt fonts-ipafont
+        elif [ "$(get_distribution_name)" == "fedora" ]; then
+            install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts
+        elif [ "$(get_distribution_name)" == "arch" ]; then
+            install_packages_with_pacman otf-ipafont
+        elif [ "$(get_distribution_name)" == "mac" ]; then
+            true    # TODO:
         fi
-    elif [ "$(get_distribution_name)" == "mac" ]; then
-        true    # TODO:
     fi
 
     popd
