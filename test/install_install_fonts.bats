@@ -9,7 +9,7 @@ function setup() {
 function teardown() {
     rm -rf ${HOME}/${DOTDIR}
     cd ~
-    rm -rf .local Library
+    rm -rf .local Library migu-1m* Inconsolata\ for\ Powerline*
 }
 
 function curl() {

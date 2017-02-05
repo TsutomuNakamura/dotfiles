@@ -221,6 +221,11 @@ function should_the_dotfile_be_skipped() {
             [[ "$target" =  "$BACKUPDIR" ]]
 }
 
+function files_that_should_not_be_linked() {
+    local target="$1"
+    [[ "$target" = "LICENSE.txt" ]]
+}
+
 function get_target_dotfiles() {
     local dir="$1"
     declare -a dotfiles=()
@@ -307,7 +312,6 @@ function deploy() {
 
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
-
         if should_it_make_deep_link_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
             declare link_of_destinations=()
@@ -317,21 +321,22 @@ function deploy() {
                 return 1
             }
             pushd ${DOTDIR}/${dotfiles[i]}
-            for f in $(find . -type f); do
-                link_of_destinations+=( ${f#./} )
-            done
+            while read f; do
+                link_of_destinations+=( "${f#./}" )
+            done < <(find . -type f)
             popd
 
-            for f in ${link_of_destinations[@]}; do
-
+            for (( j = 0; j < ${#link_of_destinations[@]}; j++ )) {
                 # Count depth of directory and append "../" in front of the target
-                local depth=$(( $(tr -cd / <<< "${dotfiles[i]}/$f" | wc -c) ))
-                local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${dotfiles[i]}/${f}"
-                mkdir -p ${dotfiles[i]}/${f%/*}
-                echo "ln -s ${destination} -t ${dotfiles[i]}/${f%/*}"
-                # ln -s ../../.dotfiles/.config/fontconfig/fonts.conf -t .config/fontconfig
-                ln -s ${destination} -t ${dotfiles[i]}/${f%/*}
-            done
+                local depth=$(( $(tr -cd / <<< "${dotfiles[i]}/${link_of_destinations[j]}" | wc -c) ))
+                local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${dotfiles[i]}/${link_of_destinations[j]}"
+                mkdir -p ${dotfiles[i]}/${link_of_destinations[j]%/*}
+
+                if ! files_that_should_not_be_linked ${link_of_destinations[j]##*/}; then
+                    echo "ln -s \"${destination}\" -t \"${dotfiles[i]}/$(dirname \"${link_of_destinations[j]}\")\""
+                    ln -s "${destination}" -t "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")"
+                fi
+            }
         else
             echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
             ln -s ${DOTDIR}/${dotfiles[i]}
@@ -358,7 +363,7 @@ function should_it_make_deep_link_directory() {
     pushd ${HOME}/${DOTDIR}
 
     [[ -d $directory ]] && \
-        ( [[ "$directory" = ".config" ]] || [[ "$directory" = "bin" ]] )
+        ( [[ "$directory" = ".config" ]] || [[ "$directory" = "bin" ]] || [[ "$directory" = ".local" ]] )
 
     local result=$?
     popd

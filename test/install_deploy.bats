@@ -5,16 +5,18 @@ load helpers
 function setup() {
     pushd ${HOME}
     mkdir -p .dotfiles
+
     function backup_current_dotfiles() { return 0; }
     function should_it_make_deep_link_directory() {
         [[ "$1" = ".config" ]] && return 0
         [[ "$1" = ".config2" ]] && return 0
+        [[ "$1" = ".local" ]] && return 0
         return 1
     }
 }
 
 function teardown() {
-    rm -rf ${HOME}/.dotfiles ${HOME}/.config ${HOME}/.config2
+    rm -rf ${HOME}/${DOTDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local
     [[ -L ${HOME}/.dir0 ]] && unlink ${HOME}/.dir0
     [[ -L ${HOME}/.dir1 ]] && unlink ${HOME}/.dir1
     popd
@@ -87,6 +89,7 @@ function teardown() {
     mkdir -p ${DOTDIR}/.config2/fontconfig/foo
     touch ${DOTDIR}/.config2/fontconfig/fonts.conf
     touch ${DOTDIR}/.config2/fontconfig/foo/foo.conf
+
     function get_target_dotfiles() { echo ".config .config2"; }
 
     run deploy
@@ -96,16 +99,32 @@ function teardown() {
     [[ -d "${HOME}/.config/fontconfig/foo" ]]
     [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]
     [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]
-    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
-    [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config/fontconfig/foo/foo.conf" ]]
+    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../${DOTDIR}/.config/fontconfig/fonts.conf" ]]
+    [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../${DOTDIR}/.config/fontconfig/foo/foo.conf" ]]
     [[ -d "${HOME}/.config2" ]]
     [[ -d "${HOME}/.config2/fontconfig" ]]
     [[ -d "${HOME}/.config2/fontconfig/foo" ]]
     [[ -L "${HOME}/.config2/fontconfig/fonts.conf" ]]
     [[ -L "${HOME}/.config2/fontconfig/foo/foo.conf" ]]
-    [[ "$(readlink ${HOME}/.config2/fontconfig/fonts.conf)" = "../../.dotfiles/.config2/fontconfig/fonts.conf" ]]
-    [[ "$(readlink ${HOME}/.config2/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config2/fontconfig/foo/foo.conf" ]]
+    [[ "$(readlink ${HOME}/.config2/fontconfig/fonts.conf)" = "../../${DOTDIR}/.config2/fontconfig/fonts.conf" ]]
+    [[ "$(readlink ${HOME}/.config2/fontconfig/foo/foo.conf)" = "../../../${DOTDIR}/.config2/fontconfig/foo/foo.conf" ]]
 
+}
+
+@test '#deploy should create some links .local deeply' {
+    mkdir -p ${DOTDIR}/.local/share/fonts
+    touch "${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf"
+    touch "${DOTDIR}/.local/share/fonts/LICENSE.txt"
+
+    function get_target_dotfiles() { echo ".local"; }
+
+    run deploy
+
+    [[ "$status" -eq 0 ]]
+    [[ -d "${HOME}/.local" ]]
+    [[ -L "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+    [[ ! -e "${HOME}/.local/share/fonts/LICENSE.txt" ]]
+    [[ "$(readlink ${HOME}/.local/share/fonts/Inconsolata\ for\ Powerline.otf)" = "../../../${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
 }
 
 @test '#deploy should create the symlink to the file under the .dotfiles/bin directory' {

@@ -25,6 +25,22 @@ function teardown() {
     [[ "$status" -ne 0 ]]
 }
 
+@test '#should_it_make_deep_link_directory should returns 0 if bin directory was existed' {
+    mkdir ${HOME}/${DOTDIR}/bin
+    pushd ${HOME}
+    run should_it_make_deep_link_directory "bin"
+    [[ "$status" -eq 0 ]]
+    popd
+}
+
+@test '#should_it_make_deep_link_directory should returns 0 if .local directory was existed' {
+    mkdir ${HOME}/${DOTDIR}/.local
+    pushd ${HOME}
+    run should_it_make_deep_link_directory ".local"
+    [[ "$status" -eq 0 ]]
+    popd
+}
+
 @test '#should_it_make_deep_link_directory should not returns 0 if .config2 directory was existed' {
     mkdir ${HOME}/${DOTDIR}/.config2
     run should_it_make_deep_link_directory ".config2"
