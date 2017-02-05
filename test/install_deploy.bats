@@ -11,12 +11,13 @@ function setup() {
         [[ "$1" = ".config" ]] && return 0
         [[ "$1" = ".config2" ]] && return 0
         [[ "$1" = ".local" ]] && return 0
+        [[ "$1" = "bin" ]] && return 0
         return 1
     }
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local
+    rm -rf ${HOME}/${DOTDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local ${HOME}/bin
     [[ -L ${HOME}/.dir0 ]] && unlink ${HOME}/.dir0
     [[ -L ${HOME}/.dir1 ]] && unlink ${HOME}/.dir1
     popd
@@ -132,7 +133,7 @@ function teardown() {
     mkdir -p ${DOTDIR}/bin
     touch ${DOTDIR}/bin/foo
 
-    function get_target_dotfiles() { echo; }
+    function get_target_dotfiles() { echo "bin"; }
 
     run deploy
     echo "$output"
@@ -148,7 +149,7 @@ function teardown() {
     touch ${DOTDIR}/bin/foo
     touch ${DOTDIR}/bin/bar
 
-    function get_target_dotfiles() { echo; }
+    function get_target_dotfiles() { echo "bin"; }
 
     run deploy
     echo "$output"

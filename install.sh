@@ -237,7 +237,14 @@ function get_target_dotfiles() {
              dotfiles+=($f)
          }
     done < <(find . -mindepth 1 -maxdepth 1 -name ".*")
+
+    # Extra target for original command
+    if [[ -d "./bin" ]]; then
+        echo "bin"
+    fi
+
     popd
+
 
     echo ${dotfiles[@]}
 }
@@ -258,10 +265,6 @@ function backup_current_dotfiles() {
 
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         [[ -e "${dotfiles[i]}" ]] || continue
-        # FIXME: Skip .config directory because of copying .config directory always failes with errors like below.
-        #           cp: cannot stat '.config/chromium/SingletonLock': No such file or directory
-        #           cp: cannot stat '.config/chromium/SingletonCookie': No such file or directory
-        #[[ "${dotfiles[i]}" =~ ^\.config/.* ]] || continue
         local dir_name=${dotfiles[i]#./}
         dir_name=${dir_name%%/*}
         if (should_it_make_deep_link_directory "$dir_name"); then
@@ -332,7 +335,7 @@ function deploy() {
                 # Count depth of directory and append "../" in front of the target
                 local depth=$(( $(tr -cd / <<< "${dotfiles[i]}/${link_of_destinations[j]}" | wc -c) ))
                 local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${dotfiles[i]}/${link_of_destinations[j]}"
-                mkdir -p ${dotfiles[i]}/${link_of_destinations[j]%/*}
+                mkdir -p "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")"
 
                 if ! files_that_should_not_be_linked ${link_of_destinations[j]##*/}; then
                     echo "ln -s \"${destination}\" -t \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\""
@@ -344,18 +347,6 @@ function deploy() {
             ln -s "${DOTDIR}/${dotfiles[i]}"
         fi
     }
-
-    # Create symbolic links to commands that is customized.
-    if [ -d ${HOME}/${DOTDIR}/bin ]; then
-        mkdir -p ${HOME}/bin
-        pushd ${HOME}/bin
-
-        while read f; do
-            ln -s $f
-        done < <(find ../${DOTDIR}/bin -type f)
-
-        popd
-    fi
 
     popd
 }
@@ -393,7 +384,7 @@ function init_repo() {
     pushd ${HOME}/${DOTDIR}
     if is_here_git_repo; then
         echo "The repository ${REPO_URI} is already existed. Pulling from \"origin $branch\""
-        git pull origin $branch    # TODO: testing
+        git pull origin $branch
         # TODO: error handling
     else
 
@@ -425,11 +416,11 @@ function init_vim_environment() {
 
     # Install pathogen.vim
     mkdir -p ./.vim/autoload
+    echo "curl -LSso ./.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
     curl -LSso ./.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
 
     # update vim's submodules
     # Link color theme
-
     mkdir -p .vim/colors/
     pushd .vim/colors
     ln -sf ../../resources/etc/config/vim/colors/molokai.vim
@@ -440,7 +431,6 @@ function init_vim_environment() {
 
 # Get your OS distribution name
 function get_distribution_name() {
-    # TODO
     [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
 
     # Is Mac OS?
