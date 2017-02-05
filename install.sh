@@ -341,7 +341,7 @@ function deploy() {
             }
         else
             echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
-            ln -s ${DOTDIR}/${dotfiles[i]}
+            ln -s "${DOTDIR}/${dotfiles[i]}"
         fi
     }
 

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# - Status of files ------------------------------------------------
+# ?? file    -> Untracked
+# A  file    -> Added tracking. After the command "git add file"
+#  M file    -> Modified.
+# M  file    -> Modified and index was updated. After the command "(added some modification) && git add file"
+#  D file    -> Deleted. After the command "rm file"
+# D  hoge    -> Deleted then updated index. After the command "rm file && git add file" or "git rm file"
+# UU file    -> Mergeconflict and auto merge has failed
+# R  file -> foo
+#     -> Renamed. After the command "git mv file foo" or "mv file foo && git add foo && git rm file"
+#
+# - Status of branch -----------------------------------------------
+# ## master...origin/master [ahead 1]
+#     -> Your local branch is aheaded 1 commits.
+# ## master...origin/master [gone]
+#     -> Your local branch is not pushed to remote yet.
+#
+# - Status of result icons (with unpatched fonts) ------------------
+# * : symbol
+# S : staged file
+# U : updated
+# C : merge conflict
+# N : untracked file
+# T : stashed
+
+git status --porcelain --branch
+
+
