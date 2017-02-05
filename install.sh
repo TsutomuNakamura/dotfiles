@@ -104,7 +104,7 @@ function install_packages() {
     elif [ "$(get_distribution_name)" == "fedora" ]; then
         install_packages_with_dnf git vim ctags tmux zsh unzip
     elif [ "$(get_distribution_name)" == "arch" ]; then
-        install_packages_with_pacman git gvim ctags tmux zsh unzip
+        install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal
     elif [ "$(get_distribution_name)" == "mac" ]; then
         install_packages_with_homebrew vim ctags tmux zsh unzip
     fi
