@@ -288,7 +288,7 @@ function teardown() {
     touch ${HOME}/${DOTDIR}/bin/bar
     mkdir -p ${HOME}/bin
     touch ${HOME}/bin/foo
-    touch ${HOME}/bin/bar
+    pushd ${HOME}/bin; ln -s baz bar; popd
     touch ${HOME}/bin/baz
 
     function get_target_dotfiles() { echo "bin"; }
