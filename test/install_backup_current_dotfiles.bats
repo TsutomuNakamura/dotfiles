@@ -8,8 +8,7 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR}
-    rm -rf ${HOME}/${BACKUPDIR}
+    rm -rf ${HOME}/${DOTDIR} ${HOME}/${BACKUPDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local
 }
 
 @test '#backup_current_dotfiles should print a message if dotfiles directory was not existed' {
@@ -144,8 +143,6 @@ function teardown() {
     [[ ! -e "${HOME}/.config/fontconfig/fonts.conf" ]]
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig/fonts.conf" ]]
-
-    rm -rf ${HOME}/.config
 }
 
 @test '#backup_current_dotfiles should backup files deeply if they should be deep copied' {
@@ -192,11 +189,33 @@ function teardown() {
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config/someconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/someconfig/some.conf" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/foo.conf" ]]
-
-    rm -rf ${HOME}/.config
 }
 
-@test '#backup_current_dotfiles should backup files deeply if some of source directory were existed' {
+@test '#backup_current_dotfiles should backup files deeply if the file name contains some spaces' {
+    mkdir -p ${HOME}/${DOTDIR}/.local/share/fonts
+    touch "${HOME}/${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf"
+
+    mkdir -p ${HOME}/.local/share/fonts
+    touch "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf"
+
+
+    function get_target_dotfiles() { echo ".local"; }
+    function should_it_make_deep_link_directory() { return 0; };
+
+    run backup_current_dotfiles
+
+    echo "$output"
+    find "${HOME}/${BACKUPDIR}/19700101000000/" -ls
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    [[ -d ${HOME}/.local/share/fonts ]]
+    [[ ! -e "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+    [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.local/share/fonts" ]]
+    [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+}
+
+@test '#backup_current_dotfiles should backup ' {
     mkdir -p ${HOME}/${DOTDIR}/.config/fontconfig
     touch ${HOME}/${DOTDIR}/.config/fontconfig/fonts.conf
     touch ${HOME}/${DOTDIR}/.config/foo.conf
@@ -235,9 +254,8 @@ function teardown() {
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config2/fontconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config2/fontconfig/fonts.conf" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config2/foo.conf" ]]
-
-    rm -rf ${HOME}/.config ${HOME}/.config2
 }
+
 
 @test '#backup_current_dotfiles should backup a file under bin deeply' {
     rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin

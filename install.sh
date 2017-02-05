@@ -265,26 +265,28 @@ function backup_current_dotfiles() {
         local dir_name=${dotfiles[i]#./}
         dir_name=${dir_name%%/*}
         if (should_it_make_deep_link_directory "$dir_name"); then
+
             # Backup deeplink
-            pushd ${HOME}/${DOTDIR}/${dotfiles[i]}
+            pushd "${HOME}/${DOTDIR}/${dotfiles[i]}"
             while read target; do
                 # Backup only files or symlinks
                 target=${target#./}
-                local directory=$(dirname $target)
 
-                echo "mkdir -p ${backup_dir}/${dir_name}/${directory}"
-                mkdir -p ${backup_dir}/${dir_name}/${directory}
-                [[ -f ${HOME}/${dir_name}/${target} ]] || [[ -L ${HOME}/${dir_name}/${target} ]] && {
-                    echo "cp -RLp ${HOME}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}"
-                    cp -RLp ${HOME}/${dir_name}/${target} ${backup_dir}/${dir_name}/${directory}
+                local directory=$(dirname "$target")
+
+                echo "mkdir -p \"${backup_dir}/${dir_name}/${directory}\""
+                mkdir -p "${backup_dir}/${dir_name}/${directory}"
+                [[ -f "${HOME}/${dir_name}/${target}" ]] || [[ -L "${HOME}/${dir_name}/${target}" ]] && {
+                    echo "cp -RLp \"${HOME}/${dir_name}/${target}\" \"${backup_dir}/${dir_name}/${directory}\""
+                    cp -RLp "${HOME}/${dir_name}/${target}" "${backup_dir}/${dir_name}/${directory}"
                     remove_an_object "${HOME}/${dir_name}/${target}"
                 }
             done < <(find . -mindepth 1 \( -type f -or -type l \))
             popd
         else
-            echo "cp -RLp ${dotfiles[i]} ${backup_dir}"
-            cp -RLp ${dotfiles[i]} ${backup_dir}
-            remove_an_object ${dotfiles[i]}
+            echo "cp -RLp \"${dotfiles[i]}\" \"${backup_dir}\""
+            cp -RLp "${dotfiles[i]}" "${backup_dir}"
+            remove_an_object "${dotfiles[i]}"
         fi
     }
     popd
@@ -293,13 +295,13 @@ function backup_current_dotfiles() {
 function remove_an_object() {
     local object=$1
 
-    echo "Removing $object ..."
-    if [ -L $object ]; then
-        unlink $object
-    elif [ -d $object ]; then
-        rm -rf $object
+    echo "Removing \"$object\" ..."
+    if [ -L "$object" ]; then
+        unlink "$object"
+    elif [ -d "$object" ]; then
+        rm -rf "$object"
     else
-        rm -f $object
+        rm -f "$object"
     fi
 }
 
