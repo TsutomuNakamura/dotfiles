@@ -89,8 +89,6 @@ branch_name=
 BK_IFS=$IFS
 IFS=''
 while read l; do
-
-    echo "DEBUG: \"${l}\""
     stats="${l:0:2}"
 
     if [[ "$stats" = "##" ]]; then
@@ -108,14 +106,13 @@ while read l; do
             ## master...origin/master [ahead 1, behind 1]
             remote="$(git config --get remote.origin.url)"
             if [[ "$remote" =~ \@github\.com\:|\/github\.com\/ ]]; then
-                icon=""
+                icon=" "
             else
                 icon="⭠"
             fi
         fi
         continue
     fi
-    echo "DEBUG: \"$stats\""
     if [[ "$stats" =~ [MADRC]. ]]; then
         ((num_indexed++))
     elif [[ "$stats" = "??" ]]; then
@@ -131,10 +128,32 @@ while read l; do
     elif [[ "$stats" = " D" ]]; then
         ((num_deleted++))
     fi
-done < <(git -C "$1" status --porcelain --branch)
+done < <(git -C "$1" status --porcelain --branch 2> /dev/null)
 IFS=$BK_IFS
 
-echo "$1"
-echo "DEBUG: icon: ${icon}  branch_name: ${branch_name}"
-echo "DEBUG: num_indexed: ${num_indexed}, num_modified: ${num_modified}, num_deleted: ${num_deleted}, num_conflict: ${num_conflict}, num_untracked: ${num_untracked}, num_ignored: ${num_ignored}"
+# DEBUG:
+num_indexed=100
+num_modified=100
+num_deleted=100
+num_conflict=100
+num_untracked=100
+num_ignored=100
+
+if [[ ! -z "$icon" ]]; then
+    line="$icon $branch_name "
+
+    for l in "$num_indexed " "$num_modified " "$num_deleted " "$num_conflict " "$num_untracked " "$num_ignored "
+    do
+        n=${l% *}
+        if [[ $n -gt 0 ]]; then
+            line+="${l#* } "
+            if [[ $n -gt 99 ]]; then
+                line+="99+ "
+            else
+                line+="$n "
+            fi
+        fi
+    done
+    echo "$line "
+fi
 
