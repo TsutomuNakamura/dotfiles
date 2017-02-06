@@ -1,55 +1,4 @@
 #!/bin/bash
-
-# - Status of files ------------------------------------------------
-# X          Y     Meaning
-# -------------------------------------------------
-#           [MD]   not updated
-# M        [ MD]   updated in index
-# A        [ MD]   added to index
-# D         [ M]   deleted from index
-# R        [ MD]   renamed in index
-# C        [ MD]   copied in index
-# [MARC]           index and work tree matches
-# [ MARC]     M    work tree changed since index
-# [ MARC]     D    deleted in work tree
-# -------------------------------------------------
-# D           D    unmerged, both deleted
-# A           U    unmerged, added by us
-# U           D    unmerged, deleted by them
-# U           A    unmerged, added by them
-# D           U    unmerged, deleted by us
-# A           A    unmerged, both added
-# U           U    unmerged, both modified
-# -------------------------------------------------
-# ?           ?    untracked
-# !           !    ignored
-# -------------------------------------------------
-
-# ' [MD]'        -> work tree changed since index
-#
-# '[MADRC].?'    -> added in index
-#
-
-#
-# - Status of branch -----------------------------------------------
-# ## master...origin/master [ahead 1]
-#     -> Your local branch is aheaded 1 commits.
-# ## master...origin/master [behind 1]
-#     -> Your local branch is behind 1 commits.
-# ## master...origin/master [ahead 1, behind 1]
-#     -> Merge conflict??
-# ## master...origin/master [gone]
-#     -> Your local branch is not pushed to remote yet??
-
-#
-# - Status of result icons (with unpatched fonts) ------------------
-# * : symbol
-# S : staged file
-# U : updated
-# C : merge conflict
-# N : untracked file
-# T : stashed
-
 ## symbols
 # \uf113: symbol                  : 
 # \uf126:                         : 
@@ -59,23 +8,14 @@
 # \uf0ed: symbol                  : 
 # \uf0ee: symbol                  : 
 # \uf071:                         : 
-
 # \uf058: modified index          : 
-# \uf058: updated work tree       : 
+# \uf055: updated work tree       : 
 # \uf056: deleted work tree       : 
 # \uf06a: merge conflict          : 
 # \uf059: untracked file          : 
 # \uf28b: ignored                 : 
 
-# -- duplicated
-# \uf057: merge conflict          : 
-
-
-#echo -e "\uf09b master \uf058 9  \uf059 5  \uf057 10  "
-#echo -e "\uf113  master \uf058 99+ \uf055 99+ \uf057 99+ \uf059 99+ \uf28b 99+    "
-#echo -e "\uf1e1 master \uf058 99+ \uf055 99+ \uf057 99+ \uf059 99+ \uf28b 99+    "
-#echo -e "\uf1e1 master \uf058 9  \uf059 5  \uf057 10  "
-
+directory="$1"
 num_indexed=0
 num_modified=0
 num_deleted=0
@@ -104,7 +44,7 @@ while read l; do
             icon=""
         else
             ## master...origin/master [ahead 1, behind 1]
-            remote="$(git config --get remote.origin.url)"
+            remote="$(git -C "$directory" config --get remote.origin.url)"
             if [[ "$remote" =~ \@github\.com\:|\/github\.com\/ ]]; then
                 icon=" "
             else
@@ -128,16 +68,8 @@ while read l; do
     elif [[ "$stats" = " D" ]]; then
         ((num_deleted++))
     fi
-done < <(git -C "$1" status --porcelain --branch 2> /dev/null)
+done < <(git -C "$directory" status --porcelain --branch 2> /dev/null)
 IFS=$BK_IFS
-
-# DEBUG:
-num_indexed=100
-num_modified=100
-num_deleted=100
-num_conflict=100
-num_untracked=100
-num_ignored=100
 
 if [[ ! -z "$icon" ]]; then
     line="$icon $branch_name "

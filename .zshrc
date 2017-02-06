@@ -20,3 +20,5 @@ PROMPT2="%{[22;38;05;242m%}>%{[0m%} "
 
 alias ls='ls --color=auto'
 
+export PATH="${HOME}/bin:${PATH}"
+
