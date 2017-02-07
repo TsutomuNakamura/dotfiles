@@ -34,14 +34,14 @@ while read l; do
     if [[ "$stats" = "##" ]]; then
         line_info="${l:3}"
         branch_name="${line_info%...*}"
-        position_of_tree="${hoge#* }"
+        position_of_tree="${line_info#* }"
         if [[ "$position_of_tree" =~ \[ahead\ [0-9]+\] ]]; then
-            icon=""
+            icon=" "
         elif [[ "$position_of_tree" =~ \[behind\ [0-9]+\] ]]; then
-            icon=""
+            icon=" "
         elif [[ "$position_of_tree" =~ \[.*\] ]]; then
             # For instance, conflict "## master...origin/master [ahead 1, behind 1]"
-            icon=""
+            icon=" "
         else
             ## master...origin/master [ahead 1, behind 1]
             remote="$(git -C "$directory" config --get remote.origin.url)"
@@ -87,5 +87,9 @@ if [[ ! -z "$icon" ]]; then
         fi
     done
     echo "$line "
+else
+    load="$(uptime)"
+    load=${load##*:}
+    echo " $load"
 fi
 
