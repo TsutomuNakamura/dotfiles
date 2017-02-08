@@ -16,12 +16,23 @@
 # \uf28b: ignored                 : 
 
 directory="$1"
+
+output=""
 num_indexed=0
 num_modified=0
 num_deleted=0
 num_conflict=0
 num_untracked=0
 num_ignored=0
+
+# hostname
+output+="  $(uname -n) "
+
+output+="  $(whoami) "
+
+# load average
+load="$(uptime)"
+output+=" ${load##*:}  "
 
 icon=
 branch_name=
@@ -72,24 +83,21 @@ done < <(git -C "$directory" status --porcelain --branch 2> /dev/null)
 IFS=$BK_IFS
 
 if [[ ! -z "$icon" ]]; then
-    line="$icon $branch_name "
+    output+="$icon $branch_name "
 
     for l in "$num_indexed " "$num_modified " "$num_deleted " "$num_conflict " "$num_untracked " "$num_ignored "
     do
         n=${l% *}
         if [[ $n -gt 0 ]]; then
-            line+="${l#* } "
+            output+="${l#* } "
             if [[ $n -gt 99 ]]; then
-                line+="99+ "
+                output+="99+ "
             else
-                line+="$n "
+                output+="$n "
             fi
         fi
     done
-    echo "$line "
-else
-    load="$(uptime)"
-    load=${load##*:}
-    echo " $load"
 fi
+
+echo "$output "
 
