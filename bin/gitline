@@ -16,6 +16,8 @@
 # \uf28b: ignored                 : 
 
 directory="$1"
+# TODO: Use width of pane to display contents propary
+width_of_pane="$2"
 
 output=""
 num_indexed=0
@@ -25,16 +27,14 @@ num_conflict=0
 num_untracked=0
 num_ignored=0
 
-# hostname
 output+="  $(uname -n) "
-
 output+="  $(whoami) "
 
 # load average
 load="$(uptime)"
 output+=" ${load##*:}  "
 
-icon=
+icon="⭠ "
 branch_name=
 
 BK_IFS=$IFS
@@ -47,19 +47,17 @@ while read l; do
         branch_name="${line_info%...*}"
         position_of_tree="${line_info#* }"
         if [[ "$position_of_tree" =~ \[ahead\ [0-9]+\] ]]; then
-            icon=" "
+            icon+="  "
         elif [[ "$position_of_tree" =~ \[behind\ [0-9]+\] ]]; then
-            icon=" "
+            icon+="  "
         elif [[ "$position_of_tree" =~ \[.*\] ]]; then
             # For instance, conflict "## master...origin/master [ahead 1, behind 1]"
-            icon=" "
+            icon+="  "
         else
             ## master...origin/master [ahead 1, behind 1]
             remote="$(git -C "$directory" config --get remote.origin.url)"
             if [[ "$remote" =~ \@github\.com\:|\/github\.com\/ ]]; then
-                icon=" "
-            else
-                icon="⭠"
+                icon+="  "
             fi
         fi
         continue
@@ -82,20 +80,19 @@ while read l; do
 done < <(git -C "$directory" status --porcelain --branch 2> /dev/null)
 IFS=$BK_IFS
 
-if [[ ! -z "$icon" ]]; then
-    output+="$icon $branch_name "
+if [[ ! -z "$branch_name" ]]; then
+    output+="${icon}${branch_name:---} "
 
     for l in "$num_indexed " "$num_modified " "$num_deleted " "$num_conflict " "$num_untracked " "$num_ignored "
     do
         n=${l% *}
-        if [[ $n -gt 0 ]]; then
-            output+="${l#* } "
-            if [[ $n -gt 99 ]]; then
-                output+="99+ "
-            else
-                output+="$n "
-            fi
+        output+="${l#* } "
+        if [[ $n -gt 99 ]]; then
+            output+=" 99+ "
+        else
+            output+=" $n  "
         fi
+
     done
 fi
 
