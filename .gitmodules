@@ -19,6 +19,3 @@
 [submodule ".vim/bundle/tmuxline.vim"]
 	path = .vim/bundle/tmuxline.vim
 	url = https://github.com/edkolev/tmuxline.vim
-[submodule "resources/dependencies/fonts"]
-	path = resources/dependencies/fonts
-	url = https://github.com/powerline/fonts
