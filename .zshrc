@@ -2,6 +2,13 @@
 autoload -Uz compinit
 compinit
 
+# Use cache for completion
+zstyle ':completion::complete:*' use-cache 1
+# Print message when no matches were found.
+zstyle ':completion:*:warnings' format 'No matches for %d'
+# Don't complete directory we are already in (../here)
+zstyle ':completion:*' ignore-parents parent pwd
+
 # End of lines added by compinstall
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile
@@ -31,8 +38,17 @@ fi
 
 [[ -z "$EDITOR" ]] && export EDITOR=vim
 
+if (command -v most > /dev/null 2>&1); then
+    export PAGER=most
+elif (command -v less > /dev/null 2>&1); then
+    export PAGER=less
+else
+    export PAGER=more
+fi
+
+
 # Set terminal color variation to 256 for tmux and vim etc.
-export TERM=xterm-256color
+##export TERM=xterm-256color
 
 # Append bin just below user's home directory to PATH to execute user specific command.
 export PATH="${HOME}/bin:${PATH}"
@@ -45,12 +61,18 @@ fi
 # Set colors when completion also.
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
+# Perform the cd command to that directory if only the directory was specified.
+setopt AUTO_CD
 # Command that duplicates with last one command will not be added in the history.
-setopt hist_ignore_dups
-# Remove trailing spaces after completion if needed
-setopt auto_param_keys
+setopt HIST_IGNORE_DUPS
+# Reduce extra spaces in history.
+setopt HIST_REDUCE_BLANKS
+# Remove trailing spaces after completion if needed.
+setopt AUTO_PARAM_KEYS
 # Make cd push the old directory onto the directory stack.
-setopt auto_pushd
+setopt AUTO_PUSHD
 # Don't push multiple copies of the same directory onto the directory stack.
-setopt pushd_ignore_dups
+setopt PUSHD_IGNORE_DUPS
+
+
 
