@@ -30,8 +30,6 @@ curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/insta
 ```
 This command will clone the develop branch of the repository.
 
-## Multioption
-
 
 + Images
 ![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy00.png)
