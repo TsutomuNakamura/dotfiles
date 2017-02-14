@@ -3,20 +3,35 @@ This is a collection of dotfiles that I use on a arch linux as usual.
 When you run the install script, you can make this customized environment onto arch, ubuntu, fedora and Mac OS X instantly.
 
 # Install and setup
-You can install and setup the environment by using a command like below.
+These install methods will clone this repository at ~/.dotfiles and create symbolic links to .vim .tmux etc in ~/.dotfiles.
 
+## Standard method
 ```
 curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash
 ```
-
 It will install dependency packages if you have root privileges or belong to sudoers.
-If you want not to install dependency packages, you can specify the option "-n" like below.
 
+## Without instakking dependency packages
+If you want not to install dependency packages, you can specify the option "-n" like below.
 ```
 curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -n
 ```
+## With clone by using ssh protocol
+Usually, the install script clone this repository by using https protocol but if you want to clone it by using ssh protocol, you can specify the option "-g" like below
 
-This script will clone this repository at ~/.dotfiles then create symbolic links to .vim .tmux etc in ~/.dotfiles.
+```
+curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -g
+```
+
+## With clone of specific branch or tag
+This script can clone this specific branch or tag of repository for developers or the man who want to use other main versions of dotfiles.
+```
+curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -b develop
+```
+This command will clone the develop branch of the repository.
+
+## Multioption
+
 
 + Images
 ![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy00.png)
