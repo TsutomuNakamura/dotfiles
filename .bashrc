@@ -21,6 +21,7 @@ function __prompt_command() {
         ## PS1=$(printf "%*s\r%s" "$(($(tput cols)+${compensate}))" ".$EXIT " "\u@\h \W\[\e[38;05;197m\]$prompt_prefix\[\e[0m\]>_ ")
 
         # printf "\[\e[38;05;242m\]%*s\[\e[0m\]\r" "$(tput cols)" "$EXIT "
+        printf "\e[38;05;242m%*s\e[0m\r" "$(tput cols)" ".$EXIT "
         PS1="\u@\h \W\[\e[38;05;197m\]$prompt_prefix\[\e[0m\]>_ "
     else
         #PS1="\u@\h \W$prompt_prefix\[\e[38;05;45m\]>_\[\e[0m\] "
