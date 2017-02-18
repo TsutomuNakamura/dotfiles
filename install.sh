@@ -334,8 +334,8 @@ function deploy() {
                 mkdir -p "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")"
 
                 if ! files_that_should_not_be_linked ${link_of_destinations[j]##*/}; then
-                    echo "ln -s \"${destination}\" -t \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\""
-                    ln -s "${destination}" -t "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")"
+                    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && ln -s \"${destination}\")"
+                    (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && ln -s "${destination}")
                 fi
             }
         else
