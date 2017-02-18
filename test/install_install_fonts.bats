@@ -51,17 +51,16 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     ls -l ${HOME}/.local/share/fonts/
 
     [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 3 ]]
+    [[ "$(call_count curl)" -eq 2 ]]
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 4 ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
     [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
 }
 
-@test '#install_fonts should install Inconsolata Powerline, Inconsolata Powerline Nerd, Migu 1M on debian' {
+@test '#install_fonts should install Inconsolata Powerline Nerd, Migu 1M on debian' {
     function get_distribution_name() { echo "debian"; }
     function do_i_have_admin_privileges() { return 1; }
 
@@ -69,11 +68,10 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     ls -l ${HOME}/.local/share/fonts/
 
     [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 3 ]]
+    [[ "$(call_count curl)" -eq 2 ]]
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 4 ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
     [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
@@ -87,11 +85,10 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     ls -l ${HOME}/.local/share/fonts/
 
     [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 3 ]]
+    [[ "$(call_count curl)" -eq 2 ]]
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 4 ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
     [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
@@ -105,7 +102,7 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 3 ]]
+    [[ "$(call_count curl)" -eq 2 ]]
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
     [[ "$(count ${HOME}/Library/Fonts/)" -eq 4 ]]
