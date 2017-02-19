@@ -10,8 +10,6 @@ BACKUPDIR=".backup_of_dotfiles"
 # Distribution of this environment
 DISTRIBUTION=
 
-## cd $BASE_DIR
-
 function main() {
 
     local flag_init=0
@@ -99,20 +97,46 @@ function init() {
 
 # Install packages
 function install_packages() {
-    if [ "$(get_distribution_name)" == "debian" ]; then
+    if [[ "$(get_distribution_name)" = "debian" ]]; then
         install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip
-    elif [ "$(get_distribution_name)" == "fedora" ]; then
+    elif [[ "$(get_distribution_name)" = "fedora" ]]; then
         install_packages_with_dnf git vim ctags tmux zsh unzip
-    elif [ "$(get_distribution_name)" == "arch" ]; then
+    elif [[ "$(get_distribution_name)" = "arch" ]]; then
         install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal
-    elif [ "$(get_distribution_name)" == "mac" ]; then
+    elif [[ "$(get_distribution_name)" = "mac" ]]; then
         install_packages_with_homebrew vim ctags tmux zsh unzip
+    fi
+}
+
+# Get the value of XDG_CONFIG_HOME for individual environments appropliately.
+function get_xdg_config_home() {
+    if [[ -z "${XDG_CONFIG_HOME}" ]]; then
+        if [[ "$(get_distribution_name)" = "mac" ]]; then
+            echo "${HOME}/Library/Preferences"
+        else
+            echo "${HOME}/.config"
+        fi
+    else
+        echo "${XDG_CONFIG_HOME}"
+    fi
+}
+
+# Get the value of XDG_DATA_HOME for individual environments appropliately.
+function get_xdg_data_home() {
+    if [[ -z "${XDG_DATA_HOME}" ]]; then
+        if [[ "$(get_distribution_name)" = "mac" ]]; then
+            echo "${HOME}/Library/Preferences"
+        else
+            echo "${HOME}/.config"
+        fi
+    else
+        echo "${XDG_DATA_HOME}"
     fi
 }
 
 # Installe font
 function install_fonts() {
-    if [[ "$(get_distribution_name)" == "mac" ]]; then
+    if [[ "$(get_distribution_name)" = "mac" ]]; then
         local font_dir=${HOME}/Library/Fonts
     else
         local font_dir=${HOME}/.local/share/fonts
@@ -343,6 +367,8 @@ function deploy() {
             ln -s "${DOTDIR}/${dotfiles[i]}"
         fi
     }
+
+    deploy_xdg_base_directory
 
     popd
 }
