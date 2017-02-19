@@ -203,7 +203,7 @@ endfunction
 " その表示の前に %N というところでタブ番号を表示させています
 set guitablabel=%N:\ %{GuiTabLabel()}
 
-if !filereadable(".vimrc_do_not_use_ambiwidth")
+if !filereadable(expand("~/.vimrc_do_not_use_ambiwidth"))
   source ~/.vim/myconf/ambiwidth.conf
 endif
 
