@@ -12,6 +12,24 @@ DISTRIBUTION=
 
 function main() {
 
+    is_customized_xdg_base_directories || {
+        echo "ERROR: This dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
+        echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
+        if [[ -z "${XDG_CONFIG_HOME}" ]]; then
+            echo "       XDG_CONFIG_HOME=(unset)"
+        else
+            echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\""
+        fi
+        echo "           -> This must be set \"\${HOME}/.config\" in Linux or \"\${HOME}/Library/Preferences\" in Mac or unset."
+        if [[ -z "${XDG_DATA_HOME}" ]]; then
+            echo "       XDG_DATA_HOME=(unset)"
+        else
+            echo "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\""
+        fi
+        echo "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
+        return 1
+    }
+
     local flag_init=0
     local flag_deploy=0
     local flag_only_install_packages=0
