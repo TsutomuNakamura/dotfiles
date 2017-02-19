@@ -127,7 +127,7 @@ function get_xdg_data_home() {
         if [[ "$(get_distribution_name)" = "mac" ]]; then
             echo "${HOME}/Library"
         else
-            echo "${HOME}/.config"
+            echo "${HOME}/.local/share"
         fi
     else
         echo "${XDG_DATA_HOME}"
@@ -137,9 +137,9 @@ function get_xdg_data_home() {
 # Installe font
 function install_fonts() {
     if [[ "$(get_distribution_name)" = "mac" ]]; then
-        local font_dir=${HOME}/Library/Fonts
+        local font_dir="$(get_xdg_data_home)/Fonts"
     else
-        local font_dir=${HOME}/.local/share/fonts
+        local font_dir="$(get_xdg_data_home)/fonts"
     fi
 
     mkdir -p $font_dir
