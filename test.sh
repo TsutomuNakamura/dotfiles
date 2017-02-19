@@ -26,11 +26,37 @@ if ! (command -v bats > /dev/null); then
     cd ../
 fi
 
+# Only compatible for GNU getopt
+opts=$(getopt -o "t" --long "tap" -- "$@")
+[[ "$?" -ne 0 ]] && {
+    echo "Some error was occured in getopt"
+    exit 1
+}
+eval set -- "$opts"
+opts_for_bats=""
+
+while true; do
+    case "$1" in
+        -t | --tap)
+            opts_for_bats+="--tap "
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Some error occured at getopt"
+            exit 1
+            ;;
+    esac
+done
+
 if [[ "$#" -ne 0 ]]; then
     for f in "$@"; do
-        bats $f
+        bats $opts_for_bats $f
     done
 else
-    bats ./test/*.bats
+    bats $opts_for_bats ./test/*.bats
 fi
 
