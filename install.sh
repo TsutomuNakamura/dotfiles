@@ -125,7 +125,7 @@ function get_xdg_config_home() {
 function get_xdg_data_home() {
     if [[ -z "${XDG_DATA_HOME}" ]]; then
         if [[ "$(get_distribution_name)" = "mac" ]]; then
-            echo "${HOME}/Library/Preferences"
+            echo "${HOME}/Library"
         else
             echo "${HOME}/.config"
         fi
