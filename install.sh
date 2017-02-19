@@ -243,6 +243,32 @@ function should_the_dotfile_be_skipped() {
             [[ "$target" =  "$BACKUPDIR" ]]
 }
 
+# TODO: This dotfiles sunsupported customized XDG directories.
+#       XDG_CONFIG_HOME must be "~/.config" in Linux OS and "~/Library/Preferences" in Mac OS.
+#       XDG_DATA_HOME must be "~/.local/share" in Linux OS and "~/Library" in Mac OS.
+function is_customized_xdg_base_directories() {
+    local result=0
+
+    if [[ ! -z "${XDG_CONFIG_HOME}" ]]; then
+        if [[ "$(get_distribution_name)" = "mac" ]]; then
+            [[ "${XDG_CONFIG_HOME%/}" = "${HOME}/Library/Preferences" ]]    || (( result++ ))
+        else
+            [[ "${XDG_CONFIG_HOME%/}" = "${HOME}/.config" ]]                || (( result++ ))
+        fi
+    fi
+
+    if [[ ! -z "${XDG_DATA_HOME}" ]]; then
+        if [[ "$(get_distribution_name)" = "mac" ]]; then
+            [[ "${XDG_DATA_HOME%/}" = "${HOME}/Library" ]]      || (( result++ ))
+        else
+            [[ "${XDG_DATA_HOME%/}" = "${HOME}/.local/share" ]] || (( result++ ))
+        fi
+    fi
+
+    return $result
+}
+
+# Check the file whether should not be linked
 function files_that_should_not_be_linked() {
     local target="$1"
     [[ "$target" = "LICENSE.txt" ]]
@@ -336,8 +362,7 @@ function deploy() {
 
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
-        if should_it_make_deep_link_directory "${dotfiles[i]}" \
-                || is_xdg_base_directory "${dotfiles[i]}"; then
+        if should_it_make_deep_link_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
             declare link_of_destinations=()
             [[ ! -e "${dotfiles[i]}" ]] && mkdir ${dotfiles[i]}
@@ -368,7 +393,7 @@ function deploy() {
         fi
     }
 
-    deploy_xdg_base_directory
+    # deploy_xdg_base_directory
 
     popd
 }
