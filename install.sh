@@ -145,6 +145,8 @@ function install_fonts() {
     mkdir -p $font_dir
     pushd $font_dir
 
+    # Inconsolata for Powerlin will be deployed from the repository
+
     # Inconsolata for Powerline Nerd Font Complete Mono.otf
     curl -fLo "Inconsolata for Powerline Nerd Font Complete.otf" \
             https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete.otf
@@ -259,13 +261,10 @@ function get_target_dotfiles() {
     done < <(find . -mindepth 1 -maxdepth 1 -name ".*")
 
     # Extra target for original command
-    if [[ -d "./bin" ]]; then
-        echo "bin"
-    fi
+    [[ -d "./bin" ]] && dotfiles+=("bin")
+    [[ -d "./Library" ]] && dotfiles+=("Library")
 
     popd
-
-
     echo ${dotfiles[@]}
 }
 
@@ -337,7 +336,8 @@ function deploy() {
 
     pushd ${HOME}
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
-        if should_it_make_deep_link_directory "${dotfiles[i]}"; then
+        if should_it_make_deep_link_directory "${dotfiles[i]}" \
+                || is_xdg_base_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
             declare link_of_destinations=()
             [[ ! -e "${dotfiles[i]}" ]] && mkdir ${dotfiles[i]}
@@ -373,6 +373,18 @@ function deploy() {
     popd
 }
 
+# Deploy resources about xdg_base directories
+function deploy_xdg_base_directory() {
+    # XDG_CONFIG_HOME
+    # XDG_DATA_HOME
+
+    # Deploy fonts in dotfiles repository
+    
+
+    # Deploy fontconfig
+    true
+}
+
 function should_it_make_deep_link_directory() {
     local directory="$1"
     pushd ${HOME}/${DOTDIR}
@@ -385,6 +397,8 @@ function should_it_make_deep_link_directory() {
 
     return $result
 }
+
+
 
 # Check whether I have admin privileges or not
 function do_i_have_admin_privileges() {

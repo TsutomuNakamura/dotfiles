@@ -100,3 +100,25 @@ function teardown() {
     [[ "${#result[@]}" -eq 0 ]]
 }
 
+@test '#get_target_dotfiles should get bin directory if it was existed' {
+    mkdir ${HOME}/${DOTDIR}/bin
+
+    run get_target_dotfiles "${HOME}/${DOTDIR}"
+    declare -a result=($output)
+
+    [[ "$status" -eq 0 ]]
+    [[ "${#result[@]}" -eq 1 ]]
+    contains "bin" "${result[@]}"
+}
+
+@test '#get_target_dotfiles should get Library directory if it was existed' {
+    mkdir ${HOME}/${DOTDIR}/Library
+
+    run get_target_dotfiles "${HOME}/${DOTDIR}"
+    declare -a result=($output)
+
+    [[ "$status" -eq 0 ]]
+    [[ "${#result[@]}" -eq 1 ]]
+    contains "Library" "${result[@]}"
+}
+
