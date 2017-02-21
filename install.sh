@@ -418,14 +418,40 @@ function deploy() {
 
 # Deploy resources about xdg_base directories
 function deploy_xdg_base_directory() {
-    # XDG_CONFIG_HOME
-    # XDG_DATA_HOME
+    # XDG_CONFIG_HOME must be "~/.config" in Linux OS and "~/Library/Preferences" in Mac OS.
+    # XDG_DATA_HOME must be "~/.local/share" in Linux OS and "~/Library" in Mac OS.
+    link_xdg_base_directory "XDG_CONFIG_HOME" "$(get_xdg_config_home)"
+    link_xdg_base_directory "XDG_DATA_HOME"   "$(get_xdg_data_home)"
+}
 
-    # Deploy fonts in dotfiles repository
-    
+function link_xdg_base_directory() {
+    local xdg_directory="${1#./*}"
+    local actual_xdg_directory="${2#./*}"
+    local replaced=
+    local depth=
+    local pushd_target=
+    local link_target=
 
-    # Deploy fontconfig
-    true
+
+    pushd ${HOME}/${DOTDIR}
+    if [[ -d "$xdg_directory" ]]; then
+        while read f; do
+            f=${f#./*}
+            replaced="$(sed -e "s|${xdg_directory}|${actual_xdg_directory}|" <<< ${f})"
+            replaced="$(sed -e "s|${HOME}|.|" <<< $replaced)"
+            # Add -1 since $replaced always starts with "./"
+            depth=$(( $(tr -cd / <<< "$replaced" | wc -c) - 1 ))
+            pushd_target="$(dirname "${HOME}/${replaced#./*}")"
+            [[ ! -d "$pushd_target" ]] && mkdir -p "$pushd_target"
+
+            pushd "$pushd_target"
+            link_target="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${f}"
+            echo "ln -s \"${link_target}\" from \"$(pwd)\""
+            ln -s "${link_target}"
+            popd
+        done < <(find ./${xdg_directory} -type f)
+    fi
+    popd
 }
 
 function should_it_make_deep_link_directory() {
