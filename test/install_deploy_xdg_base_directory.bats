@@ -3,6 +3,9 @@ load helpers
 
 function setup() {
     cd ${HOME}
+}
+
+function teardown() {
     rm -rf ./.dotfiles ./.config ./.local ./Library
 }
 
@@ -11,7 +14,6 @@ function setup() {
 # XDG_DATA_HOME     -> ${HOME}/.local/share   ${HOME}/Library
 ## On Mac
 # 
-
 
 @test '#deploy_xdg_base_directory should deploy resources in "~/.dotfiles/XDG_CONFIG_HOME" to "~/.config" on Linux' {
     mkdir -p .dotfiles/XDG_CONFIG_HOME/foo
