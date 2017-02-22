@@ -143,6 +143,7 @@ function get_xdg_config_home() {
 
 # Get the value of XDG_DATA_HOME for individual environments appropliately.
 function get_xdg_data_home() {
+    set +u
     if [[ -z "${XDG_DATA_HOME}" ]]; then
         if [[ "$(get_distribution_name)" = "mac" ]]; then
             echo "${HOME}/Library"
@@ -152,6 +153,7 @@ function get_xdg_data_home() {
     else
         echo "${XDG_DATA_HOME}"
     fi
+    set -u
 }
 
 # Installe font
@@ -243,7 +245,7 @@ function install_packages_with_homebrew() {
     local output=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        output="$(brew install ${packages[i]} 2>&1)" || {
+        output="$(sudo brew install ${packages[i]} 2>&1)" || {
             echo "ERROR: Some error occured when installing ${packages[i]}"
             echo "${output}"
         }
