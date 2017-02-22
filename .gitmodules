@@ -19,3 +19,6 @@
 [submodule ".vim/bundle/tmuxline.vim"]
 	path = .vim/bundle/tmuxline.vim
 	url = https://github.com/edkolev/tmuxline.vim
+[submodule "resources/etc/config/vim/bats.vim"]
+	path = resources/etc/config/vim/bats.vim
+	url = https://github.com/vim-scripts/bats.vim.git
