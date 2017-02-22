@@ -128,6 +128,7 @@ function install_packages() {
 
 # Get the value of XDG_CONFIG_HOME for individual environments appropliately.
 function get_xdg_config_home() {
+    set +u
     if [[ -z "${XDG_CONFIG_HOME}" ]]; then
         if [[ "$(get_distribution_name)" = "mac" ]]; then
             echo "${HOME}/Library/Preferences"
@@ -137,6 +138,7 @@ function get_xdg_config_home() {
     else
         echo "${XDG_CONFIG_HOME}"
     fi
+    set -u
 }
 
 # Get the value of XDG_DATA_HOME for individual environments appropliately.
