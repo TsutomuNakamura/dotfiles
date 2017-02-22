@@ -267,6 +267,7 @@ function should_the_dotfile_be_skipped() {
 #       XDG_CONFIG_HOME must be "~/.config" in Linux OS and "~/Library/Preferences" in Mac OS.
 #       XDG_DATA_HOME must be "~/.local/share" in Linux OS and "~/Library" in Mac OS.
 function is_customized_xdg_base_directories() {
+    set +u
     local result=0
 
     if [[ ! -z "${XDG_CONFIG_HOME}" ]]; then
@@ -285,6 +286,7 @@ function is_customized_xdg_base_directories() {
         fi
     fi
 
+    set -u
     return $result
 }
 
