@@ -22,3 +22,6 @@
 [submodule "resources/etc/config/vim/bats.vim"]
 	path = resources/etc/config/vim/bats.vim
 	url = https://github.com/vim-scripts/bats.vim.git
+[submodule "resources/etc/config/vim/snipmate-snippets.git"]
+	path = resources/etc/config/vim/snipmate-snippets.git
+	url = https://github.com/jjasghar/snipmate-snippets.git
