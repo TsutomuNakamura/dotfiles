@@ -129,7 +129,6 @@ function teardown() {
 }
 
 @test '#deploy should create the symlink to the file under the .dotfiles/bin directory' {
-    rm -rf ${HOME}/bin
     mkdir -p ${DOTDIR}/bin
     touch ${DOTDIR}/bin/foo
 
@@ -144,7 +143,6 @@ function teardown() {
 }
 
 @test '#deploy should create some symlinks to the files under the .dotfiles/bin directory' {
-    rm -rf ${HOME}/bin
     mkdir -p ${DOTDIR}/bin
     touch ${DOTDIR}/bin/foo
     touch ${DOTDIR}/bin/bar

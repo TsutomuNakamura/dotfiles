@@ -86,9 +86,23 @@ function teardown() {
     [[ -L "./Library/bar.txt" ]]
     [[ -L "./Library/foo/baz.sh" ]]
     [[ "$(count ./Library)" -eq 2 ]]
-    ls -l ./Library
     [[ "$(readlink ./Library/bar.txt)" = "../.dotfiles/XDG_DATA_HOME/bar.txt" ]]
     [[ "$(count ./Library/foo)" -eq 1 ]]
     [[ "$(readlink ./Library/foo/baz.sh)" = "../../.dotfiles/XDG_DATA_HOME/foo/baz.sh" ]]
+}
+
+@test '#deploy_xdg_base_directory should deploy fonts "~/Library/Fonts" (not to ~/Library/fonts) on Mac' {
+    mkdir -p .dotfiles/XDG_DATA_HOME/fonts
+    touch ".dotfiles/XDG_DATA_HOME/fonts/Inconsolata for Powerline.otf"
+
+    function get_distribution_name() { echo "mac"; }
+
+    run deploy_xdg_base_directory
+
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ -L "./Library/Fonts/Inconsolata for Powerline.otf" ]]
+    [[ "$(count ./Library/Fonts)" -eq 1 ]]
+    [[ "$(readlink "./Library/Fonts/Inconsolata for Powerline.otf")" = "../../.dotfiles/XDG_DATA_HOME/fonts/Inconsolata for Powerline.otf" ]]
 }
 
