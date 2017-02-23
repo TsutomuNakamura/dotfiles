@@ -10,12 +10,13 @@ function setup() {
     mkdir -p ${DOTDIR}/.vim
     touch ${DOTDIR}/resources/etc/config/vim/bats.vim/after/syntax/sh.vim
     touch ${DOTDIR}/resources/etc/config/vim/bats.vim/ftdetect/bats.vim
+    ln -sf ${DOTDIR}/.vim
 }
 
 function teardown() {
     cd ${HOME}
     rm -rf ${DOTDIR}
-    unlink .vim
+    rm -rf .vim
 }
 
 @test '#deploy_vim_environment should deploy bats.vim' {
@@ -27,6 +28,11 @@ function teardown() {
     [[ -L ".vim/after/syntax/sh.vim" ]]
     [[ "$(readlink .vim/after/syntax/sh.vim)" = "../../../${DOTDIR}/resources/etc/config/vim/bats.vim/after/syntax/sh.vim" ]]
     [[ "$(readlink .vim/ftdetect/bats.vim)" = "../../${DOTDIR}/resources/etc/config/vim/bats.vim/ftdetect/bats.vim" ]]
+
+    [[ -L ".vim/snippets/bats.snippets" ]]
+    [[ "$(readlink ".vim/snippets/bats.snippets")" = "../../${DOTDIR}/resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets" ]]
+    [[ -L ".vim/snippets/chef.snippets" ]]
+    [[ "$(readlink ".vim/snippets/chef.snippets")" = "../../${DOTDIR}/resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets" ]]
 }
 
 

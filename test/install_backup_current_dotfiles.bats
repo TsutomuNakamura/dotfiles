@@ -8,12 +8,14 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR} ${HOME}/${BACKUPDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local
+    rm -rf ${HOME}/${DOTDIR} ${HOME}/${BACKUPDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local ${HOME}/.vim ${HOME}/bin ${HOME}/foo ${HOME}/bar
 }
 
 @test '#backup_current_dotfiles should print a message if dotfiles directory was not existed' {
     rm -rf ${HOME}/${DOTDIR}
     run backup_current_dotfiles
+
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$output" = "There are no dotfiles to backup." ]]
 }
@@ -25,6 +27,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ ! -e ${HOME}/.vimrc ]]
@@ -38,6 +41,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 0 ]]
     [[ -e ${HOME}/.dummy ]]
@@ -54,6 +58,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 2 ]]
     [[ ! -e ${HOME}/.vimrc ]]
@@ -73,6 +78,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ ! -e ${HOME}/.vim/foo ]]
@@ -90,6 +96,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 0 ]]
     [[ -e ${HOME}/.dummy ]]
@@ -112,6 +119,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 2 ]]
     [[ ! -e "${HOME}/.vim" ]]
@@ -137,6 +145,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ -d ${HOME}/.config/fontconfig ]]
@@ -170,6 +179,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ -d ${HOME}/.config/fontconfig ]]
@@ -205,8 +215,6 @@ function teardown() {
     run backup_current_dotfiles
 
     echo "$output"
-    find "${HOME}/${BACKUPDIR}/19700101000000/" -ls
-
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ -d ${HOME}/.local/share/fonts ]]
@@ -239,6 +247,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 2 ]]
     [[ -d ${HOME}/.config/fontconfig ]]
@@ -270,6 +279,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
@@ -296,6 +306,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
@@ -322,6 +333,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 1 ]]
@@ -350,6 +362,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 2 ]]
@@ -380,6 +393,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 2 ]]
@@ -415,6 +429,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 4 ]]
@@ -458,6 +473,7 @@ function teardown() {
 
     find ${HOME}/${BACKUPDIR}/19700101000000/bin -ls
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000/bin)" -eq 2 ]]
@@ -488,6 +504,7 @@ function teardown() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ -d ${HOME}/${BACKUPDIR}/19700101000000/bin ]]
@@ -495,8 +512,6 @@ function teardown() {
     [[ -d ${HOME}/bin ]]
     [[ ! -e ${HOME}/bin/foo ]]
     [[ "$(count ${HOME}/bin)" -eq 0 ]]
-
-    rm -rf ${HOME}/bin
 }
 
 @test '#backup_current_dotfiles should do nothing when the ${HOME}/bin directory has no target files' {
@@ -520,7 +535,5 @@ function teardown() {
     [[ "$(count ${HOME}/bin)" -eq 1 ]]
     [[ -f ${HOME}/bin/bar ]]
     [[ -f ${HOME}/${DOTDIR}/bin/foo ]]
-
-    rm -rf ${HOME}/bin
 }
 

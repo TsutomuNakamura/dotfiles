@@ -17,7 +17,7 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local ${HOME}/bin
+    rm -rf ${HOME}/${DOTDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local ${HOME}/bin ${HOME}/.vim
     [[ -L ${HOME}/.dir0 ]] && unlink ${HOME}/.dir0
     [[ -L ${HOME}/.dir1 ]] && unlink ${HOME}/.dir1
     popd
@@ -25,23 +25,27 @@ function teardown() {
 
 @test '#deploy should create a link .vim into .dotfiles' {
 
-    touch ${DOTDIR}/.vim
+    mkdir -p ${DOTDIR}/.vim
     function get_target_dotfiles() { echo ".vim"; }
 
     run deploy
+
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -L "${HOME}/.vim" ]]
     [[ "$(readlink ${HOME}/.vim)" = "${DOTDIR}/.vim" ]]
 }
 
 @test '#deploy should create links .vim, .tmux.conf, .dir0 and .dir1 into .dotfiles' {
-    touch ${DOTDIR}/.vim
+    mkdir -p ${DOTDIR}/.vim
     touch ${DOTDIR}/.tmux.conf
     mkdir ${DOTDIR}/.dir0
     mkdir ${DOTDIR}/.dir1
     function get_target_dotfiles() { echo ".vim .tmux.conf .dir0 .dir1"; }
 
     run deploy
+
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -L "${HOME}/.vim" ]]
     [[ -L "${HOME}/.tmux.conf" ]]
@@ -59,6 +63,8 @@ function teardown() {
     function get_target_dotfiles() { echo ".config"; }
 
     run deploy
+
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
@@ -73,6 +79,8 @@ function teardown() {
     function get_target_dotfiles() { echo ".config"; }
 
     run deploy
+
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
@@ -94,6 +102,8 @@ function teardown() {
     function get_target_dotfiles() { echo ".config .config2"; }
 
     run deploy
+
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
@@ -121,6 +131,7 @@ function teardown() {
 
     run deploy
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.local" ]]
     [[ -L "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
@@ -135,6 +146,7 @@ function teardown() {
     function get_target_dotfiles() { echo "bin"; }
 
     run deploy
+
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/bin" ]]
@@ -150,6 +162,7 @@ function teardown() {
     function get_target_dotfiles() { echo "bin"; }
 
     run deploy
+
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/bin" ]]

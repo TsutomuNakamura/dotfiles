@@ -468,7 +468,7 @@ function link_xdg_base_directory() {
 }
 
 function deploy_vim_environment() {
-    # deploy bats.vim
+    # Deploy bats.vim
     pushd ${HOME}
     mkdir -p .vim/after/syntax
     mkdir -p .vim/ftdetect
@@ -479,7 +479,12 @@ function deploy_vim_environment() {
     ln -sf ../../${DOTDIR}/resources/etc/config/vim/bats.vim/ftdetect/bats.vim
     popd
 
-    # TODO: https://github.com/jjasghar/snipmate-snippets
+    # Deploy snipmate-snippets
+    mkdir -p .vim/snippets
+    pushd .vim/snippets
+    ln -sf ../../${DOTDIR}/resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets
+    ln -sf ../../${DOTDIR}/resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets
+    popd
 
     popd
 }
