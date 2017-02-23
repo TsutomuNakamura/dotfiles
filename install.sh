@@ -416,8 +416,8 @@ function deploy() {
             ln -s "${DOTDIR}/${dotfiles[i]}"
         fi
     }
-
-    # deploy_xdg_base_directory
+    deploy_xdg_base_directory
+    deploy_vim_environment
 
     popd
 }
@@ -448,8 +448,15 @@ function link_xdg_base_directory() {
             # Add -1 since $replaced always starts with "./"
             depth=$(( $(tr -cd / <<< "$replaced" | wc -c) - 1 ))
             pushd_target="$(dirname "${HOME}/${replaced#./*}")"
-            [[ ! -d "$pushd_target" ]] && mkdir -p "$pushd_target"
 
+            # FIXME: Is there a way to change the directory smarter?
+            if [[ "$(get_distribution_name)" = "mac" ]]; then
+                if [[ "$pushd_target" =~ .*/Library/fonts$ ]]; then
+                    pushd_target=$(sed -e "s|/fonts/\?$|/Fonts|" <<< "$pushd_target")
+                fi
+            fi
+
+            [[ ! -d "$pushd_target" ]] && mkdir -p "$pushd_target"
             pushd "$pushd_target"
             link_target="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${f}"
             echo "ln -s \"${link_target}\" from \"$(pwd)\""
@@ -457,6 +464,23 @@ function link_xdg_base_directory() {
             popd
         done < <(find ./${xdg_directory} -type f)
     fi
+    popd
+}
+
+function deploy_vim_environment() {
+    # deploy bats.vim
+    pushd ${HOME}
+    mkdir -p .vim/after/syntax
+    mkdir -p .vim/ftdetect
+    pushd .vim/after/syntax
+    ln -sf ../../../${DOTDIR}/resources/etc/config/vim/bats.vim/after/syntax/sh.vim
+    popd
+    pushd .vim/ftdetect
+    ln -sf ../../${DOTDIR}/resources/etc/config/vim/bats.vim/ftdetect/bats.vim
+    popd
+
+    # TODO: https://github.com/jjasghar/snipmate-snippets
+
     popd
 }
 
