@@ -443,6 +443,11 @@ function link_xdg_base_directory() {
     if [[ -d "$xdg_directory" ]]; then
         while read f; do
             f=${f#./*}
+            (files_that_should_not_be_linked "${f##*/}") && {
+                echo "Creating the link was skipped because of un necessity: $f"
+                continue
+            }
+
             replaced="$(sed -e "s|${xdg_directory}|${actual_xdg_directory}|" <<< ${f})"
             replaced="$(sed -e "s|${HOME}|.|" <<< $replaced)"
             # Add -1 since $replaced always starts with "./"
