@@ -11,19 +11,19 @@ curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/insta
 ```
 It will install dependency packages if you have root privileges or belong to sudoers.
 
-## Without instakking dependency packages
+## Without installing dependency packages
 If you want not to install dependency packages, you can specify the option "-n" like below.
 ```
 curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -n
 ```
-## With clone by using ssh protocol
+## Clone with ssh protocol
 Usually, the install script clone this repository by using https protocol but if you want to clone it by using ssh protocol, you can specify the option "-g" like below
 
 ```
 curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -g
 ```
 
-## With clone of specific branch or tag
+## Clone with specific branch or tag
 This script can clone this specific branch or tag of repository for developers or the man who want to use other main versions of dotfiles.
 ```
 curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -b develop
