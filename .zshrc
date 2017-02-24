@@ -36,7 +36,7 @@ else
     alias ls='ls --color=auto'
 fi
 
-[[ -z "$EDITOR" ]] && export EDITOR=vim
+export EDITOR=vim
 
 if (command -v most > /dev/null 2>&1); then
     export PAGER=most
