@@ -29,3 +29,6 @@ PS2="\e[38;05;242m>_\e[0m "
 
 export PATH="${PATH}:${HOME}/bin"
 
+# Load user specific environment
+[[ -f ~/.user_specificrc ]] && . ~/.user_specificrc
+

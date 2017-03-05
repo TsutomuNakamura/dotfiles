@@ -77,3 +77,6 @@ setopt AUTO_PUSHD
 # Don't push multiple copies of the same directory onto the directory stack.
 setopt PUSHD_IGNORE_DUPS
 
+# Load user specific environment
+[[ -f ~/.user_specificrc ]] && . ~/.user_specificrc
+
