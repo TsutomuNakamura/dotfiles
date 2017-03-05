@@ -444,6 +444,13 @@ function deploy() {
     deploy_xdg_base_directory
     deploy_vim_environment
 
+    # FIXME: On Mac, do not ready for fontconfig yet.
+    #        For appropriate view, release ambi_width_double settings for vim and 
+    #        font "Inconsolata for Powerline Nerd Font Complete.otf" must be set on Mac.
+    if [[ "$(get_distribution_name)" == "mac" ]]; then
+        touch ~/.vimrc_do_not_use_ambiwidth
+    fi
+
     popd
 }
 

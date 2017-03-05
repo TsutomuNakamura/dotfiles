@@ -5,6 +5,7 @@ load helpers
 function setup() {
     pushd ${HOME}
     mkdir -p .dotfiles
+    rm -f ~/.vimrc_do_not_use_ambiwidth
 
     function backup_current_dotfiles() { return 0; }
     function should_it_make_deep_link_directory() {
@@ -17,7 +18,7 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local ${HOME}/bin ${HOME}/.vim
+    rm -rf ${HOME}/${DOTDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local ${HOME}/bin ${HOME}/.vim ${HOME}/.vimrc_do_not_use_ambiwidth
     [[ -L ${HOME}/.dir0 ]] && unlink ${HOME}/.dir0
     [[ -L ${HOME}/.dir1 ]] && unlink ${HOME}/.dir1
     popd
@@ -169,5 +170,23 @@ function teardown() {
     [[ -L "${HOME}/bin/foo" ]]
     [[ -L "${HOME}/bin/bar" ]]
     [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
+}
+
+@test '#deploy should create ~/.vimrc_do_not_use_ambiwidth on Mac' {
+    function get_distribution_name() { echo "mac"; }
+    run deploy
+
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ -f ~/.vimrc_do_not_use_ambiwidth ]]
+}
+
+@test '#deploy should NOT create ~/.vimrc_do_not_use_ambiwidth on Linux' {
+    function get_distribution_name() { echo "arch"; }
+    run deploy
+
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ ! -f ~/.vimrc_do_not_use_ambiwidth ]]
 }
 
