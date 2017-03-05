@@ -10,6 +10,7 @@ function teardown() {
     rm -rf ${HOME}/${DOTDIR}
     cd ~
     rm -rf .local Library migu-1m* Inconsolata\ for\ Powerline*
+    clear_call_count
 }
 
 function curl() {
@@ -33,7 +34,6 @@ function unzip() {
     touch migu-1m-bold.ttf
     touch migu-1m-regular.ttf
     touch migu-README.txt
-    mkdir ipag00303
     mkdir mplus-TESTFLIGHT-060
     popd
 }
