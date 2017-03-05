@@ -361,6 +361,31 @@ function backup_current_dotfiles() {
             remove_an_object "${dotfiles[i]}"
         fi
     }
+
+    backup_xdg_base_directory
+
+    popd
+}
+
+function backup_xdg_base_directory() {
+    local dir=
+    pushd "${HOME}/${DOTDIR}"
+    if [[ -d 'XDG_CONFIG_HOME' ]]; then
+
+        while read f; do
+            echo ${f%%./XDG_CONFIG_HOME}
+        done < <(find ./XDG_CONFIG_HOME -type f)
+
+        dir="$(get_xdg_config_home)"
+        pushd "${HOME}"
+        find "$dir" -type f
+        popd
+    fi
+
+    if [[ -d 'XDG_DATA_HOME' ]]; then
+        true
+    fi
+
     popd
 }
 
