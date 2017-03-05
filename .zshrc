@@ -50,6 +50,9 @@ fi
 # Set terminal color variation to 256 for tmux and vim etc.
 ##export TERM=xterm-256color
 
+# Set the keybind like emacs (and bash too)
+bindkey -e
+
 # Append bin just below user's home directory to PATH to execute user specific command.
 export PATH="${HOME}/bin:${PATH}"
 
@@ -74,5 +77,6 @@ setopt AUTO_PUSHD
 # Don't push multiple copies of the same directory onto the directory stack.
 setopt PUSHD_IGNORE_DUPS
 
-
+# Load user specific environment
+[[ -f ~/.user_specificrc ]] && . ~/.user_specificrc
 
