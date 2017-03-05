@@ -32,7 +32,7 @@ This command will clone the develop branch of the repository.
 
 
 + Images
-![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy00.png)
+![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy01.png)
 
 
 # Tested distribution and OS
