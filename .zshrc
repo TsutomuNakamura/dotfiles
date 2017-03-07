@@ -78,5 +78,5 @@ setopt AUTO_PUSHD
 setopt PUSHD_IGNORE_DUPS
 
 # Load user specific environment
-[[ -f ~/.user_specificrc ]] && . ~/.user_specificrc
+[[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 
