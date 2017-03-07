@@ -136,7 +136,8 @@ function get_xdg_config_home() {
             echo "${HOME}/.config"
         fi
     else
-        echo "${XDG_CONFIG_HOME}"
+        # Use eval to expand special variable like "~"
+        eval echo "${XDG_CONFIG_HOME}"
     fi
     set -u
 }
@@ -151,7 +152,7 @@ function get_xdg_data_home() {
             echo "${HOME}/.local/share"
         fi
     else
-        echo "${XDG_DATA_HOME}"
+        eval echo "${XDG_DATA_HOME}"
     fi
     set -u
 }
@@ -318,7 +319,7 @@ function get_target_dotfiles() {
     echo ${dotfiles[@]}
 }
 
-# BAckup current backup files
+# Backup current dotfiles
 function backup_current_dotfiles() {
 
     [ ! -d "${HOME}/${DOTDIR}" ] && {
@@ -362,13 +363,15 @@ function backup_current_dotfiles() {
         fi
     }
 
-    backup_xdg_base_directory
+    backup_xdg_base_directory "$backup_dir"
 
     popd
 }
 
 function backup_xdg_base_directory() {
+    local backup_dir="$1"
     local dir=
+
     pushd "${HOME}/${DOTDIR}"
     if [[ -d 'XDG_CONFIG_HOME' ]]; then
 
