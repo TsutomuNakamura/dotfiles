@@ -7,6 +7,8 @@ REPO_URI="https://github.com/TsutomuNakamura/dotfiles"
 DOTDIR=".dotfiles"
 # The directory that dotfiles resources will be backuped
 BACKUPDIR=".backup_of_dotfiles"
+# Cache of absolute backup dir
+CASH_ABSOLUTE_BACKUPDIR=
 # Distribution of this environment
 DISTRIBUTION=
 
@@ -130,16 +132,31 @@ function install_packages() {
 function get_xdg_config_home() {
     set +u
     if [[ -z "${XDG_CONFIG_HOME}" ]]; then
-        if [[ "$(get_distribution_name)" = "mac" ]]; then
-            echo "${HOME}/Library/Preferences"
-        else
-            echo "${HOME}/.config"
-        fi
+        echo "${HOME}$(get_suffix_xdg_config_home)"
     else
         # Use eval to expand special variable like "~"
         eval echo "${XDG_CONFIG_HOME}"
     fi
     set -u
+}
+
+# Get the value of suffix of XDG_CONFIG_HOME
+function get_suffix_xdg_config_home() {
+    if [[ "$(get_distribution_name)" = "mac" ]]; then
+        echo "/Library/Preferences"
+    else
+        echo "/.config"
+    fi
+}
+
+# Get the value of suffix of XDG_DATA_HOME
+function get_suffix_xdg_data_home() {
+    if [[ "$(get_distribution_name)" = "mac" ]]; then
+        echo "/Library"
+    else
+        echo "/.local/share"
+    fi
+
 }
 
 # Get the value of XDG_DATA_HOME for individual environments appropliately.
@@ -327,7 +344,7 @@ function backup_current_dotfiles() {
         return
     }
 
-    local backup_dir="${HOME}/${BACKUPDIR}/$(date "+%Y%m%d%H%M%S")"
+    local backup_dir="$(get_backup_dir)"
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
     mkdir -p ${backup_dir}
@@ -368,27 +385,58 @@ function backup_current_dotfiles() {
     popd
 }
 
+function get_backup_dir() {
+    set +u
+    if [[ -z "$CASH_ABSOLUTE_BACKUPDIR" ]]; then
+        CASH_ABSOLUTE_BACKUPDIR="${HOME}/${BACKUPDIR}/$(date "+%Y%m%d%H%M%S")"
+    fi
+    set -u
+    echo "$CASH_ABSOLUTE_BACKUPDIR"
+}
+
 function backup_xdg_base_directory() {
     local backup_dir="$1"
-    local dir=
+
+    [[ ! -d "$backup_dir" ]] && mkdir -p "$backup_dir"
+
+    backup_xdg_base_directory_individually "XDG_CONFIG_HOME" "$(get_xdg_config_home)" "$(get_backupdir_xdg_config_home)"
+    backup_xdg_base_directory_individually "XDG_DATA_HOME" "$(get_xdg_data_home)"     "$(get_backupdir_xdg_data_home)"
+}
+
+# Get absolute backup directory path
+function get_backupdir_xdg_config_home() {
+    echo "$(get_backup_dir)$(get_suffix_xdg_config_home)"
+}
+
+function get_backupdir_xdg_data_home() {
+    echo "$(get_backup_dir)$(get_suffix_xdg_data_home)"
+}
+
+function backup_xdg_base_directory_individually() {
+    local xdg_param_name="$1"
+    local xdg_dir="$2"
+    local backup_dir="$3"
+    local target=
+    local middle=
+    local file=
 
     pushd "${HOME}/${DOTDIR}"
-    if [[ -d 'XDG_CONFIG_HOME' ]]; then
+    while read f; do
+        target="${f#./${xdg_param_name}/*}"
+        middle=$(dirname "$target")
+        file=${target##*/}
 
-        while read f; do
-            echo ${f%%./XDG_CONFIG_HOME}
-        done < <(find ./XDG_CONFIG_HOME -type f)
+        # TODO: debug
+        echo "xdg_dir: $xdg_dir"
+        echo "middle: $middle"
+        echo "backup_dir: $backup_dir"
 
-        dir="$(get_xdg_config_home)"
-        pushd "${HOME}"
-        find "$dir" -type f
-        popd
-    fi
+        [[ ! -d "$backup_dir/$middle" ]] && mkdir -p "$backup_dir/$middle"
 
-    if [[ -d 'XDG_DATA_HOME' ]]; then
-        true
-    fi
-
+        echo "cp -RLp $xdg_dir/$middle/$file $backup_dir/$middle/$file"
+        cp -RLp "$xdg_dir/$middle/$file" "$backup_dir/$middle/$file"
+        remove_an_object "${xdg_dir}/${f#./${xdg_param_name}/*}"
+    done < <(find ./${xdg_param_name} -type f)
     popd
 }
 

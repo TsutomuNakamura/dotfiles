@@ -2,7 +2,7 @@
 load helpers
 
 function setup() {
-    mkdir ${HOME}/${DOTDIR}
+    mkdir -p ${HOME}/${DOTDIR}
     function should_it_make_deep_link_directory() { return 1; };
     function date() { echo "19700101000000"; }
 }
