@@ -426,11 +426,7 @@ function backup_xdg_base_directory_individually() {
         middle=$(dirname "$target")
         file=${target##*/}
 
-        # TODO: debug
-        echo "xdg_dir: $xdg_dir"
-        echo "middle: $middle"
-        echo "backup_dir: $backup_dir"
-
+        [[ ! -e "$xdg_dir/$middle/$file" ]] && continue
         [[ ! -d "$backup_dir/$middle" ]] && mkdir -p "$backup_dir/$middle"
 
         echo "cp -RLp $xdg_dir/$middle/$file $backup_dir/$middle/$file"
