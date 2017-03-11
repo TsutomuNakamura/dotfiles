@@ -46,6 +46,13 @@ These dotfiles tested on the environment like below, but on arch the most suitab
 | fedora             |
 | MacOS              |
 
+# Tested terminal applications
+
+| application        | Condition |
+| ------------------ | --------- |
+| Gnome terminal     | ◎        |
+| Konsole            | ○        |
+
 # Concept (and goal)
 These dotfiles is made on the concept as simple and visibility but utilities satisfactory.
 Customizing these files are now under ongoing and will commit new customizations for continuously.
