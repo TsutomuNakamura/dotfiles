@@ -73,13 +73,20 @@ vim-airline will provide cool status line for vim!
 tmuxline has some useful icons.
 Each icons gives us informations like below.
 
-| icon        | OS    |
+* basic
+
+| icon        | description |
 | ------------------ | ----- |
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon00.png) | Hostname |
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon01.png) | User name |
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon02.png) | Load average |
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon03.png) | Git branch name |
-| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon04.png) | Git branch name |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon04.png) | Index moditifed |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon05.png) | Updated files |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon06.png) | Deleted files |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon07.png) | Merge conflict |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon08.png) | Untracked files |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon09.png) | Ignored files |
 
 # Concept (and goal)
 These dotfiles is made on the concept as simple and visibility but utilities satisfactory.
