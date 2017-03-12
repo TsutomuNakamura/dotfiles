@@ -34,7 +34,6 @@ This command will clone the develop branch of the repository.
 + Images
 ![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy01.png)
 
-
 # Tested distribution and OS
 These dotfiles tested on the environment like below, but on arch the most suitable for because I usually use arch linux and use them.
 
@@ -57,6 +56,30 @@ Terminal that has been tested are like below.
 | Konsole            | Linux | ○        |
 | Terminal (Mac)     | Mac   | ○        |
 | iTerm (Mac)        | Mac   | ○        |
+
+# Applications and feathres
+I introduce you applications and features that I commonly used.
+
+## vim
+### NERDTree
+Run vim and push "tr", then NERDTree will open.
+
+### vim-airline
+vim-airline will provide cool status line for vim!
+
+## tmux
+### tmuxline
+![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline00.png)
+tmuxline has some useful icons.
+Each icons gives us informations like below.
+
+| icon        | OS    |
+| ------------------ | ----- |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon00.png) | Hostname |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon01.png) | User name |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon02.png) | Load average |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon03.png) | Git branch name |
+| ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon04.png) | Git branch name |
 
 # Concept (and goal)
 These dotfiles is made on the concept as simple and visibility but utilities satisfactory.
