@@ -46,12 +46,17 @@ These dotfiles tested on the environment like below, but on arch the most suitab
 | fedora             |
 | MacOS              |
 
-# Tested terminal applications
+# Emulators recommended
+These dotfiles uses a few many patched fonts.
+Some patched fonts has lost shape on some terminal emulators.
+Terminal that has been tested are like below.
 
-| application        | Condition |
-| ------------------ | --------- |
-| Gnome terminal     | ◎        |
-| Konsole            | ○        |
+| application        | OS    | Condition |
+| ------------------ | ----- | --------- |
+| Gnome terminal     | Linux | ◎        |
+| Konsole            | Linux | ○        |
+| Terminal (Mac)     | Mac   | ○        |
+| iTerm (Mac)        | Mac   | ○        |
 
 # Concept (and goal)
 These dotfiles is made on the concept as simple and visibility but utilities satisfactory.
