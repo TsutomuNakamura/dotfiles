@@ -69,7 +69,9 @@ vim-airline will provide cool status line for vim!
 
 ## tmux
 ### tmuxline
+
 ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline00.png)
+<br />
 tmuxline has some useful icons.
 Each icons gives us informations like below.
 
