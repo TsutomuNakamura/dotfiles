@@ -45,7 +45,7 @@ These dotfiles tested on the environment like below, but on arch the most suitab
 | fedora             |
 | MacOS              |
 
-# Emulators recommended
+# Recommended emulators
 These dotfiles uses a few many patched fonts.
 Some patched fonts has lost shape on some terminal emulators.
 Terminal that has been tested are like below.
@@ -58,10 +58,11 @@ Terminal that has been tested are like below.
 | iTerm (Mac)        | Mac   | ○        |
 
 # Applications and feathres
-I introduce you applications and features that I commonly used.
+I introduce you applications and features that the dotfiles will bring.
 
 ## vim
 ### NERDTree
+https://github.com/scrooloose/nerdtree
 Run vim and push "tr", then NERDTree will open.
 
 ### vim-airline
@@ -104,7 +105,7 @@ E834: Conflicts with value of 'listchars': ambiwidth=double
 ```
 + Lose shape powerline of vim.
 ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/lose_shape_powerline00.png)
-
+<br />
 If you want to eliminate the causes of defects, then you can disable the options by creating .vimrc_do_not_use_ambiwidth in your home directory.
 
 ```
