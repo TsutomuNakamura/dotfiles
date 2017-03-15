@@ -1,5 +1,11 @@
-.vim/autoload/pathogen.vim
 *.swp
-.vim/colors/molokai.vim
 bats/
 bats.git/
+
+.vim/autoload/pathogen.vim
+.vim/colors/molokai.vim
+.vim/after/syntax/sh.vim
+.vim/ftdetect/bats.vim
+.vim/snippets/bats.snippets
+.vim/snippets/chef.snippets
+

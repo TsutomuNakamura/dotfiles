@@ -32,5 +32,5 @@ export EDITOR=vim
 export PATH="${PATH}:${HOME}/bin"
 
 # Load user specific environment
-[[ -f ~/.user_specificrc ]] && . ~/.user_specificrc
+[[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 

@@ -63,3 +63,17 @@ function teardown() {
     [[ "$output" = "${HOME}/foo/bar" ]]
 }
 
+@test '#get_xdg_config_home should expand special variable like "~/foo/bar" to /home/foo/foo/bar' {
+    function get_distribution_name() {
+        echo "debian"
+        increment_call_count "get_distribution_name"
+    }
+    export XDG_CONFIG_HOME="~/foo/bar"
+
+    run get_xdg_config_home
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(call_count get_distribution_name)" -eq 0 ]]
+    [[ "$output" = "${HOME}/foo/bar" ]]
+}
+
