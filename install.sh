@@ -122,7 +122,7 @@ function install_packages() {
     elif [[ "$(get_distribution_name)" = "centos" ]]; then
         # TODO: ranger not supported in centos
         echo "INFO: Package \"ranger\" will not be installed, so please instlal it manually."
-        install_packages_with_yum git gvim ctags tmux zsh unzip gnome-terminal
+        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal
     elif [[ "$(get_distribution_name)" = "fedora" ]]; then
         install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger
     elif [[ "$(get_distribution_name)" = "arch" ]]; then
