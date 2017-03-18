@@ -238,7 +238,7 @@ function install_packages_with_apt() {
     }
 }
 
-function install_package_with_yum() {
+function install_packages_with_yum() {
     install_packages_on_redhat "yum" $@
 }
 

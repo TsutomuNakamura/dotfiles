@@ -10,12 +10,12 @@ function teardown() {
     clear_call_count
 }
 
-@test '#install_package_with_yum should call install_packages_on_redhat by passing "yum" and packages' {
+@test '#install_packages_with_yum should call install_packages_on_redhat by passing "yum" and packages' {
 
     function install_packages_on_redhat() {
         increment_call_count "install_packages_on_redhat"
     }
-    run install_package_with_yum vim git
+    run install_packages_with_yum vim git
 
     echo "$output"
     [[ "$status" -eq 0 ]]
