@@ -118,13 +118,17 @@ function init() {
 # Install packages
 function install_packages() {
     if [[ "$(get_distribution_name)" = "debian" ]]; then
-        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip
+        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger
+    elif [[ "$(get_distribution_name)" = "centos" ]]; then
+        # TODO: ranger not supported in centos
+        echo "INFO: Package \"ranger\" will not be installed, so please instlal it manually."
+        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal
     elif [[ "$(get_distribution_name)" = "fedora" ]]; then
-        install_packages_with_dnf git vim ctags tmux zsh unzip
+        install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger
     elif [[ "$(get_distribution_name)" = "arch" ]]; then
-        install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal
+        install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal ranger
     elif [[ "$(get_distribution_name)" = "mac" ]]; then
-        install_packages_with_homebrew vim ctags tmux zsh unzip
+        install_packages_with_homebrew vim ctags tmux zsh unzip 
     fi
 }
 
@@ -234,14 +238,23 @@ function install_packages_with_apt() {
     }
 }
 
+function install_packages_with_yum() {
+    install_packages_on_redhat "yum" $@
+}
+
 function install_packages_with_dnf() {
+    install_packages_on_redhat "dnf" $@
+}
+
+function install_packages_on_redhat() {
+    local command="$1" ; shift
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
     local output=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         echo "Installing ${packages[i]}..."
-        output="$(${prefix} dnf install -y ${packages[i]} 2>&1)" || {
+        output="$(${prefix} ${command} install -y ${packages[i]} 2>&1)" || {
             echo "ERROR: Some error occured when installing ${packages[i]}"
             echo "${output}"
         }
@@ -666,7 +679,9 @@ function get_distribution_name() {
     local release_info="$(cat /etc/*-release 2> /dev/null)"
 
     # Check the distribution from release-infos
-    if (grep -i fedora <<< "$release_info" > /dev/null 2>&1); then
+    if (grep -i centos <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="centos"
+    elif (grep -i fedora <<< "$release_info" > /dev/null 2>&1); then
         DISTRIBUTION="fedora"
     elif (grep -i ubuntu <<< "$release_info" > /dev/null 2>&1) || \
             (grep -i debian <<< "$release_info" > /dev/null 2>&1); then
@@ -682,6 +697,8 @@ function get_distribution_name() {
         DISTRIBUTION="debian"
     elif (command -v dnf > /dev/null 2>&1); then
         DISTRIBUTION="fedora"
+    elif (command -v yum > /dev/null 2>&1); then
+        DISTRIBUTION="centos"
     elif (command -v pacman > /dev/null 2>&1); then
         DISTRIBUTION="arch"
     fi
