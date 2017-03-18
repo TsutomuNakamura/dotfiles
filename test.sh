@@ -9,9 +9,10 @@ fi
 
 [[ "${HOST}" = "arch-dot-test" ]] \
         || [[ "${HOST}" = "fedora-dot-test" ]] \
+        || [[ "${HOST}" = "centos-dot-test" ]] \
         || {
     echo "ERROR: This test script is not allowed executing on unexpected host because of some instruction make destructive."
-    echo "ERROR: It is able to that running this script on the hostname \"arch-dot-test\" and \"fedora-dot-test\"."
+    echo "ERROR: It is able to that running this script on the hostname \"arch-dot-test\", "centos-dot-test" and \"fedora-dot-test\"."
     exit 1
 }
 
