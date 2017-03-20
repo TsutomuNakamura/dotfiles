@@ -20,9 +20,17 @@ function __prompt_command() {
     local EXIT="$?"
     if [[ "$EXIT" -ne 0 ]]; then
         printf "\e[38;05;242m%*s\e[0m\r" "$(tput cols)" ".$EXIT "
-        PS1="\u@\h \W\[\e[38;05;197m\]$prompt_prefix\[\e[0m\]>_ "
+        if [[ "$UID" -eq 0 ]]; then
+            PS1="@\h \W\[\e[38;05;197m\]$prompt_prefix\[\e[0m\]>_ "
+        else
+            PS1="\u@\h \W\[\e[38;05;197m\]$prompt_prefix\[\e[0m\]>_ "
+        fi
     else
-        PS1="\u@\h \W\[\e[38;05;45m\]$prompt_prefix\[\e[0m\]>_ "
+        if [[ "$UID" -eq 0 ]]; then
+            PS1="@\h \W\[\e[38;05;45m\]$prompt_prefix\[\e[0m\]>_ "
+        else
+            PS1="\u@\h \W\[\e[38;05;45m\]$prompt_prefix\[\e[0m\]>_ "
+        fi
     fi
 }
 PS2="\e[38;05;242m>_\e[0m "
