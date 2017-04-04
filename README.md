@@ -91,26 +91,14 @@ Each icons gives us informations like below.
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon08.png) | Untracked files |
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon09.png) | Ignored files |
 
+# For Mac users
+I found that there are some differences between Mac and Linux for expressing fonts on terminal.
+In Linux, you can experience the best view by fontconfig but Mac doesn't.
+For the reasons mentioned above, I recommend to set font to NertFont on your Mac.
+
 # Concept (and goal)
 These dotfiles is made on the concept as simple and visibility but utilities satisfactory.
 Customizing these files are now under ongoing and will commit new customizations for continuously.
-
-# Bug
-On some environment, these dotfiles may occur errors due to be specified "ambiwidth=double" and some font aliases in ~/.vim/myconf/ambiwidth.conf that is called from .vimrc.
-For instance, errors which I have met are like below.
-
-+ The error message appears when command vim executed.
-```
-E834: Conflicts with value of 'listchars': ambiwidth=double
-```
-+ Lose shape powerline of vim.
-![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/lose_shape_powerline00.png)
-<br />
-If you want to eliminate the causes of defects, then you can disable the options by creating .vimrc_do_not_use_ambiwidth in your home directory.
-
-```
-touch ~/.vimrc_do_not_use_ambiwidth
-```
 
 # License
 The code is available under the MIT license.
