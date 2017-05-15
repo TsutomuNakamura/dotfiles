@@ -76,6 +76,8 @@ setopt AUTO_PARAM_KEYS
 setopt AUTO_PUSHD
 # Don't push multiple copies of the same directory onto the directory stack.
 setopt PUSHD_IGNORE_DUPS
+# Disable complement
+setopt NONOMATCH
 
 # Load user specific environment
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
