@@ -2,6 +2,7 @@
 /bats/
 /bats.git/
 /stub.sh/
+/test/stub.sh
 
 .vim/autoload/pathogen.vim
 .vim/colors/molokai.vim
