@@ -1,12 +1,12 @@
 #!/bin/bash
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+cd "${SCRIPT_DIR}"
 
-if (command -v hostname); then
+if (command -v hostname > /dev/null); then
     HOST="$(hostname)"
-elif (command -v uname); then
+elif (command -v uname > /dev/null); then
     HOST="$(uname -n)"
 fi
-
 [[ "${HOST}" = "arch-dot-test" ]] \
         || [[ "${HOST}" = "fedora-dot-test" ]] \
         || [[ "${HOST}" = "centos-dot-test" ]] \
@@ -16,21 +16,26 @@ fi
     exit 1
 }
 
+# bats is installed or not?
 export PATH="${SCRIPT_DIR}/bats/bin:${PATH}"
 if ! (command -v bats > /dev/null); then
     rm -rf bats.git bats
     git clone --depth 1 https://github.com/sstephenson/bats.git bats.git
     mkdir -p bats
     cd bats.git
-    ./install.sh ${SCRIPT_DIR}/bats
+    ./install.sh "${SCRIPT_DIR}/bats"
     sync
     cd ../
 fi
 
+# stub.sh is installed or not
+if [[ ! -d "${SCRIPT_DIR}/stub.sh" ]]; then
+    git clone https://github.com/jimeh/stub.sh.git
+fi
 # Only compatible for GNU getopt
 opts=$(getopt -o "t" --long "tap" -- "$@")
 [[ "$?" -ne 0 ]] && {
-    echo "Some error was occured in getopt"
+    echo "ERROR: Some error was occured in getopt"
     exit 1
 }
 eval set -- "$opts"
@@ -47,7 +52,7 @@ while true; do
             break
             ;;
         *)
-            echo "Some error occured at getopt"
+            echo "ERROR: Some error occured at getopt"
             exit 1
             ;;
     esac
