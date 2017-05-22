@@ -93,8 +93,11 @@ function teardown() {
     mkdir -p $xdg_dir/foo
     touch ${HOME}/${DOTDIR}/XDG_DATA_HOME/hoge.txt
     touch ${HOME}/${DOTDIR}/XDG_DATA_HOME/foo/fuga.txt
-    touch $xdg_dir/hoge.txt
-    touch $xdg_dir/foo/fuga.txt
+    (cd $xdg_dir; ln -s ../${DOTDIR}/XDG_DATA_HOME/hoge.txt)
+    (cd $xdg_dir/foo; ln -s ../../${DOTDIR}/XDG_DATA_HOME/foo/fuga.txt)
+
+    # touch $xdg_dir/hoge.txt
+    # touch $xdg_dir/foo/fuga.txt
 
     run backup_xdg_base_directory "XDG_DATA_HOME" "$xdg_dir" "$abs_backup_dir"
 
@@ -127,5 +130,4 @@ function teardown() {
     [[ ! -e "$xdg_dir/hoge.txt" ]]
     [[ ! -e "$xdg_dir/foo/fuga.txt" ]]
 }
-
 
