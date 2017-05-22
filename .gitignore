@@ -1,6 +1,7 @@
 *.swp
-bats/
-bats.git/
+/bats/
+/bats.git/
+/stub.sh/
 
 .vim/autoload/pathogen.vim
 .vim/colors/molokai.vim
