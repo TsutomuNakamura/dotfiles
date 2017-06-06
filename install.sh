@@ -229,12 +229,35 @@ function install_packages_with_apt() {
     local output=
 
     ${prefix} apt-get update
-    for (( i = 0; i < ${#packages[@]}; i++ )) {
-        echo "Installing ${packages[i]}..."
-        output="$(${prefix} apt-get install -y ${packages[i]} 2>&1)" || {
-            echo "ERROR: Some error occured when installing ${packages[i]}"
-            echo "${output}"
-        }
+
+    echo "INFO: Creating cache of installed packages"
+
+    local pkg_cache=$(apt list --installed 2> /dev/null | grep -v -P 'Listing...' | cut -d '/' -f 1)
+
+    local length_of_packages=${#packages[@]}
+    local num_of_deleted=0
+    for (( i = 0; i < $length_of_packages; i++ )) {
+        local p="${packages[i]}"
+
+        if (grep -P "^${p}$" &> /dev/null <<< "$pkg_cache"); then
+            # Remove already installed packages
+            echo "NOTICE: ${p} is already installed."
+            unset packages[i]
+            (( ++num_of_deleted ))
+        fi
+    }
+
+    [[ "$num_of_deleted" -eq "$length_of_packages" ]] && {
+        echo "There are no packages to install"
+        return 0
+    }
+
+    echo "Installing ${packages[@]}..."
+
+    local output="$(${prefix} apt-get install -y ${packages[@]} 2>&1)" || {
+        echo "ERROR: Some error occured when installing ${packages[i]}"
+        echo "${output}"
+        return 1
     }
 }
 
@@ -251,14 +274,27 @@ function install_packages_on_redhat() {
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
     local output=
+    local flag_deleted=1
 
-    for (( i = 0; i < ${#packages[@]}; i++ )) {
-        echo "Installing ${packages[i]}..."
-        output="$(${prefix} ${command} install -y ${packages[i]} 2>&1)" || {
-            echo "ERROR: Some error occured when installing ${packages[i]}"
-            echo "${output}"
-        }
+    local pkg_cache="$(rpm -qa --queryformat="%{NAME}\n")"
+
+    for ((i = 0; i < ${#packages[@]}; i++)) {
+        while read n; do
+            if [[ "${packages[i]}" = "$n" ]]; then
+                echo "$n is already installed"
+                unset packages[i]
+                flag_deleted=0
+            fi
+        done <<< "$pkg_cache"
     }
+
+    packages=("${packages[@]}")
+
+    [[ "${#packages[@]}" -eq 0 ]] && echo "There are no packages to install" && return 0
+
+    echo "Installing ${packages[@]}..."
+
+    ${prefix} ${command} install -y ${packages[@]}
 }
 
 function install_packages_with_pacman() {

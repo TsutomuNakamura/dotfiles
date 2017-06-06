@@ -22,5 +22,3 @@ function teardown() {
     [[ "$(call_count install_packages_on_redhat)" -eq 1 ]]
 }
 
-
-

@@ -17,4 +17,3 @@ RUN sed -i.org -e 's/#VerbosePkgLists/#VerbosePkgLists\nILoveCandy/g' /etc/pacma
 # For you located in Japan
 RUN sed -i.org '1s|^|Server = http://ftp.jaist.ac.jp/pub/Linux/ArchLinux/$repo/os/$arch\nServer = http://ftp.tsukuba.wide.ad.jp/Linux/archlinux/$repo/os/$arch\n|' /etc/pacman.d/mirrorlist
 
-
