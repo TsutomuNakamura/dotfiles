@@ -300,11 +300,22 @@ function install_packages_on_redhat() {
 function install_packages_with_pacman() {
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
+    local flag_deleted=1
+
+    local pkg_cache="$(pacman -Qe | cut -d ' ' -f 1)"
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        echo "${prefix} pacman -Sy --noconfirm ${packages[i]}"
-        ${prefix} pacman -Sy --noconfirm ${packages[i]}
+        while read n; do
+            if [[ "${package[i]}" = "$n" ]]; then
+                echo "$n is already installed"
+                unset packages[i]
+                flag_deleted=0
+            fi
+        done <<< "$pkg_cache"
     }
+    echo "Installing gc..."
+    ${prefix} pacman -Sy --noconfirm ${packages[@]}
+
 }
 
 function install_packages_with_homebrew() {

@@ -11,7 +11,11 @@ function teardown() {
 }
 
 @test '#install_packages_on_redhat should call dnf with parameter "gc" when it was not installed' {
-#    run install_packages_on_redhat "dnf" vim
+    stub_and_eval rpm '{
+        if [[ "$1" = "-qa" ]]; then
+            echo "gc"
+        fi
+    }'
     run install_packages_on_redhat "dnf" gc
 
     echo "$output"
