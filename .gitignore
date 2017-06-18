@@ -1,7 +1,7 @@
 *.swp
 /bats/
 /bats.git/
-/stub.sh/
+/stub4bats.sh/
 /test/stub.sh
 
 .vim/autoload/pathogen.vim
