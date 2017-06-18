@@ -42,6 +42,6 @@ function call_count() {
 
 BATS_TEST_SKIPPED=
 SCRIPT_DIR="$(dirname "$(readlink -f "$BASH_SOURCE")")"
-. ${SCRIPT_DIR}/../stub.sh/stub.sh
+. ${SCRIPT_DIR}/../stub4bats.sh/stub.sh
 . ${SCRIPT_DIR}/../install.sh --load-functions
 

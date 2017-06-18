@@ -298,6 +298,7 @@ function install_packages_on_redhat() {
 }
 
 function install_packages_with_pacman() {
+    set +u
     declare -a packages=("$@")
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
     local flag_deleted=1
@@ -322,7 +323,7 @@ function install_packages_with_pacman() {
 
     echo "Installing ${packages[@]}..."
     ${prefix} pacman -Sy --noconfirm ${packages[@]}
-
+    set -u
 }
 
 function install_packages_with_homebrew() {

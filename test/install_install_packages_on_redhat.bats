@@ -27,6 +27,11 @@ function teardown() {
 
     stub_and_eval dnf '{ true; }'
     stub_and_eval sudo '{ true; }'
+    stub_and_eval rpm '{
+        if [[ "$1" = "-qa" ]]; then
+            echo "gc"
+        fi
+    }'
 
     run install_packages_on_redhat "dnf" gc vim git
 

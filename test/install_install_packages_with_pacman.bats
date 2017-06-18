@@ -8,7 +8,7 @@ function teardown() {
     true
 }
 
-@test '#install_packages_with_pacman should call pacman with parameter "gc" when it was not installed' {
+@test '#install_packages_with_pacman should not call pacman with parameter "sed" when it was already installed' {
     stub_and_eval sudo '{
         true
     }'
@@ -27,7 +27,7 @@ function teardown() {
     [[ "$(stub_called_with_times sudo pacman -Sy --noconfirm vim git)" -eq 0 ]]
 }
 
-@test '#install_packages_with_pacman should call pacman with parameter "gc", "vim" when it was not installed' {
+@test '#install_packages_with_pacman should call pacman with parameter "vim", "git" when they were not installed and sed was already installed' {
     stub_and_eval sudo '{ true; }'
     stub_and_eval pacman '{
         if [[ "$1" -eq "-Qe" ]]; then
@@ -42,25 +42,7 @@ function teardown() {
     [[ "${output##*$'\n'}" = "Installing vim git..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_with_times sudo pacman -Sy --noconfirm vim git)" -eq 1 ]]
+
+    false
 }
-
-@test '#test' {
-    stub_and_eval sudo '{
-        true
-    }'
-    stub_and_eval pacman '{
-        if [[ "$1" -eq "-Qe" ]]; then
-            echo "sed 4.4-1"
-        fi
-    }'
-
-    run install_packages_with_pacman "sed" "vim" "git"
-
-    echo "$output"
-    [[ "$status" -eq 0 ]]
-    [[ "${output##*$'\n'}" = "Installing vim git..." ]]
-    [[ "$(stub_called_times sudo)" -eq 1 ]]
-    [[ "$(stub_called_with_times sudo pacman -Sy --noconfirm vim git)" -eq 1 ]]
-}
-
 
