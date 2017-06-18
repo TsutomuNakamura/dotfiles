@@ -298,7 +298,7 @@ function install_packages_on_redhat() {
 }
 
 function install_packages_with_pacman() {
-    declare -a packages=($@)
+    declare -a packages=("$@")
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
     local flag_deleted=1
 
@@ -306,14 +306,21 @@ function install_packages_with_pacman() {
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         while read n; do
-            if [[ "${package[i]}" = "$n" ]]; then
+            if [[ "${packages[i]}" = "$n" ]]; then
                 echo "$n is already installed"
                 unset packages[i]
                 flag_deleted=0
             fi
         done <<< "$pkg_cache"
     }
-    echo "Installing gc..."
+
+    packages=("${packages[@]}")
+    [[ "${#packages[@]}" -eq 0 ]] && {
+        echo "There are no packages to install."
+        return
+    }
+
+    echo "Installing ${packages[@]}..."
     ${prefix} pacman -Sy --noconfirm ${packages[@]}
 
 }
