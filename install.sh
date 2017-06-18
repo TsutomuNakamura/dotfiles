@@ -777,7 +777,7 @@ function popd() {
 
 if [[ "$1" != "--load-functions" ]]; then
     # Call this script as ". ./script --load-functions" if you want to load functions only
-    set -eu
+    set -e
     main "$@"
 fi
 
