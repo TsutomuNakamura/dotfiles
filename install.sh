@@ -134,14 +134,12 @@ function install_packages() {
 
 # Get the value of XDG_CONFIG_HOME for individual environments appropliately.
 function get_xdg_config_home() {
-    set +u
     if [[ -z "${XDG_CONFIG_HOME}" ]]; then
         echo "${HOME}$(get_suffix_xdg_config_home)"
     else
         # Use eval to expand special variable like "~"
         eval echo "${XDG_CONFIG_HOME}"
     fi
-    set -u
 }
 
 # Get the value of suffix of XDG_CONFIG_HOME
@@ -165,7 +163,6 @@ function get_suffix_xdg_data_home() {
 
 # Get the value of XDG_DATA_HOME for individual environments appropliately.
 function get_xdg_data_home() {
-    set +u
     if [[ -z "${XDG_DATA_HOME}" ]]; then
         if [[ "$(get_distribution_name)" = "mac" ]]; then
             echo "${HOME}/Library"
@@ -175,7 +172,6 @@ function get_xdg_data_home() {
     else
         eval echo "${XDG_DATA_HOME}"
     fi
-    set -u
 }
 
 # Installe font
@@ -354,7 +350,6 @@ function should_the_dotfile_be_skipped() {
 #       XDG_CONFIG_HOME must be "~/.config" in Linux OS and "~/Library/Preferences" in Mac OS.
 #       XDG_DATA_HOME must be "~/.local/share" in Linux OS and "~/Library" in Mac OS.
 function is_customized_xdg_base_directories() {
-    set +u
     local result=0
 
     if [[ ! -z "${XDG_CONFIG_HOME}" ]]; then
@@ -373,7 +368,6 @@ function is_customized_xdg_base_directories() {
         fi
     fi
 
-    set -u
     return $result
 }
 
@@ -453,11 +447,9 @@ function backup_current_dotfiles() {
 }
 
 function get_backup_dir() {
-    set +u
     if [[ -z "$CASH_ABSOLUTE_BACKUPDIR" ]]; then
         CASH_ABSOLUTE_BACKUPDIR="${HOME}/${BACKUPDIR}/$(date "+%Y%m%d%H%M%S")"
     fi
-    set -u
     echo "$CASH_ABSOLUTE_BACKUPDIR"
 }
 
