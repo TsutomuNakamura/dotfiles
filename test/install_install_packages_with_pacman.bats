@@ -42,7 +42,5 @@ function teardown() {
     [[ "${output##*$'\n'}" = "Installing vim git..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_with_times sudo pacman -Sy --noconfirm vim git)" -eq 1 ]]
-
-    false
 }
 
