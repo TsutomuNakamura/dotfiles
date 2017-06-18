@@ -29,8 +29,8 @@ if ! (command -v bats > /dev/null); then
 fi
 
 # stub.sh is installed or not
-if [[ ! -d "${SCRIPT_DIR}/stub.sh" ]]; then
-    git clone https://github.com/jimeh/stub.sh.git
+if [[ ! -d "${SCRIPT_DIR}/stub4bats.sh" ]]; then
+    git clone --depth 1 https://github.com/TsutomuNakamura/stub4bats.sh
 fi
 # Only compatible for GNU getopt
 opts=$(getopt -o "t" --long "tap" -- "$@")
