@@ -270,6 +270,7 @@ function install_packages_with_dnf() {
 }
 
 function install_packages_on_redhat() {
+    set +u
     local command="$1" ; shift
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
@@ -295,6 +296,7 @@ function install_packages_on_redhat() {
     echo "Installing ${packages[@]}..."
 
     ${prefix} ${command} install -y ${packages[@]}
+    set -u
 }
 
 function install_packages_with_pacman() {
