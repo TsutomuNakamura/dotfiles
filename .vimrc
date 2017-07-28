@@ -50,6 +50,10 @@ let g:airline#extensions#tmuxline#enabled = 0
 let g:airline#extensions#tabline#enabled = 1
 " let g:tmuxline_theme = 'powerline'
 
+" Mapping for ctrlp
+let g:ctrlp_map = '<c-l><c-p>'
+let g:ctrlp_cmd = 'CtrlP'
+
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
 endif
