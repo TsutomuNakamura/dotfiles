@@ -1,0 +1,47 @@
+set whichwrap+=<,>,h,l,[,]
+
+noremap <Space>h  0
+noremap <Space>l  $
+
+" key map about tab
+nnoremap <silent> tt  :<C-u>tabe<CR>
+nnoremap <C-p>  gT
+nnoremap <C-n>  gt
+
+inoremap jk  <Esc>
+
+" also copy data to clipboard
+set clipboard=unnamed
+
+" save, quit, force quit
+nnoremap <Space>w  :<C-u>w<CR>
+nnoremap <Space>W  :<C-u>w !sudo tee % >/dev/null<CR>
+nnoremap <Space>q  :<C-u>q<CR>
+nnoremap <Space>Q  :<C-u>q!<CR>
+
+" nnoremap n nzz
+" nnoremap N Nzz
+" nnoremap * *zz
+" nnoremap # #zz
+" nnoremap g* g*zz
+" nnoremap g# g#zz
+
+" ----------------------------------------------------------------------------------
+" tab page settings
+" 
+" reference
+" http://qiita.com/tekkoc/items/98adcadfa4bdc8b5a6ca
+" ----------------------------------------------------------------------------------
+nnoremap s, <C-w><
+nnoremap s. <C-w>>
+
+nnoremap sj <C-w>j
+nnoremap sk <C-w>k
+nnoremap sl <C-w>l
+nnoremap sh <C-w>h
+nnoremap sJ <C-w>J
+nnoremap sK <C-w>K
+nnoremap sL <C-w>L
+nnoremap sH <C-w>H
+
+
