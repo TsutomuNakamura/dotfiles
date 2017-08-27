@@ -36,6 +36,9 @@ set helplang=en
 set wildmenu
 set wildmode=longest:full,full
 
+" enable auto load the file (depending on your platform)
+set autoread
+
 " Change leader for vim plugins
 let mapleader = ";"
 
