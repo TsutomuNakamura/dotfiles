@@ -189,11 +189,13 @@ function install_fonts() {
     mkdir -p $font_dir
     pushd $font_dir
 
-    # Inconsolata for Powerlin will be deployed from the repository
+    # Inconsolata for Powerline Nerd Font
+    curl -fLo "Inconsolata Nerd Font Complete.otf" \
+        https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf
 
-    # Inconsolata for Powerline Nerd Font Complete Mono.otf
-    curl -fLo "Inconsolata for Powerline Nerd Font Complete.otf" \
-            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete.otf
+    ## # backup
+    ## curl -fLo "Inconsolata for Powerline Nerd Font Complete.otf" \
+    ##     https://cdn.rawgit.com/ryanoasis/nerd-fonts/v1.0.0/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete.otf
 
     # Migu 1M for Japanese font
     curl -fLo "migu-1m-20150712.zip" \
