@@ -19,6 +19,8 @@ set ruler			" When enabled, the ruler is displayed on the right side of the stat
 					" http://choorucode.com/2010/11/28/vim-ruler-and-default-ruler-format/
 "set rulerformat=%-14.(%l,%c%V%)\ %P
 
+set clipboard=unnamedplus    " user the system clipboard
+
 " # Visualization tags, tails etc
 set list
 set listchars=tab:^\ ,trail:･,nbsp:%,extends:>,precedes:<
