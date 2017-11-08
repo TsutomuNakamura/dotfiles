@@ -27,12 +27,12 @@ num_conflict=0
 num_untracked=0
 num_ignored=0
 
-output+="  $(uname -n) "
-output+="  $(whoami) "
+output+=" $(uname -n) "
+output+=" $(whoami) "
 
 # load average
 load="$(uptime)"
-output+=" ${load##*:}  "
+output+="${load##*:} "
 
 icon="⭠ "
 branch_name=
