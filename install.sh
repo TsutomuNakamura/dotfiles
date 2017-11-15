@@ -317,29 +317,35 @@ function install_packages_on_redhat() {
 function install_packages_with_pacman() {
     set +u
     declare -a packages=("$@")
+    declare -a packages_will_be_installed=()
+    declare -a packages_may_conflict=()
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
-    local flag_deleted=1
-
-    local pkg_cache="$(pacman -Qe | cut -d ' ' -f 1)"
+    local i=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        while read n; do
-            if [[ "${packages[i]}" = "$n" ]]; then
-                echo "$n is already installed"
-                unset packages[i]
-                flag_deleted=0
+        if sudo pacman -Q "${packages[i]}"; then
+            echo "${packages[i]} is already installed."
+        else
+            if [[ "${packages[i]}" = "vim" ]] || [[ "${packages[i]}" = "gvim" ]]; then
+                packages_may_conflict+=("${packages[i]}")
+            else
+                packages_will_be_installed+=("${packages[i]}")
             fi
-        done <<< "$pkg_cache"
+        fi
     }
 
-    packages=("${packages[@]}")
-    [[ "${#packages[@]}" -eq 0 ]] && {
+    if [[ "${#packages_will_be_installed[@]}" -eq 0 ]] && [[ "${#packages_may_conflict[@]}" -eq 0 ]]; then
         echo "There are no packages to install."
-        return
-    }
-
-    echo "Installing ${packages[@]}..."
-    ${prefix} pacman -Sy --noconfirm ${packages[@]}
+    else
+        if [[ "${#packages_will_be_installed[@]}" -ne 0 ]]; then
+            echo "Installing ${packages_will_be_installed[@]}..."
+            ${prefix} pacman -S --noconfirm ${packages_will_be_installed[@]}
+        fi
+        for (( i = 0; i < ${#packages_may_conflict[@]}; i++ )) {
+            echo "Installing ${packages_may_conflict[i]}..."
+            ${prefix} pacman -S --noconfirm "${packages_may_conflict[i]}"
+        }
+    fi
     set -u
 }
 
