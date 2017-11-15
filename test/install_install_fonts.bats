@@ -55,7 +55,8 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
     [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
 }
@@ -72,7 +73,8 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
     [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
 }
@@ -89,7 +91,8 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
     [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
     [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
 }
@@ -106,7 +109,8 @@ function install_packages_with_pacman() { increment_call_count "install_packages
     [[ "$(call_count unzip)" -eq 1 ]]
     [[ "$(call_count fc-cache)" -eq 1 ]]
     [[ "$(count ${HOME}/Library/Fonts/)" -eq 3 ]]
-    [[ -f "${HOME}/Library/Fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    # [[ -f "${HOME}/Library/Fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
+    [[ -f "${HOME}/Library/Fonts/Inconsolata Nerd Font Complete.otf" ]]
     [[ -f "${HOME}/Library/Fonts/migu-1m-bold.ttf" ]]
     [[ -f "${HOME}/Library/Fonts/migu-1m-regular.ttf" ]]
 }
