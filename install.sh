@@ -180,6 +180,7 @@ function get_xdg_data_home() {
 
 # Installe font
 function install_fonts() {
+    set +u
     if [[ "$(get_distribution_name)" = "mac" ]]; then
         local font_dir="$(get_xdg_data_home)/Fonts"
     else
@@ -201,28 +202,40 @@ function install_fonts() {
     curl -fLo "migu-1m-20150712.zip" \
         https://ja.osdn.net/projects/mix-mplus-ipa/downloads/63545/migu-1m-20150712.zip
 
-    unzip migu-1m-20150712.zip
-    pushd migu-1m-20150712
-    mv ./*.ttf ../
-    popd
-    rm -rf migu-1m-20150712 migu-1m-20150712.zip
+    if [[ -f "migu-1m-20150712.zip" ]] && [[ "$(wc -c < migu-1m-20150712.zip)" -ne 0 ]]; then
+        unzip migu-1m-20150712.zip
+        pushd migu-1m-20150712
+        mv ./*.ttf ../
+        popd
+        rm -rf migu-1m-20150712 migu-1m-20150712.zip
+    fi
 
-    # IPAFonts for express Japanese characters
-    if do_i_have_admin_privileges; then
-        if [ "$(get_distribution_name)" == "debian" ]; then
-            install_packages_with_apt fonts-ipafont
-        elif [ "$(get_distribution_name)" == "fedora" ]; then
-            install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts
-        elif [ "$(get_distribution_name)" == "arch" ]; then
-            install_packages_with_pacman otf-ipafont
-        elif [ "$(get_distribution_name)" == "mac" ]; then
-            true    # TODO:
+    if [[ ! -f "migu-1m-bold.ttf" ]] || [[ "$(wc -c < migu-1m-bold.ttf)" = "0" ]] \
+            || [[ ! -f "migu-1m-regular.ttf" ]] || [[ "$(wc -c < migu-1m-regular.ttf)" = 0 ]]; then
+
+        echo "WARN: Failed to install migu-fonts for some reason."
+        echo "WARN: Attempting to install ipa fonts instead."
+        rm -f migu-1m-bold.ttf migu-1m-regular.ttf
+
+        # IPAFonts for express Japanese characters
+        if do_i_have_admin_privileges; then
+            if [ "$(get_distribution_name)" == "debian" ]; then
+                install_packages_with_apt fonts-ipafont
+            elif [ "$(get_distribution_name)" == "fedora" ]; then
+                install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts
+            elif [ "$(get_distribution_name)" == "arch" ]; then
+                install_packages_with_pacman otf-ipafont
+            elif [ "$(get_distribution_name)" == "mac" ]; then
+                true    # TODO:
+            fi
         fi
     fi
+
 
     popd
     echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
     fc-cache -f $font_dir
+    set -u
 }
 
 function install_packages_with_apt() {
