@@ -1,15 +1,12 @@
 # Build and run this image with command like below
 #
 #   docker build -t="tsutomu/arch-dot-test" .
-#   docker run --name arch-dot-test --hostname arch-dot-test --volume ... -ti tsutomu/arch-dot-test /bin/bash
+#   docker run --name arch-dot-test --hostname arch-dot-test --volume /path/to/your/dotfiles:/home/foo/dotfiles -ti tsutomu/arch-dot-test /bin/bash
 #
-FROM dock0/arch:latest
+FROM base/archlinux
 
 # RUN pacman -Syu --noconfirm
-RUN pacman -Sy --noconfirm base
-RUN pacman -Sy --noconfirm base-devel
-RUN pacman -Sy --noconfirm sudo
-RUN pacman -Sy --noconfirm awk
+RUN pacman -Sy --noconfirm base base-devel sudo awk
 RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN useradd -d /home/foo -s /bin/bash -m foo
 RUN usermod -aG wheel foo
