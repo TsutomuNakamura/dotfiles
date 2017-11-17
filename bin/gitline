@@ -57,7 +57,7 @@ while read l; do
             ## master...origin/master [ahead 1, behind 1]
             remote="$(git -C "$directory" config --get remote.origin.url)"
             if [[ "$remote" =~ \@github\.com\:|\/github\.com\/ ]]; then
-                icon+="  "
+                icon+=" "
             fi
         fi
         continue
@@ -88,9 +88,9 @@ if [[ ! -z "$branch_name" ]]; then
         n=${l% *}
         output+="${l#* } "
         if [[ $n -gt 99 ]]; then
-            output+=" 99+ "
+            output+="99+ "
         else
-            output+=" $n  "
+            output+="$n  "
         fi
 
     done
