@@ -12,10 +12,47 @@ CASH_ABSOLUTE_BACKUPDIR=
 # Distribution of this environment
 DISTRIBUTION=
 
+declare -a END_MESSAGES=()
+
+function append_to_end_messages() {
+    local message="$1"
+    END_MESSAGES+=("$1")
+}
+function is_warn_messages_empty() {
+    [[ ${#END_MESSAGES} -eq 0 ]]
+}
+function print_warn_messages() {
+    local width=$(( $(tput cols) - 2 ))
+
+    printf '=%.0s' $(seq 1 ${width})
+    echo
+    echo "There are messages to report you. Some install processes may have not been done well."
+    for m in "${END_MESSAGES[@]}"; do
+        echo -e "* ${m}"
+    done
+    echo
+    printf '=%.0s' $(seq 1 ${width})
+    echo
+}
+
+function print_a_success_message() {
+    local width=$(( $(tput cols) - 2 ))
+
+    printf '=%.0s' $(seq 1 ${width})
+    echo
+    echo "Installing process has finished with no error reports."
+    echo "Enjoy your time in programming with TsutomuNakamura's dotfiles!!"
+    echo ""
+    printf '=%.0s' $(seq 1 ${width})
+    echo
+}
+
+
+
 function main() {
 
     is_customized_xdg_base_directories || {
-        echo "ERROR: This dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
+        echo "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
         echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
         if [[ -z "${XDG_CONFIG_HOME}" ]]; then
             echo "       XDG_CONFIG_HOME=(unset)"
@@ -38,6 +75,8 @@ function main() {
     local flag_no_install_packages=0
     local branch="master"
     local flag_cleanup=0
+
+    local error_count=0
 
     while getopts "idonb:cgh" opts; do
         case $opts in
@@ -67,22 +106,46 @@ function main() {
 
     if [ "$flag_only_install_packages" == "1" ]; then
         if do_i_have_admin_privileges; then
-            install_packages
+            install_packages || (( error_count++ ))
         else
-            echo "Sorry, you don't have privileges to install packages."
-            return 1
+            echo "Sorry, you don't have privileges to install packages." >&2
+            (( error_count++ ))
         fi
     elif [ "$flag_cleanup" == "1" ]; then
-        backup_current_dotfiles
+        backup_current_dotfiles || {
+            echo "ERROR: Cleaning up and backup current dotfiles are failed." >&2
+            (( error_count++ ))
+        }
     elif [ "$flag_init" == "1" ]; then
-        init "$branch" "$flag_no_install_packages"
+        init "$branch" "$flag_no_install_packages" || {
+            echo "ERROR: init() has failed." >&2
+            (( error_count++ ))
+        }
     elif [ "$flag_deploy" == "1" ]; then
         deploy
     elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
-        init "$branch" "$flag_no_install_packages" && deploy
+        # It's a default behavior.
+        init "$branch" "$flag_no_install_packages" || {
+            echo "ERROR: init() has failed." >&2
+            (( error_count++ ))
+        }
+        if [[ "$error_count" -eq 0 ]]; then
+            deploy || {
+                echo "ERROR: deploy() has failed." >&2
+                (( error_count++ ))
+            }
+        fi
     fi
 
-    return 0
+    if [[ "$error_count" -eq 0 ]]; then
+        print_a_success_message
+    else
+        echo "Some error or warning are occured."
+        if ! is_warn_messages_empty; then
+            print_warn_messages
+        fi
+    fi
+    return $error_count
 }
 
 
