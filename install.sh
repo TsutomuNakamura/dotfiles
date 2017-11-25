@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 trap 'echo "SIG INT was received. This program will be terminated." && exit 1' INT
 
-# URI of dotfiles repository
-REPO_URI="https://github.com/TsutomuNakamura/dotfiles"
 # The directory that dotfiles resources will be installed
 DOTDIR=".dotfiles"
 # The directory that dotfiles resources will be backuped
@@ -42,6 +40,7 @@ function main() {
     local flag_no_install_packages=0
     local branch="master"
     local flag_cleanup=0
+    local repo="https://github.com/TsutomuNakamura/dotfiles"
 
     local error_count=0
 
@@ -60,7 +59,7 @@ function main() {
             c)
                 flag_cleanup=1;;
             g)
-                REPO_URI="git@github.com:TsutomuNakamura/dotfiles.git";;
+                repo="git@github.com:TsutomuNakamura/dotfiles.git";;
             h | \?)
                 usage && return 0 ;;
         esac
@@ -84,7 +83,7 @@ function main() {
             (( error_count++ ))
         }
     elif [ "$flag_init" == "1" ]; then
-        init "$branch" "$flag_no_install_packages" || {
+        init "$branch" "$flag_no_install_packages" "$repo" || {
             echo "ERROR: init() has failed." >&2
             (( error_count++ ))
         }
@@ -92,7 +91,7 @@ function main() {
         deploy
     elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
         # It's a default behavior.
-        init "$branch" "$flag_no_install_packages" || {
+        init "$branch" "$flag_no_install_packages" "$repo" || {
             echo "ERROR: init() has failed." >&2
             (( error_count++ ))
         }
@@ -159,6 +158,7 @@ function usage() {
 # Initialize dotfiles repo
 function init() {
     local branch=${1:-master}
+    local repo=${$2:-https://github.com/TsutomuNakamura/dotfiles}
     local flag_no_install_packages=${2:-0}
 
     if [ "$flag_no_install_packages" == 0 ]; then
@@ -175,7 +175,7 @@ function init() {
 
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
-    init_repo "$branch"
+    init_repo "$branch" "$repo"
     install_fonts
     init_vim_environment
 }
@@ -739,6 +739,7 @@ function do_i_have_admin_privileges() {
 function init_repo() {
 
     local branch="$1"
+    local repo="$2"
 
     mkdir -p "${HOME}/${DOTDIR}"
     [ -d "${HOME}/${DOTDIR}" ] || {
@@ -749,7 +750,7 @@ function init_repo() {
     # Is here the git repo?
     pushd ${HOME}/${DOTDIR}
     if is_here_git_repo; then
-        echo "The repository ${REPO_URI} is already existed. Pulling from \"origin $branch\""
+        echo "The repository ${repo} is already existed. Pulling from \"origin $branch\""
         git pull origin $branch
         # TODO: error handling
     else
@@ -761,8 +762,8 @@ function init_repo() {
             return 1
         fi
 
-        echo "The repository is not existed. Cloning branch from ${REPO_URI} then checkout branch ${branch}"
-        git clone -b $branch $REPO_URI .
+        echo "The repository is not existed. Cloning branch from ${repo} then checkout branch ${branch}"
+        git clone -b $branch $repo .
     fi
 
     # Freeze .gitconfig for not to push username and email

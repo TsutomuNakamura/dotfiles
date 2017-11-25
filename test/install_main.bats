@@ -2,22 +2,19 @@
 load helpers
 
 function setup() {
-    mkdir -p ${HOME}/${DOTDIR}
-    stub_and_eval is_customized_xdg_base_directories '{ true; }'
-    stub_and_eval usage '{ true; }'
-    stub_and_eval do_i_have_admin_privileges '{ true; }'
-    stub_and_eval install_packages '{ true; }'
-    stub_and_eval backup_current_dotfiles '{ true; }'
-    stub_and_eval init '{ true; }'
-    stub_and_eval deploy '{ true; }'
-    stub_and_eval print_a_success_message '{ true; }'
-    stub_and_eval is_warn_messages_empty '{ true; }'
-    stub_and_eval print_warn_messages '{ true; }'
+    stub is_customized_xdg_base_directories
+    stub usage
+    stub do_i_have_admin_privileges
+    stub install_packages
+    stub backup_current_dotfiles
+    stub init
+    stub deploy
+    stub print_a_success_message
+    stub is_warn_messages_empty
+    stub print_warn_messages
 }
 
-function teardown() {
-    rm -rf ${HOME}/${DOTDIR}
-}
+# function teardown() {}
 
 @test "#main should call print_a_success_message() when default execution is finished" {
     run main
@@ -295,5 +292,41 @@ function teardown() {
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
     [[ "$(stub_called_times is_warn_messages_empty)"                -eq 1 ]]
     [[ "$(stub_called_times print_warn_messages)"                   -eq 0 ]]
+}
+
+@test "#main should call init() with parameters 'develop' and 1 and 'git@github.com:TsutomuNakamura/dotfiles.git' when -d and -g and -n flag is specified" {
+    run main -b 'develop' -g -n
+    echo "$output"
+
+    [[ "$status"                                                    -eq 0 ]]
+    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
+    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
+    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
+    [[ "$(stub_called_times init)"                                  -eq 1 ]]
+    [[ "$(stub_called_times deploy)"                                -eq 1 ]]
+    [[ "$(stub_called_times is_warn_messages_empty)"                -eq 0 ]]
+    [[ "$(stub_called_times print_warn_messages)"                   -eq 0 ]]
+
+    stub_called_with_exactly_times init 1 'develop' 1 'git@github.com:TsutomuNakamura/dotfiles.git'
+}
+
+@test "#main should call init() with parameters 'master' and 0 and 'https://github.com/TsutomuNakamura/dotfiles' when no parameters are specified" {
+    run main
+    echo "$output"
+
+    [[ "$status"                                                    -eq 0 ]]
+    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
+    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
+    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
+    [[ "$(stub_called_times init)"                                  -eq 1 ]]
+    [[ "$(stub_called_times deploy)"                                -eq 1 ]]
+    [[ "$(stub_called_times is_warn_messages_empty)"                -eq 0 ]]
+    [[ "$(stub_called_times print_warn_messages)"                   -eq 0 ]]
+
+    stub_called_with_exactly_times init 1 'master' 0 'https://github.com/TsutomuNakamura/dotfiles'
 }
 

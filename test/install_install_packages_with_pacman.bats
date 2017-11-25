@@ -9,6 +9,8 @@ function setup() {
                 if [[ "$3" = "sed" ]]; then
                     return 0
                 fi
+            elif [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]]; then
+                return 0
             fi
         fi
         return 1
@@ -183,6 +185,9 @@ function teardown() {
     echo "$output"
     declare -a outputs=
     IFS=$'\n' outputs=($output)
+
+    echo "stats: $status"
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "sed is already installed." ]]
     [[ "${outputs[1]}" = "Installing git..." ]]
