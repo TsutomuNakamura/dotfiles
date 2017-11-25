@@ -3,9 +3,6 @@ load helpers
 
 function setup() {
     mkdir -p ${HOME}/${DOTDIR}
-
-    unset is_customized_xdg_base_directories
-
     stub_and_eval is_customized_xdg_base_directories '{ true; }'
     stub_and_eval usage '{ true; }'
     stub_and_eval do_i_have_admin_privileges '{ true; }'
@@ -16,7 +13,6 @@ function setup() {
     stub_and_eval print_a_success_message '{ true; }'
     stub_and_eval is_warn_messages_empty '{ true; }'
     stub_and_eval print_warn_messages '{ true; }'
-
 }
 
 function teardown() {
@@ -280,7 +276,7 @@ function teardown() {
     [[ "$(stub_called_times print_warn_messages)"                   -eq 1 ]]
 }
 
-@test "#main should call print_warn_messages() when some error has occured and is_warn_messages_empty() returns false" {
+@test "#main should NOT call print_warn_messages() when some error has occured and is_warn-messages_empty() returns true" {
     stub_and_eval init '{ false; }'
 
     run main -i
