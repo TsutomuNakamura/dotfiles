@@ -199,14 +199,12 @@ function install_packages() {
 
 # Get the value of XDG_CONFIG_HOME for individual environments appropliately.
 function get_xdg_config_home() {
-    set +u
     if [[ -z "${XDG_CONFIG_HOME}" ]]; then
         echo "${HOME}$(get_suffix_xdg_config_home)"
     else
         # Use eval to expand special variable like "~"
         eval echo "${XDG_CONFIG_HOME}"
     fi
-    set -u
 }
 
 # Get the value of suffix of XDG_CONFIG_HOME
@@ -230,7 +228,6 @@ function get_suffix_xdg_data_home() {
 
 # Get the value of XDG_DATA_HOME for individual environments appropliately.
 function get_xdg_data_home() {
-    set +u
     if [[ -z "${XDG_DATA_HOME}" ]]; then
         if [[ "$(get_distribution_name)" = "mac" ]]; then
             echo "${HOME}/Library"
@@ -240,12 +237,10 @@ function get_xdg_data_home() {
     else
         eval echo "${XDG_DATA_HOME}"
     fi
-    set -u
 }
 
 # Installe font
 function install_fonts() {
-    set +u
     if [[ "$(get_distribution_name)" = "mac" ]]; then
         local font_dir="$(get_xdg_data_home)/Fonts"
     else
@@ -300,7 +295,6 @@ function install_fonts() {
     popd
     echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
     fc-cache -f $font_dir
-    set -u
 }
 
 function install_packages_with_apt() {
@@ -350,7 +344,6 @@ function install_packages_with_dnf() {
 }
 
 function install_packages_on_redhat() {
-    set +u
     local command="$1" ; shift
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
@@ -376,11 +369,9 @@ function install_packages_on_redhat() {
     echo "Installing ${packages[@]}..."
 
     ${prefix} ${command} install -y ${packages[@]}
-    set -u
 }
 
 function install_packages_with_pacman() {
-    set +u
     declare -a packages=("$@")
     declare -a packages_will_be_installed=()
     declare -a packages_may_conflict=()
@@ -411,7 +402,6 @@ function install_packages_with_pacman() {
             ${prefix} pacman -S --noconfirm "${packages_may_conflict[i]}"
         }
     fi
-    set -u
 }
 
 function install_packages_with_homebrew() {
@@ -443,7 +433,6 @@ function should_the_dotfile_be_skipped() {
 #       XDG_CONFIG_HOME must be "~/.config" in Linux OS and "~/Library/Preferences" in Mac OS.
 #       XDG_DATA_HOME must be "~/.local/share" in Linux OS and "~/Library" in Mac OS.
 function is_customized_xdg_base_directories() {
-    set +u
     local result=0
 
     if [[ ! -z "${XDG_CONFIG_HOME}" ]]; then
@@ -462,7 +451,6 @@ function is_customized_xdg_base_directories() {
         fi
     fi
 
-    set -u
     return $result
 }
 
@@ -542,11 +530,9 @@ function backup_current_dotfiles() {
 }
 
 function get_backup_dir() {
-    set +u
     if [[ -z "$CASH_ABSOLUTE_BACKUPDIR" ]]; then
         CASH_ABSOLUTE_BACKUPDIR="${HOME}/${BACKUPDIR}/$(date "+%Y%m%d%H%M%S")"
     fi
-    set -u
     echo "$CASH_ABSOLUTE_BACKUPDIR"
 }
 
@@ -874,7 +860,7 @@ function popd() {
 
 if [[ "$1" != "--load-functions" ]]; then
     # Call this script as ". ./script --load-functions" if you want to load functions only
-    set -eu
+    #set -eu
     main "$@"
 fi
 
