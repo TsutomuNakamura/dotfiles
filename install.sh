@@ -11,43 +11,10 @@ BACKUPDIR=".backup_of_dotfiles"
 CASH_ABSOLUTE_BACKUPDIR=
 # Distribution of this environment
 DISTRIBUTION=
-
-declare -a END_MESSAGES=()
-
-function append_to_end_messages() {
-    local message="$1"
-    END_MESSAGES+=("$1")
-}
-function is_warn_messages_empty() {
-    [[ ${#END_MESSAGES} -eq 0 ]]
-}
-function print_warn_messages() {
-    local width=$(( $(tput cols) - 2 ))
-
-    printf '=%.0s' $(seq 1 ${width})
-    echo
-    echo "There are messages to report you. Some install processes may have not been done well."
-    for m in "${END_MESSAGES[@]}"; do
-        echo -e "* ${m}"
-    done
-    echo
-    printf '=%.0s' $(seq 1 ${width})
-    echo
-}
-
-function print_a_success_message() {
-    local width=$(( $(tput cols) - 2 ))
-
-    printf '=%.0s' $(seq 1 ${width})
-    echo
-    echo "Installing process has finished with no error reports."
-    echo "Enjoy your time in programming with TsutomuNakamura's dotfiles!!"
-    echo ""
-    printf '=%.0s' $(seq 1 ${width})
-    echo
-}
-
-
+# Messages of info
+declare -a INFO_MESSAGES=()
+# Messages of warn or error
+declare -a WARN_MESSAGES=()
 
 function main() {
 
@@ -148,7 +115,42 @@ function main() {
     return $error_count
 }
 
+# Push a message into info message list
+function push_info_message_list() {
+    INFO_MESSAGES+=("$1")
+}
+# Push a message into warn message list
+function push_warn_message_list() {
+    WARN_MESSAGES+=("$1")
+}
 
+# Print info messages
+function print_info_message_list() {
+    print_boarder
+    _print_message_list 'INFO_MESSAGES[@]'
+}
+
+# Print warn messages
+function print_warn_message_list() {
+    print_boarder
+    _print_message_list 'WARN_MESSAGES[@]'
+}
+# Print boarder on console
+function print_boarder() {
+    local width=$(( $(tput cols) - 2 ))
+    printf '=%.0s' $(seq 1 ${width})
+}
+
+# Print messages
+function _print_message_list() {
+    local msg_list="$1"
+
+    if [[ ! -z "${!msg_list}" ]]; then
+        for m in "${!msg_list}"; do
+            echo -e "* ${m}"
+        done
+    fi
+}
 
 function usage() {
     echo "usage"
