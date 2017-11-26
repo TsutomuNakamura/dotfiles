@@ -143,8 +143,7 @@ function print_boarder() {
 # Print messages
 function _print_message_list() {
     local msg_list="$1"
-
-    if [[ ! -z "${!msg_list}" ]]; then
+    if [[ ! -z "${msg_list}" ]]; then
         for m in "${!msg_list}"; do
             echo -e "* ${m}"
         done
@@ -376,7 +375,10 @@ function install_packages_with_pacman() {
     declare -a packages_will_be_installed=()
     declare -a packages_may_conflict=()
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
-    local i=
+    local i
+    local result=0
+    local installed_packages
+    local failed_to_installe_packages
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         if sudo pacman -Q "${packages[i]}"; then
@@ -395,13 +397,30 @@ function install_packages_with_pacman() {
     else
         if [[ "${#packages_will_be_installed[@]}" -ne 0 ]]; then
             echo "Installing ${packages_will_be_installed[@]}..."
-            ${prefix} pacman -S --noconfirm ${packages_will_be_installed[@]}
+            ${prefix} pacman -S --noconfirm ${packages_will_be_installed[@]} && {
+                installed_packages+="${packages_will_be_installed[@]} "
+            }  || {
+                failed_to_installe_packages+="${packages_will_be_installed[@]} "
+                ((result++))
+            }
         fi
         for (( i = 0; i < ${#packages_may_conflict[@]}; i++ )) {
             echo "Installing ${packages_may_conflict[i]}..."
-            ${prefix} pacman -S --noconfirm "${packages_may_conflict[i]}"
+            ${prefix} pacman -S --noconfirm "${packages_may_conflict[i]}" && {
+                installed_packages+="${packages_may_conflict[i]} "
+            } || {
+                failed_to_installe_packages+="${packages_may_conflict[i]} "
+                ((result++))
+            }
         }
     fi
+
+    [[ ! -z "$installed_packages" ]] && \
+            push_info_message_list "NOTICE: Package(s) \"${installed_packages% }\" have been installed on your OS."
+    [[ ! -z "$failed_to_installe_packages" ]] && \
+            push_warn_message_list "ERROR: Package(s) \"${failed_to_installe_packages% }\" have not been installed on your OS for some error.\n  Please install these packages manually."
+
+    return $result
 }
 
 function install_packages_with_homebrew() {
