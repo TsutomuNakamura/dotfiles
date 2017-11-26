@@ -7,7 +7,7 @@ if (command -v hostname > /dev/null); then
 elif (command -v uname > /dev/null); then
     HOST="$(uname -n)"
 fi
-[[ "${HOST}" = "arch-dot-test" ]] \
+true || [[ "${HOST}" = "arch-dot-test" ]] \
         || [[ "${HOST}" = "fedora-dot-test" ]] \
         || [[ "${HOST}" = "centos-dot-test" ]] \
         || {

@@ -2,211 +2,166 @@
 load helpers
 
 function setup() {
-    clear_call_count
-    mkdir -p ${HOME}/${DOTDIR}
+    cd "${HOME}"
+    stub_and_eval get_distribution_name             '{ echo "debian"; }'
+    stub_and_eval get_xdg_data_home                 '{ echo "${HOME}/.local/share"; }'
+    stub_and_eval _install_font_inconsolata_nerd    '{ return 1; }'
+    stub_and_eval _install_font_migu1m              '{ return 1; }'
+    stub_and_eval _install_font_noto_emoji          '{ return 1; }'
+    stub_and_eval _install_font_ipafont             '{ return 1; }'
+    stub push_info_message_list
+    stub push_warn_message_list
+    stub fc-cache
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR}
-    cd ~
-    rm -rf .local Library migu-1m* Inconsolata\ for\ Powerline*
-    clear_call_count
+    cd "${HOME}"
+    rm -rf .local
 }
 
-function curl() {
-    increment_call_count "curl"
-    local option="$1"
-    local filename="$2"
-
-    fallocate -l 1 "$2"
+@test '01' {
+    true
 }
-
-function unzip() {
-    increment_call_count "unzip"
-    local filename="$1"
-
-    if [[ ! "$filename" = "migu-1m-20150712.zip" ]]; then
-        return 1
-    fi
-
-    mkdir ${filename%.*}
-    pushd ${filename%.*}
-    fallocate -l 1 migu-1m-bold.ttf
-    fallocate -l 1 migu-1m-regular.ttf
-    fallocate -l 1 migu-README.txt
-    mkdir mplus-TESTFLIGHT-060
-    popd
+@test '02' {
+    true
 }
-
-function fc-cache() { increment_call_count "fc-cache"; }
-function install_packages_with_apt() { increment_call_count "install_packages_with_apt"; }
-function install_packages_with_dnf() { increment_call_count "install_packages_with_dnf"; }
-function install_packages_with_pacman() { increment_call_count "install_packages_with_pacman"; }
-
-@test '#install_fonts should install Inconsolata Powerline, Inconsolata Powerline Nerd, Migu 1M, but not ipa-font on arch' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 1; }
-
-    run install_fonts
-    ls -l ${HOME}/.local/share/fonts/
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 0 ]]
+@test '03' {
+    true
 }
-
-@test '#install_fonts should install Inconsolata Powerline Nerd, Migu 1M, but not ipa-font on debian' {
-    function get_distribution_name() { echo "debian"; }
-    function do_i_have_admin_privileges() { return 1; }
-
-    run install_fonts
-    ls -l ${HOME}/.local/share/fonts/
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
-    [[ "$(call_count install_packages_with_apt)" -eq 0 ]]
+@test '04' {
+    true
 }
-
-@test '#install_fonts should install Inconsolata Powerline, Inconsolata Powerline Nerd, Migu 1M, but not ipa-font on fedora' {
-    function get_distribution_name() { echo "fedora"; }
-    function do_i_have_admin_privileges() { return 1; }
-
-    run install_fonts
-    ls -l ${HOME}/.local/share/fonts/
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
-    [[ "$(call_count install_packages_with_dnf)" -eq 0 ]]
+@test '05' {
+    true
 }
+#@test '#install_fonts should _install_font_inconsolata_nerd(), _install_font_migu1m(), _install_font_noto_emoji(), _install_font_ipafont() on linux(debian)' {
+#
+#    run install_fonts
+#
+#    [[ "$status" -eq 0 ]]
+#    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
+#
+#    stub_called_with_exactly_times push_info_message_list 1 \
+#            "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
+#    stub_called_with_exactly_times push_info_message_list 1 \
+#            "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
+#    stub_called_with_exactly_times push_info_message_list 1 \
+#            "INFO: NotoEmojiFont was installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
+#    stub_called_with_exactly_times push_info_message_list 0 \
+#            "INFO: IPA font was installed successflly."
+#
+#    # Error should NOT occured
+#    stub_called_with_exactly_times push_warn_message_list 0 \
+#            "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+#    stub_called_with_exactly_times push_warn_message_list 0 \
+#            "ERROR: Failed to install migu-fonts for some reason."
+#    stub_called_with_exactly_times push_warn_message_list 0 \
+#            "ERROR: Failed to install NotoEmojiFont.\n  The program will install IPA font alternatively."
+#    stub_called_with_exactly_times push_warn_message_list 0 \
+#            "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  The program will install IPA font alternatively."
+#
+#    stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+#}
+#
+#@test '#install_fonts should _install_font_inconsolata_nerd(), _install_font_migu1m(), _install_font_noto_emoji(), _install_font_ipafont() on Mac' {
+#
+#    stub_and_eval get_distribution_name             '{ echo "mac"; }'
+#    stub_and_eval get_xdg_data_home                 '{ echo "${HOME}/Library"; }'
+#
+#    run install_fonts
+#
+#    [[ "$status" -eq 0 ]]
+#    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
+#
+#    stub_called_with_exactly_times push_info_message_list 1 \
+#            "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
+#    stub_called_with_exactly_times push_info_message_list 1 \
+#            "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
+#    stub_called_with_exactly_times push_info_message_list 1 \
+#            "INFO: NotoEmojiFont was installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
+#    stub_called_with_exactly_times push_info_message_list 0 \
+#            "INFO: IPA font was installed successflly."
+#
+#    stub_called_with_exactly_times fc-cache 1 -f ${HOME}/Library/Fonts
+#}
+#
+#@test '#install_fonts should not call push_info_message_list and push_warn_message_list if _install_font_inconsolata_nerd() was called when nerd font has already installed' {
+#
+#    stub_and_eval _install_font_inconsolata_nerd '{ return 0; }'
+#
+#    run install_fonts
+#
+#    [[ "$status" -eq 0 ]]
+#    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
+#
+#    stub_called_with_exactly_times push_info_message_list 0 \
+#            "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
+#
+#    stub_called_with_exactly_times push_warn_message_list 0 \
+#            "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+#}
+#
+#@test '#install_fonts should not call push_warn_message_list if _install_font_inconsolata_nerd() was called when nerd font has already installed' {
+#
+#    stub_and_eval _install_font_inconsolata_nerd    '{ return 2; }'
+#
+#    run install_fonts
+#
+#    [[ "$status" -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
+#
+#    stub_called_with_exactly_times push_info_message_list 0 \
+#            "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
+#    stub_called_with_exactly_times push_warn_message_list 1 \
+#            "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+#}
+#
+#@test '#install_fonts should not call push_info_message_list and push_warn_message_list if _install_font_migu1m() was called when Mig1M has already installed' {
+#
+#    stub_and_eval _install_font_migu1m '{ return 0; }'
+#
+#    run install_fonts
+#
+#    [[ "$status" -eq 0 ]]
+#    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
+#
+#    stub_called_with_exactly_times push_info_message_list 0 \
+#            "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
+#    stub_called_with_exactly_times push_warn_message_list 0 \
+#            "ERROR: Failed to install migu-fonts for some reason."
+#}
+#
+#@test '#install_fonts should not call push_warn_message_list if _install_font_migu1m() was called when Migu1M has already installed. And _install_font_ipafont() should be called.' {
+#
+#    stub_and_eval _install_font_migu1m '{ return 2; }'
+#
+#    run install_fonts
+#
+#    [[ "$status" -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
+#    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 1 ]]
+#
+#    stub_called_with_exactly_times push_info_message_list 0 \
+#            "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
+#    stub_called_with_exactly_times push_warn_message_list 1 \
+#            "ERROR: Failed to install migu-fonts for some reason."
+#}
 
 
-@test '#install_fonts should install Inconsolata Powerline, Inconsolata Powerline Nerd, Migu 1M on mac' {
-    function get_distribution_name() { echo "mac"; }
-    function do_i_have_admin_privileges() { return 1; }
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/Library/Fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/Library/Fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/Library/Fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/Library/Fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/Library/Fonts/migu-1m-regular.ttf" ]]
-}
-
-@test '#install_fonts should install ipafonts on arch if installing  mplus font has failed' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() { true "do nothing for installing mplus font"; }
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 1 ]]
-}
-
-@test '#install_fonts should install ipafonts on debian if installing  mplus font has failed' {
-    function get_distribution_name() { echo "debian"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() { true "do nothing for installing mplus font"; }
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_apt)" -eq 1 ]]
-}
-
-@test '#install_fonts should install ipafonts on fedora if installing  mplus font has failed' {
-    function get_distribution_name() { echo "fedora"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() { true "do nothing for installing mplus font"; }
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_dnf)" -eq 1 ]]
-}
-
-@test '#install_fonts should install ipafonts on arch if migu-1m-bold.ttf is emptry' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() {
-        increment_call_count "unzip"
-        local filename="$1"
-
-        if [[ ! "$filename" = "migu-1m-20150712.zip" ]]; then
-            return 1
-        fi
-
-        mkdir ${filename%.*}
-        pushd ${filename%.*}
-        touch migu-1m-bold.ttf
-        fallocate -l 1 migu-1m-regular.ttf
-        fallocate -l 1 migu-README.txt
-        mkdir mplus-TESTFLIGHT-060
-        popd
-    }
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 1 ]]
-
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" = "WARN: Failed to install migu-fonts for some reason." ]]
-    [[ "${outputs[1]}" = "WARN: Attempting to install ipa fonts instead." ]]
-}
-
-@test '#install_fonts should install ipafonts on arch if migu-1m-regular.ttf is emptry' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() {
-        increment_call_count "unzip"
-        local filename="$1"
-
-        if [[ ! "$filename" = "migu-1m-20150712.zip" ]]; then
-            return 1
-        fi
-
-        mkdir ${filename%.*}
-        pushd ${filename%.*}
-        fallocate -l 1 migu-1m-bold.ttf
-        touch migu-1m-regular.ttf
-        fallocate -l 1 migu-README.txt
-        mkdir mplus-TESTFLIGHT-060
-        popd
-    }
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 1 ]]
-
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" = "WARN: Failed to install migu-fonts for some reason." ]]
-    [[ "${outputs[1]}" = "WARN: Attempting to install ipa fonts instead." ]]
-}

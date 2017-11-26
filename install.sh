@@ -240,6 +240,8 @@ function get_xdg_data_home() {
 
 # Installe font
 function install_fonts() {
+    local result=0
+
     if [[ "$(get_distribution_name)" = "mac" ]]; then
         local font_dir="$(get_xdg_data_home)/Fonts"
     else
@@ -249,52 +251,190 @@ function install_fonts() {
     mkdir -p $font_dir
     pushd $font_dir
 
-    # Inconsolata for Powerline Nerd Font
-    curl -fLo "Inconsolata Nerd Font Complete.otf" \
-        https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf
+    _install_font_inconsolata_nerd
+    local ret_of_inconsolata_nerd=$?
+    if [[ $ret_of_inconsolata_nerd -eq 1 ]]; then
+        push_info_message_list "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
+    elif [[ $ret_of_inconsolata_nerd -eq 2 ]]; then
+        push_warn_message_list "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+        (( result++ ))
+    fi
 
-    ## # backup
-    ## curl -fLo "Inconsolata for Powerline Nerd Font Complete.otf" \
-    ##     https://cdn.rawgit.com/ryanoasis/nerd-fonts/v1.0.0/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete.otf
+    _install_font_migu1m
+    local ret_of_migu1m=$?
+    if [[ "$ret_of_migu1m" -eq 1 ]]; then
+        push_info_message_list "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
+    elif [[ "$ret_of_migu1m" -eq 2 ]]; then
+        echo "ERROR: Failed to install Inconsolata for Powerline Nerd Font. The program will install IPA font alternatively."
+        push_warn_message_list "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  The program will install IPA font alternatively."
+        (( result++ ))
+    fi
+
+    _install_font_noto_emoji
+    local ret_of_noto_emoji=$?
+    if [[ "$ret_of_noto_emoji" -eq 1 ]]; then
+        push_info_message_list "INFO: NotoEmojiFont was installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
+    elif [[ "$ret_of_noto_emoji" -eq 2 ]]; then
+        push_warn_message_list "ERROR: Failed to install NotoEmojiFont.\n  The program will install IPA font alternatively."
+        (( result++ ))
+    fi
+
+    if [[ $ret_of_migu1m -eq 2 ]]; then
+        _install_font_ipafont
+        local ref_of_ipafont=$?
+        if [[ "$ref_of_ipafont" -eq 1 ]]; then
+            push_info_message_list "INFO: IPA font was installed successflly."
+        elif [[ "$ref_of_ipafont" -eq 2 ]]; then
+            push_warn_message_list "ERROR: Failed to install IPA font was installed.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+            (( result++ ))
+        fi
+    fi
+
+    popd
+
+    echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
+    fc-cache -f $font_dir && push_info_message_list "INFO: Font cache was recreated."
+
+    return $result
+}
+
+# Install font Inconsolata Nerd Font Complete
+# Return codes are...
+#     0: Already installed
+#     1: Installed successfully
+#     2: Failed to install
+function _install_font_inconsolata_nerd() {
+    local result=0
+
+    # TODO: This function assumes the process already in font directory.
+    # Inconsolata for Powerline Nerd Font
+    if [[ ! -e "Inconsolata Nerd Font Complete.otf" ]] || [[ "$(wc -c < 'Inconsolata Nerd Font Complete.otf')" == "0" ]]; then
+        curl -fLo "Inconsolata Nerd Font Complete.otf" \
+            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf
+        local ret_of_curl=$?
+
+        if [[ "$ret_of_curl" -eq 0 ]] && [[ -e "Inconsolata Nerd Font Complete.otf" ]] && [[ "$(wc -c < 'Inconsolata Nerd Font Complete.otf')" != "0" ]]; then
+            # Installing font has succeeded
+            result=1
+        else
+            # Installing font has failed
+            rm -f "Inconsolata Nerd Font Complete.otf"
+            result=2
+        fi
+    fi
+
+    # TODO: If you want to install old Powerline Nerd Font, please download it from old tag
+    # curl -fLo "Inconsolata for Powerline Nerd Font Complete.otf" \
+    #     https://cdn.rawgit.com/ryanoasis/nerd-fonts/v1.0.0/patched-fonts/Inconsolata/complete/Inconsolata%20for%20Powerline%20Nerd%20Font%20Complete.otf
+
+    return $result
+}
+
+# Install font migu1m (for Japanese)
+# Return codes are...
+#     0: Already installed
+#     1: Installed successfully
+#     2: Failed to install
+function _install_font_migu1m() {
+
+    # Migu 1M has already been installed?
+    if [[ -e "migu-1m-bold.ttf" ]] && [[ "$(wc -c < migu-1m-bold.ttf)" != "0" ]] \
+            && [[ -e "migu-1m-regular.ttf" ]] || [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
+        # Migu M1 has already installed
+        return 0
+    fi
 
     # Migu 1M for Japanese font
     curl -fLo "migu-1m-20150712.zip" \
         https://ja.osdn.net/projects/mix-mplus-ipa/downloads/63545/migu-1m-20150712.zip
+    local ret_of_curl=$?
 
-    if [[ -f "migu-1m-20150712.zip" ]] && [[ "$(wc -c < migu-1m-20150712.zip)" -ne 0 ]]; then
+    if [[ "$ret_of_curl" -eq 0 ]] && [[ -e "migu-1m-20150712.zip" ]] && [[ "$(wc -c < migu-1m-20150712.zip)" -ne 0 ]]; then
         unzip migu-1m-20150712.zip
         pushd migu-1m-20150712
         mv ./*.ttf ../
         popd
         rm -rf migu-1m-20150712 migu-1m-20150712.zip
+    else
+        # Failed to install
+        rm -rf migu-1m-20150712 migu-1m-20150712.zip
+        return 2
     fi
 
-    if [[ ! -f "migu-1m-bold.ttf" ]] || [[ "$(wc -c < migu-1m-bold.ttf)" = "0" ]] \
-            || [[ ! -f "migu-1m-regular.ttf" ]] || [[ "$(wc -c < migu-1m-regular.ttf)" = 0 ]]; then
-
-        echo "WARN: Failed to install migu-fonts for some reason."
-        echo "WARN: Attempting to install ipa fonts instead."
-        rm -f migu-1m-bold.ttf migu-1m-regular.ttf
-
-        # IPAFonts for express Japanese characters
-        if do_i_have_admin_privileges; then
-            if [ "$(get_distribution_name)" == "debian" ]; then
-                install_packages_with_apt fonts-ipafont
-            elif [ "$(get_distribution_name)" == "fedora" ]; then
-                install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts
-            elif [ "$(get_distribution_name)" == "arch" ]; then
-                install_packages_with_pacman otf-ipafont
-            elif [ "$(get_distribution_name)" == "mac" ]; then
-                true    # TODO:
-            fi
-        fi
+    if [[ -e "migu-1m-bold.ttf" ]] && [[ "$(wc -c < migu-1m-bold.ttf)" != "0" ]] \
+            && [[ -e "migu-1m-regular.ttf" ]] || [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
+        # Migu M1 has already installed
+        return 1
+    else
+        rm -rf migu-1m-20150712 migu-1m-20150712.zip
     fi
 
-
-    popd
-    echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
-    fc-cache -f $font_dir
+    # Failed to install
+    return 2
 }
+
+# Install font migu1m (for Japanese)
+# Return codes are...
+#     0: Already installed (TODO: doesn't implemented now)
+#     1: Installed successfully
+#     2: Failed to install
+function _install_fonrt_ipafont() {
+    local result=1
+
+    local ret_of_ipafont
+    if do_i_have_admin_privileges; then
+        if [ "$(get_distribution_name)" == "debian" ]; then
+            install_packages_with_apt fonts-ipafont
+            ret_of_ipafont=$?
+        elif [ "$(get_distribution_name)" == "fedora" ]; then
+            install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts
+            ret_of_ipafont=$?
+        elif [ "$(get_distribution_name)" == "arch" ]; then
+            install_packages_with_pacman otf-ipafont
+            ret_of_ipafont=$?
+        elif [ "$(get_distribution_name)" == "mac" ]; then
+            true    # TODO:
+        fi
+
+        [[ "$ret_of_ipafont" -ne 0 ]] && result=2
+    else
+        push_warn_message_list "ERROR: Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
+        result=2
+    fi
+
+    return $result
+}
+
+# Install font noto emoji (for emoji)
+# Return codes are...
+#     0: Already installed
+#     1: Installed successfully
+#     2: Failed to install
+function _install_font_noto_emoji() {
+
+    if [[ -e "NotoColorEmoji.ttf" ]] && [[ -e "NotoEmoji-Regular.ttf" ]] && \
+            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] && [[ $(wc -c < "NotoEmoji-Regular.ttf") ]]; then
+        # Already installed
+        return 0
+    fi
+    rm -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
+
+    local ret_of_noto=0
+    curl -fLo "NotoColorEmoji.ttf" \
+            https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf || (( ret_of_noto++ ))
+    curl -fLo "NotoEmoji-Regular.ttf" \
+            https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf  || (( ret_of_noto++ ))
+
+    if [[ "$ret_of_noto" -ne 0 ]] || [[ -e "NotoColorEmoji.ttf" ]] || [[ -e "NotoEmoji-Regular.ttf" ]] || \
+            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] || [[ $(wc -c < "NotoEmoji-Regular.ttf") -ne 0 ]]; then
+        rm -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
+        return 2
+    fi
+
+    return 1
+}
+
+
 
 function install_packages_with_apt() {
     declare -a packages=($@)
