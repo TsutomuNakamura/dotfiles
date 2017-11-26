@@ -253,41 +253,81 @@ function install_fonts() {
 
     _install_font_inconsolata_nerd
     local ret_of_inconsolata_nerd=$?
-    if [[ $ret_of_inconsolata_nerd -eq 1 ]]; then
-        push_info_message_list "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
-    elif [[ $ret_of_inconsolata_nerd -eq 2 ]]; then
-        push_warn_message_list "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
-        (( result++ ))
-    fi
+    case "$ret_of_inconsolata_nerd" in
+        0 )
+            echo "INFO: Inconsolata for Powerline Nerd Font has already installed. Skipping."
+            ;;
+        1 )
+            push_info_message_list "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
+            ;;
+        2 )
+            push_warn_message_list "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+            (( result++ ))
+            ;;
+        * )
+            echo "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
+            push_warn_message_list "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
+            ;;
+    esac
 
     _install_font_migu1m
     local ret_of_migu1m=$?
-    if [[ "$ret_of_migu1m" -eq 1 ]]; then
-        push_info_message_list "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
-    elif [[ "$ret_of_migu1m" -eq 2 ]]; then
-        echo "ERROR: Failed to install Inconsolata for Powerline Nerd Font. The program will install IPA font alternatively."
-        push_warn_message_list "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  The program will install IPA font alternatively."
-        (( result++ ))
-    fi
+    case "$ret_of_migu1m" in
+        0 )
+            echo "INFO: Migu 1M font has already installed. Skipping."
+            ;;
+        1 )
+            push_info_message_list "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
+            ;;
+        2 )
+            echo "ERROR: Failed to install Migu 1M font. The program will install IPA font alternatively."
+            push_warn_message_list "ERROR: Failed to install Migu 1M font.\n  The program will install IPA font alternatively."
+            (( result++ ))
+            ;;
+        * )
+            echo "ERROR: Unknown error was occured when installing Migu 1M font."
+            push_warn_message_list "ERROR: Unknown error was occured when installing Inconsolata for Migu 1M font."
+            ;;
+    esac
 
     _install_font_noto_emoji
     local ret_of_noto_emoji=$?
-    if [[ "$ret_of_noto_emoji" -eq 1 ]]; then
-        push_info_message_list "INFO: NotoEmojiFont was installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
-    elif [[ "$ret_of_noto_emoji" -eq 2 ]]; then
-        push_warn_message_list "ERROR: Failed to install NotoEmojiFont.\n  The program will install IPA font alternatively."
-        (( result++ ))
-    fi
+    case "$ret_of_noto_emoji" in
+        0 )
+            echo "INFO: NotoEmojiFont has already installed. Skipping."
+            ;;
+        1 )
+            push_info_message_list "INFO: NotoEmojiFont was installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
+            ;;
+        2 )
+            push_warn_message_list "ERROR: Failed to install NotoEmojiFont."
+            (( result++ ))
+            ;;
+        * )
+            echo "ERROR: Unknown error was occured when installing NotoEmojiFont."
+            push_warn_message_list "ERROR: Unknown error was occured when installing NotoEmojiFont."
+            ;;
+    esac
 
     if [[ $ret_of_migu1m -eq 2 ]]; then
         _install_font_ipafont
         local ref_of_ipafont=$?
-        if [[ "$ref_of_ipafont" -eq 1 ]]; then
-            push_info_message_list "INFO: IPA font was installed successflly."
-        elif [[ "$ref_of_ipafont" -eq 2 ]]; then
-            push_warn_message_list "ERROR: Failed to install IPA font was installed.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
-            (( result++ ))
-        fi
+        case "$ref_of_ipafont" in
+            0 )
+                echo "INFO: IPA Font has already installed. Skipping."
+                ;;
+            1 )
+                push_info_message_list "INFO: IPA Font was installed."
+                ;;
+            2 )
+                push_warn_message_list "ERROR: Failed to install IPA Font."
+                (( result++ ))
+                ;;
+            * )
+                echo "ERROR: Unknown error was occured when installing IPA Font."
+                push_warn_message_list "ERROR: Unknown error was occured when installing IPA Font."
+                ;;
+        esac
     fi
 
     popd
