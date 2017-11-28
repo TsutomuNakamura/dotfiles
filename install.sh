@@ -242,39 +242,39 @@ function install_the_font() {
     local install_cmd="$1"
     local font_name="$2"
     # Append to front "\n  " if length of variable is greater than 0.
-    local extra_msg_on_already_installed="${3:+\\n\ \ $3}"
-    local extra_msg_on_installed="${4:+\\n\ \ $4}"
-    local extra_msg_on_failed="${5:+\\n\ \ $5}"
-    local extra_msg_on_unknown_err="${6:+\\n\ \ $6}"
-    local ret
+    # local extra_msg_on_already_installed="${3:+\\n\ \ $3}"
+    local extra_msg_on_already_installed="${3:+\n  $3}"
+    local extra_msg_on_installed="${4:+\n  $4}"
+    local extra_msg_on_failed="${5:+\n  $5}"
+    local extra_msg_on_unknown_err="${6:+\n  $6}"
 
     eval "$install_cmd"
-    ret=$?
+    local ret=$?
 
     # 0: The font has already installed.
     # 1: Installing the font has successfully.
     # 2: Failed to install the font.
     # *: Unknown error
-    case "$ret_of_inconsolata_nerd" in
+    case "$ret" in
         0 )
-            echo "INFO: ${font_name} has already installed.${extra_msg_on_already_installed}"
+            echo -e "INFO: ${font_name} has already installed.${extra_msg_on_already_installed}"
             ;;
         1 )
-            echo "INFO: ${font_name} has installed.${extra_msg_on_installed}"
+            echo -e "INFO: ${font_name} has installed.${extra_msg_on_installed}"
             push_info_message_list "INFO: ${font_name} has installed.${extra_msg_on_installed}"
             ;;
         2 )
-            echo "ERROR: Failed to install ${font_name}.${extra_msg_on_failed}"
+            echo -e "ERROR: Failed to install ${font_name}.${extra_msg_on_failed}"
             push_warn_message_list "ERROR: Failed to install ${font_name}.${extra_msg_on_failed}"
-            (( result++ ))
             ;;
         * )
-            echo "ERROR: Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}"
+            echo -e "ERROR: Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}"
             push_warn_message_list "ERROR: Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}"
             ;;
     esac
 
-    return $ret
+    # This function would be finished successfully if return code of install_cmd() is 0(already installed) or 1(install has successfully).
+    [[ $ret -le 1 ]]
 }
 
 # Installe font
@@ -291,12 +291,12 @@ function install_fonts() {
     pushd $font_dir
 
     # _install_font_ipafont
-    install_the_font "_install_font_inconsolata_nerd" \                                                         # Install function
-            "Inconsolata for Powerline Nerd Font" \                                                             # Font name
-            "" \                                                                                                # The message on already installed
-            "For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \    # The message on installed successfully
-            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary." \       # The message on failed
-            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."         # The message on unknown error
+    install_the_font "_install_font_inconsolata_nerd" \
+            "Inconsolata for Powerline Nerd Font" \
+            "" \
+            "For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \
+            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary." \
+            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
     local ret_install_font_inconsolata_nerd=$?
     (( result += $ret_install_font_inconsolata_nerd ))
 
@@ -318,10 +318,10 @@ function install_fonts() {
     local ret_install_font_noto_emoji=$?
     (( result += $ret_install_font_noto_emoji ))
 
-    if [[ $ret_install_font_migu1m -eq 2 ]] || [[ $ret_install_font_migu1m -eq 3 ]]; then
+    if [[ $ret_install_font_migu1m -ne 0 ]]; then
         install_the_font "_install_font_ipafont" "IPA Font" "" "" "" ""
         local ret_install_font_ipafont=$?
-        (( result += $ret_install_font_noto_emoji ))
+        (( result += $ret_install_font_ipafont ))
     fi
 
     popd

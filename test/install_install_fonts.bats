@@ -5,225 +5,140 @@ function setup() {
     cd "${HOME}"
     function get_distribution_name  { echo "debian"; }
     function get_xdg_data_home      { echo "${HOME}/.local/share"; }
+    function mkdir { true; }
+    function pushd { true; }
+    function popd { true; }
     function fc-cache { true; }
-    stub_and_eval _install_font_inconsolata_nerd    '{ return 1; }'
-    stub_and_eval _install_font_migu1m              '{ return 1; }'
-    stub_and_eval _install_font_noto_emoji          '{ return 1; }'
-    stub_and_eval _install_font_ipafont             '{ return 1; }'
-    stub push_info_message_list
-    stub push_warn_message_list
-    stub echo
+    stub install_the_font
 }
 
 function teardown() {
     cd "${HOME}"
-    rm -rf .local
 }
 
-@test '#install_fonts should _install_font_inconsolata_nerd(), _install_font_migu1m(), _install_font_noto_emoji(), _install_font_ipafont() on linux(debian).' {
-    stub fc-cache
+function assert_install_the_nerd_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} \
+            "_install_font_inconsolata_nerd" \
+            "Inconsolata for Powerline Nerd Font" \
+            "" \
+            "For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \
+            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary." \
+            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+}
+function assert_install_the_migu1m_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} \
+            "_install_font_migu1m" \
+            "Migu 1M Font" \
+            "" \
+            "For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"." \
+            "The program will install IPA font alternatively." \
+            "The program will install IPA font alternatively."
+}
+function assert_install_the_noto_emoji_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} \
+            "_install_font_noto_emoji" \
+            "NotoEmojiFont" \
+            "" \
+            "For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
+            "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary." \
+            "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary."
+}
+function assert_install_the_ipa_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} "_install_font_ipafont" "IPA Font" "" "" "" ""
+}
+
+@test '#install_fonts should call install_the_font() for Nerd Font, Migu1M Font, Noto Emoji Font (but not IPA Font) on linux(debian).' {
+    stub mkdir; stub pushd; stub popd; stub fc-cache
 
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
+    declare -a outputs
+    IFS=$'\n' outputs=($output)
+    [[ ${outputs[0]} = "Building font information cache files with \"fc-cache -f ${HOME}/.local/share/fonts\"" ]]
+    stub_called_with_exactly_times mkdir 1 -p "${HOME}/.local/share/fonts"
+    stub_called_with_exactly_times pushd 1 "${HOME}/.local/share/fonts"
+    [[ "$(stub_called_times popd)"                -eq 1 ]]
 
-    stub_called_with_exactly_times push_info_message_list 1 \
-            "INFO: Inconsolata for Powerline Nerd Font was installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
-    stub_called_with_exactly_times push_info_message_list 1 \
-            "INFO: Migu 1M font was installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
-    stub_called_with_exactly_times push_info_message_list 1 \
-            "INFO: NotoEmojiFont was installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
-    stub_called_with_exactly_times push_info_message_list 0 \
-            "INFO: IPA font was installed successflly."
-
-    # Error should NOT occured
-    stub_called_with_exactly_times push_warn_message_list 0 \
-            "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
-    stub_called_with_exactly_times push_warn_message_list 0 \
-            "ERROR: Failed to install migu-fonts for some reason."
-    stub_called_with_exactly_times push_warn_message_list 0 \
-            "ERROR: Failed to install NotoEmojiFont.\n  The program will install IPA font alternatively."
-    stub_called_with_exactly_times push_warn_message_list 0 \
-            "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  The program will install IPA font alternatively."
-
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
 }
 
-@test '#install_fonts should _install_font_inconsolata_nerd(), _install_font_migu1m(), _install_font_noto_emoji(), _install_font_ipafont() on Mac.' {
-    stub fc-cache
+@test '#install_fonts should call install_the_font() for Nerd Font, Migu1M Font, Noto Emoji Font (but not IPA Font) on mac.' {
+    stub mkdir; stub pushd; stub popd; stub fc-cache
     function get_distribution_name()                { echo "mac"; }
     function get_xdg_data_home()                    { echo "${HOME}/Library"; }
 
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
+    declare -a outputs
+    IFS=$'\n' outputs=($output)
+    [[ ${outputs[0]} = "Building font information cache files with \"fc-cache -f ${HOME}/Library/Fonts\"" ]]
+    stub_called_with_exactly_times mkdir 1 -p "${HOME}/Library/Fonts"
+    stub_called_with_exactly_times pushd 1 "${HOME}/Library/Fonts"
+    [[ "$(stub_called_times popd)"                -eq 1 ]]
 
-    stub_called_with_exactly_times push_info_message_list 1 \
-            "INFO: Inconsolata for Powerline Nerd Font has installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
-    stub_called_with_exactly_times push_info_message_list 1 \
-            "INFO: Migu 1M font has installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
-    stub_called_with_exactly_times push_info_message_list 1 \
-            "INFO: NotoEmojiFont has installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
-    stub_called_with_exactly_times push_info_message_list 0 \
-            "INFO: IPA Font has installed."
-
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/Library/Fonts
 }
 
-
-@test '#install_fonts should not call push_info_message_list and push_warn_message_list if _install_font_inconsolata_nerd() return 0 (nerd font has already installed).' {
-
-    stub_and_eval _install_font_inconsolata_nerd '{ return 0; }'
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
-
-    stub_called_with_exactly_times echo 1 "INFO: Inconsolata for Powerline Nerd Font has already installed. Skipping."
-    stub_called_with_exactly_times push_info_message_list 0 "INFO: Inconsolata for Powerline Nerd Font has installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
-    stub_called_with_exactly_times push_warn_message_list 0 "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
-
-    stub_called_with_exactly_times echo 0 "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
-    stub_called_with_exactly_times push_warn_message_list 0 "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
-}
-
-@test '#install_fonts should not call push_warn_message_list if _install_font_inconsolata_nerd() returns 2 (Failed to install nerd font).' {
-
-    stub_and_eval _install_font_inconsolata_nerd    '{ return 2; }'
-
+@test '#install_fonts should not return 1 if _install_font_inconsolata_nerd() has failed.' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_inconsolata_nerd" ]] && return 1 || return 0; }'
     run install_fonts
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
-
-    stub_called_with_exactly_times echo 0 "INFO: Inconsolata for Powerline Nerd Font has already installed. Skipping."
-    stub_called_with_exactly_times push_info_message_list 0 "INFO: Inconsolata for Powerline Nerd Font has installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
-    stub_called_with_exactly_times push_warn_message_list 1 "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
-
-    stub_called_with_exactly_times echo 0 "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
-    stub_called_with_exactly_times push_warn_message_list 0 "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
-
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
 }
 
-@test '#install_fonts should not call push_warn_message_list if _install_font_inconsolata_nerd() returns 3 (Unknown error).' {
-
-    stub_and_eval _install_font_inconsolata_nerd    '{ return 2; }'
-
+@test '#install_fonts should not return 1 if _install_font_noto_emoji() has failed.' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_noto_emoji" ]] && return 1 || return 0; }'
     run install_fonts
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
-
-    stub_called_with_exactly_times echo 0 "INFO: Inconsolata for Powerline Nerd Font has already installed. Skipping."
-    stub_called_with_exactly_times push_info_message_list 0 "INFO: Inconsolata for Powerline Nerd Font has installed.\n  For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"."
-    stub_called_with_exactly_times push_warn_message_list 1 "ERROR: Failed to install Inconsolata for Powerline Nerd Font.\n  Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
-
-    stub_called_with_exactly_times echo 0 "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
-    stub_called_with_exactly_times push_warn_message_list 0 "ERROR: Unknown error was occured when installing Inconsolata for Powerline Nerd Font."
-
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
 }
 
-@test '#install_fonts should not call push_info_message_list and push_warn_message_list if _install_font_migu1m() returns 2 (Mig1M has already installed).' {
-
-    stub_and_eval _install_font_migu1m '{ return 0; }'
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
-
-    # TODO:
-    stub_called_with_exactly_times echo 1 "INFO: Migu 1M font has already installed. Skipping."
-    stub_called_with_exactly_times push_info_message_list 0 "INFO: Migu 1M font has installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
-    stub_called_with_exactly_times push_warn_message_list 0 "ERROR: Failed to install migu-fonts for some reason."
-}
-
-@test '#install_fonts should not call push_warn_message_list if _install_font_migu1m() returns 2 (failed to install Migu1M). And _install_font_ipafont() should be called.' {
-
-    stub_and_eval _install_font_migu1m '{ return 2; }'
-
+@test '#install_fonts should not return 1 if _install_font_migu1m() has failed then call _install_font_ipafont()' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_migu1m" ]] && return 1 || return 0; }'
     run install_fonts
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 1 ]]
-
-    stub_called_with_exactly_times push_info_message_list 0 \
-            "INFO: Migu 1M font has installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
-    stub_called_with_exactly_times push_warn_message_list 1 \
-            "ERROR: Failed to install Migu 1M font.\n  The program will install IPA font alternatively."
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
 }
 
-@test '#install_fonts should not call push_warn_message_list if _install_font_migu1m() returns 3 (unknown error). And _install_font_ipafont() should be called.' {
-    # TODO:
-    false
-}
-
-@test '#install_fonts should not call push_warn_message_list if _install_font_noto_emoji() returns 0 (NotoEmojiFont has already installed).' {
-
-    stub_and_eval _install_font_noto_emoji '{ return 0; }'
-
+@test '#install_fonts should not return 2 if _install_font_migu1m() has failed then call _install_font_ipafont() and failed it' {
+    stub_and_eval install_the_font '{
+        if [[ "$1" = "_install_font_migu1m" ]] || [[ "$1" = "_install_font_ipafont" ]]; then
+            return 1
+        fi
+        return 0
+    }'
     run install_fonts
 
-    [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
-
-    stub_called_with_exactly_times echo 1 \
-            "INFO: NotoEmojiFont has already installed. Skipping."
-    stub_called_with_exactly_times push_info_message_list 0 \
-            "INFO: NotoEmojiFont has installed.\n  For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"."
-    stub_called_with_exactly_times push_warn_message_list 0 \
-            "ERROR: Failed to install migu-fonts for some reason."
+    [[ "$status" -eq 2 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
 }
-
-@test '#install_fonts should not call push_warn_message_list if _install_font_noto_emoji() returns 2 (failed to install NotoEmojiFont).' {
-
-    stub_and_eval _install_font_noto_emoji '{ return 2; }'
-
-    run install_fonts
-
-    [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times _install_font_inconsolata_nerd)"                -eq 1 ]]
-    [[ "$(stub_called_times _install_font_migu1m)"                          -eq 1 ]]
-    [[ "$(stub_called_times _install_font_noto_emoji)"                      -eq 1 ]]
-    [[ "$(stub_called_times _install_font_ipafont)"                         -eq 0 ]]
-
-    stub_called_with_exactly_times push_info_message_list 0 \
-            "INFO: Migu 1M font has installed.\n  For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"."
-    stub_called_with_exactly_times push_warn_message_list 0 \
-            "ERROR: Failed to install NotoEmojiFont."
-}
-
-
-@test '#install_fonts should not call push_warn_message_list if _install_font_noto_emoji() returns 3 (unknown error).' {
-    # TODO:
-    false
-}
-
 
