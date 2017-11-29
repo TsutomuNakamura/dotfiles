@@ -280,8 +280,9 @@ function install_the_font() {
 # Installe font
 function install_fonts() {
     local result=0
+    local distribution_name="$(get_distribution_name)"
 
-    if [[ "$(get_distribution_name)" = "mac" ]]; then
+    if [[ "$distribution_name" = "mac" ]]; then
         local font_dir="$(get_xdg_data_home)/Fonts"
     else
         local font_dir="$(get_xdg_data_home)/fonts"
@@ -309,14 +310,17 @@ function install_fonts() {
     local ret_install_font_migu1m=$?
     (( result += $ret_install_font_migu1m ))
 
-    install_the_font "_install_font_noto_emoji" \
-            "NotoEmojiFont" \
-            "" \
-            "For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
-            "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary." \
-            "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary."
-    local ret_install_font_noto_emoji=$?
-    (( result += $ret_install_font_noto_emoji ))
+    if [[ "$distribution_name" != "mac" ]]; then
+        # Installing the emoji font only on Linux because Mac has already supported it.
+        install_the_font "_install_font_noto_emoji" \
+                "NotoEmojiFont" \
+                "" \
+                "For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
+                "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary." \
+                "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary."
+        local ret_install_font_noto_emoji=$?
+        (( result += $ret_install_font_noto_emoji ))
+    fi
 
     if [[ $ret_install_font_migu1m -ne 0 ]]; then
         install_the_font "_install_font_ipafont" "IPA Font" "" "" "" ""

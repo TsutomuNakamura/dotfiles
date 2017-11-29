@@ -71,7 +71,7 @@ function assert_install_the_ipa_font() {
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
 }
 
-@test '#install_fonts should call install_the_font() for Nerd Font, Migu1M Font, Noto Emoji Font (but not IPA Font) on mac.' {
+@test '#install_fonts should call install_the_font() for Nerd Font, Migu1M Font (but not Emoji font and IPA Font) on mac.' {
     stub mkdir; stub pushd; stub popd; stub fc-cache
     function get_distribution_name()                { echo "mac"; }
     function get_xdg_data_home()                    { echo "${HOME}/Library"; }
@@ -88,7 +88,7 @@ function assert_install_the_ipa_font() {
 
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
-    assert_install_the_noto_emoji_font  1
+    assert_install_the_noto_emoji_font  0
     assert_install_the_ipa_font         0
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/Library/Fonts
 }
