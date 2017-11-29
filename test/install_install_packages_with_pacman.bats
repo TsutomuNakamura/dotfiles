@@ -25,9 +25,7 @@ function teardown() {
 @test '#install_packages_with_pacman should NOT call pacman -S with parameter "sed" when it was already installed' {
     run install_packages_with_pacman "sed"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
 
     [[ "${outputs[0]}" = "sed is already installed." ]]
     [[ "${outputs[1]}" = "There are no packages to install." ]]
@@ -54,9 +52,7 @@ function teardown() {
 
     run install_packages_with_pacman "sed" "gvim"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
 
     [[ "${outputs[0]}" = "sed is already installed." ]]
     [[ "${outputs[1]}" = "gvim is already installed." ]]
@@ -85,9 +81,8 @@ function teardown() {
 @test '#install_packages_with_pacman should call pacman -S with parameter "git" but "sed" does not' {
     run install_packages_with_pacman "git" "sed"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "sed is already installed." ]]
     [[ "${outputs[1]}" = "Installing git..." ]]
@@ -103,9 +98,8 @@ function teardown() {
 @test '#install_packages_with_pacman should call pacman -S with parameter "git" "curl" but "sed" does not' {
     run install_packages_with_pacman "git" "sed" "curl"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "sed is already installed." ]]
     [[ "${outputs[1]}" = "Installing git curl..." ]]
@@ -119,9 +113,8 @@ function teardown() {
 @test '#install_packages_with_pacman should call pacman -S with parameter "git" then pacman -S with "vim"' {
     run install_packages_with_pacman "git" "vim"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "Installing git..." ]]
     [[ "${outputs[1]}" = "Installing vim..." ]]
@@ -136,9 +129,8 @@ function teardown() {
 @test '#install_packages_with_pacman should call pacman -S with parameter "git" then pacman -S with "gvim"' {
     run install_packages_with_pacman "git" "gvim"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "Installing git..." ]]
     [[ "${outputs[1]}" = "Installing gvim..." ]]
@@ -153,9 +145,8 @@ function teardown() {
 @test '#install_packages_with_pacman should call pacman -S with parameter "git" "curl" then pacman -S with "gvim"' {
     run install_packages_with_pacman "git" "gvim" "curl"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "Installing git curl..." ]]
     [[ "${outputs[1]}" = "Installing gvim..." ]]
@@ -184,9 +175,8 @@ function teardown() {
 
     run install_packages_with_pacman "git" "gvim" "curl"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "gvim is already installed." ]]
     [[ "${outputs[1]}" = "Installing git curl..." ]]
@@ -201,9 +191,8 @@ function teardown() {
 @test '#install_packages_with_pacman should call pacman -S with parameter "git" then pacman -S with "gvim" that has already installed' {
     run install_packages_with_pacman "git" "gvim" "sed"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
+
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "sed is already installed." ]]
     [[ "${outputs[1]}" = "Installing git..." ]]
@@ -216,9 +205,7 @@ function teardown() {
 @test '#install_packages_with_pacman should call pacman -S with parameter "git" then pacman -S with "gvim" then pacman -S with "vim"' {
     run install_packages_with_pacman "git" "gvim" "sed" "vim"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
 
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "sed is already installed." ]]
@@ -244,9 +231,7 @@ function teardown() {
 
     run install_packages_with_pacman "git"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
 
     [[ "$status" -eq 1 ]]
     [[ "${outputs[0]}" = "Installing git..." ]]
@@ -268,9 +253,7 @@ function teardown() {
 
     run install_packages_with_pacman "gvim"
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
 
     [[ "$status" -eq 1 ]]
 
@@ -295,12 +278,9 @@ function teardown() {
 
     run install_packages_with_pacman git curl vim gvim
 
-    echo "$output"
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
+    declare -a outputs; IFS=$'\n' outputs=($output)
 
     [[ "$status" -eq 2 ]]
-
     [[ "$(sbut_called_times push_info_message_list)" -eq 0 ]]
 
     stub_called_with_exactly_times push_info_message_list 1 'NOTICE: Package(s) "vim" have been installed on your OS.'
