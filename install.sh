@@ -377,11 +377,10 @@ function _install_font_migu1m() {
 
     # Migu 1M has already been installed?
     if [[ -e "migu-1m-bold.ttf" ]] && [[ "$(wc -c < migu-1m-bold.ttf)" != "0" ]] \
-            && [[ -e "migu-1m-regular.ttf" ]] || [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
+            && [[ -e "migu-1m-regular.ttf" ]] && [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
         # Migu M1 has already installed
         return 0
     fi
-
     # Migu 1M for Japanese font
     curl -fLo "migu-1m-20150712.zip" \
         https://ja.osdn.net/projects/mix-mplus-ipa/downloads/63545/migu-1m-20150712.zip
@@ -392,22 +391,20 @@ function _install_font_migu1m() {
         pushd migu-1m-20150712
         mv ./*.ttf ../
         popd
-        rm -rf migu-1m-20150712 migu-1m-20150712.zip
     else
         # Failed to install
-        rm -rf migu-1m-20150712 migu-1m-20150712.zip
+        rm -rf migu-1m-20150712.zip
         return 2
     fi
 
     if [[ -e "migu-1m-bold.ttf" ]] && [[ "$(wc -c < migu-1m-bold.ttf)" != "0" ]] \
-            && [[ -e "migu-1m-regular.ttf" ]] || [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
-        # Migu M1 has already installed
-        return 1
-    else
+            && [[ -e "migu-1m-regular.ttf" ]] && [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
+        # Downloading migu1m fonts has been successfully
         rm -rf migu-1m-20150712 migu-1m-20150712.zip
+        return 1
     fi
 
-    # Failed to install
+    rm -rf migu-1m-20150712 migu-1m-20150712.zip migu-1m-bold.ttf migu-1m-regular.ttf
     return 2
 }
 
