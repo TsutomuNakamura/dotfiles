@@ -413,10 +413,10 @@ function _install_font_migu1m() {
 #     0: Already installed (TODO: doesn't implemented now)
 #     1: Installed successfully
 #     2: Failed to install
-function _install_fonrt_ipafont() {
+function _install_font_ipafont() {
     local result=1
 
-    local ret_of_ipafont
+    local ret_of_ipafont=0
     if do_i_have_admin_privileges; then
         if [ "$(get_distribution_name)" == "debian" ]; then
             install_packages_with_apt fonts-ipafont
