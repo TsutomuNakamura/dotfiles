@@ -344,9 +344,9 @@ function install_fonts() {
 function _install_font_inconsolata_nerd() {
     local result=0
 
-    # TODO: This function assumes the process already in font directory.
     # Inconsolata for Powerline Nerd Font
     if [[ ! -e "Inconsolata Nerd Font Complete.otf" ]] || [[ "$(wc -c < 'Inconsolata Nerd Font Complete.otf')" == "0" ]]; then
+        rm -f "Inconsolata Nerd Font Complete.otf"
         curl -fLo "Inconsolata Nerd Font Complete.otf" \
             https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf
         local ret_of_curl=$?
