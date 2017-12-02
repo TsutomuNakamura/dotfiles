@@ -158,12 +158,13 @@ function usage() {
 function init() {
     local branch=${1:-master}
     local repo=${$2:-https://github.com/TsutomuNakamura/dotfiles}
-    local flag_no_install_packages=${2:-0}
+    local flag_no_install_packages=${3:-0}
+    local result=0
 
     if [ "$flag_no_install_packages" == 0 ]; then
         if do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
-            install_packages
+            install_packages || (( result++ ))
         else
             echo "= NOTICE ========================================================"
             echo "You don't have privileges to install packages."
@@ -181,19 +182,23 @@ function init() {
 
 # Install packages
 function install_packages() {
+    local result=0
+
     if [[ "$(get_distribution_name)" = "debian" ]]; then
-        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger
+        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger               || (( result++ ))
     elif [[ "$(get_distribution_name)" = "centos" ]]; then
         # TODO: ranger not supported in centos
-        echo "INFO: Package \"ranger\" will not be installed, so please instlal it manually."
-        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal
+        push_info_message_list "INFO: Package \"ranger\" will not be installed, so please instlal it manually."
+        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal          || (( result++ ))
     elif [[ "$(get_distribution_name)" = "fedora" ]]; then
-        install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger
+        install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger        || (( result++ ))
     elif [[ "$(get_distribution_name)" = "arch" ]]; then
-        install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal ranger
+        install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal ranger    || (( result++ ))
     elif [[ "$(get_distribution_name)" = "mac" ]]; then
-        install_packages_with_homebrew vim ctags tmux zsh unzip 
+        install_packages_with_homebrew vim ctags tmux zsh unzip                             || (( result++ ))
     fi
+
+    return $result
 }
 
 # Get the value of XDG_CONFIG_HOME for individual environments appropliately.
@@ -469,44 +474,59 @@ function _install_font_noto_emoji() {
     return 1
 }
 
-
-
+# Installing packages with apt
 function install_packages_with_apt() {
     declare -a packages=($@)
+    declare -a packages_will_be_installed
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
-    local output=
+    local output
 
-    ${prefix} apt-get update
-
-    echo "INFO: Creating cache of installed packages"
+    ${prefix} apt-get update || {
+        echo "ERROR: Some error has occured when updating packages with apt-get update." >&2
+        push_warn_message_list "ERROR: Some error has occured when updating packages with apt-get update."
+        return 1
+    }
 
     local pkg_cache=$(apt list --installed 2> /dev/null | grep -v -P 'Listing...' | cut -d '/' -f 1)
+    if [[ -z "$pkg_cache" ]]; then
+        echo "ERROR: Failed to get installed packages with apt list --installed." >&2
+        push_warn_message_list "ERROR: Failed to get installed packages with apt list --installed."
+        return 1
+    fi
 
-    local length_of_packages=${#packages[@]}
-    local num_of_deleted=0
-    for (( i = 0; i < $length_of_packages; i++ )) {
+    for (( i = 0; i < ${#packages[@]}; i++ )) {
         local p="${packages[i]}"
 
         if (grep -P "^${p}$" &> /dev/null <<< "$pkg_cache"); then
             # Remove already installed packages
-            echo "NOTICE: ${p} is already installed."
+            echo "INFO: ${p} has already installed. Skipped."
             unset packages[i]
-            (( ++num_of_deleted ))
+            continue
         fi
+
+        packages_will_be_installed+=("${packages[i]}")
     }
 
-    [[ "$num_of_deleted" -eq "$length_of_packages" ]] && {
-        echo "There are no packages to install"
+    if [[ "${#packages_will_be_installed[@]}" -eq 0 ]]; then
+        echo "INFO: There are no packages to install"
         return 0
-    }
+    fi
 
-    echo "Installing ${packages[@]}..."
+    echo "INFO: Installing ${packages_will_be_installed[@]}..."
 
-    local output="$(${prefix} apt-get install -y ${packages[@]} 2>&1)" || {
-        echo "ERROR: Some error occured when installing ${packages[i]}"
-        echo "${output}"
+    local output="$(${prefix} apt-get install -y ${packages_will_be_installed[@]} 2>&1)" || {
+        echo "ERROR: Some error occured when installing ${packages_will_be_installed[i]}" >&2
+        echo "${output}" >&2
+        push_warn_message_list "ERROR: Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
         return 1
     }
+
+    # push_info_message_list "INFO: Packages ${packages_will_be_installed[@]} have been installed."
+
+    local installed_packages="${packages_will_be_installed[@]}"
+    push_info_message_list "INFO: Packages ${installed_packages} have been installed."
+
+    return 0
 }
 
 function install_packages_with_yum() {
@@ -521,7 +541,7 @@ function install_packages_on_redhat() {
     local command="$1" ; shift
     declare -a packages=($@)
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
-    local output=
+    local output
     local flag_deleted=1
 
     local pkg_cache="$(rpm -qa --queryformat="%{NAME}\n")"
@@ -556,7 +576,7 @@ function install_packages_with_pacman() {
     local failed_to_installe_packages
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        if sudo pacman -Q "${packages[i]}"; then
+        if ${prefix} pacman -Q "${packages[i]}"; then
             echo "${packages[i]} is already installed."
         else
             if [[ "${packages[i]}" = "vim" ]] || [[ "${packages[i]}" = "gvim" ]]; then
@@ -1035,14 +1055,14 @@ function get_distribution_name() {
         DISTRIBUTION="arch"
         # TODO: Check for fedora, debian, ubuntu etc...
     fi
-    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+    [[ ! -z ${DISTRIBUTION} ]] && echo "${DISTRIBUTION}" && return
 
     echo "unknown"
 }
 
 # Check current directory is whether git repo or not.
 function is_here_git_repo() {
-    [ -d .git ] || (git rev-parse --git-dir > /dev/null 2>&1)
+    git rev-parse --git-dir > /dev/null 2>&1
 }
 
 function pushd() {
