@@ -986,34 +986,41 @@ function do_i_have_admin_privileges() {
 
 # Initialize dotfiles repo
 function init_repo() {
-
     local branch="$1"
     local repo="$2"
 
     mkdir -p "${HOME}/${DOTDIR}"
-    [ -d "${HOME}/${DOTDIR}" ] || {
+    [[ -d "${HOME}/${DOTDIR}" ]] || {
         echo "Failed to create the directory ${HOME}/${DOTDIR}."
         return 1
     }
 
     # Is here the git repo?
-    pushd ${HOME}/${DOTDIR}
-    if is_here_git_repo; then
-        echo "The repository ${repo} is already existed. Pulling from \"origin $branch\""
-        git pull origin $branch
-        # TODO: error handling
-    else
+    declare -A stats_of_dir=$(get_git_directory_status "${HOME}/${DOTDIR}")
+    # TOOD:
 
-        local files=$(shopt -s nullglob dotglob; echo ${HOME}/${DOTDIR}/*)
-        if (( ${#files} )); then
-            # Contains some files
-            echo "Couldn't clone the dotfiles repository because of the directory ${HOME}/${DOTDIR}/ is not empty"
-            return 1
-        fi
+    # if is_here_the_git_repo; then
+    #     echo "The repository ${repo} is already existed. Pulling from \"origin $branch\""
 
-        echo "The repository is not existed. Cloning branch from ${repo} then checkout branch ${branch}"
-        git clone -b $branch $repo .
-    fi
+    #     # TODO:
+    #     if [[ "$(git status --porcelain | grep -v -P '^\?\?.*' | wc -l)" -ne 0 ]]; then
+    #         
+    #     fi
+
+
+    #     git pull origin $branch
+    # else
+
+    #     local files=$(shopt -s nullglob dotglob; echo ${HOME}/${DOTDIR}/*)
+    #     if (( ${#files} )); then
+    #         # Contains some files
+    #         echo "Couldn't clone the dotfiles repository because of the directory ${HOME}/${DOTDIR}/ is not empty"
+    #         return 1
+    #     fi
+
+    #     echo "The repository is not existed. Cloning branch from ${repo} then checkout branch ${branch}"
+    #     git clone -b $branch $repo .
+    # fi
 
     # Freeze .gitconfig for not to push username and email
     [ -f .gitconfig ] && git update-index --assume-unchanged .gitconfig
@@ -1096,8 +1103,42 @@ function get_distribution_name() {
 }
 
 # Check current directory is whether git repo or not.
-function is_here_git_repo() {
-    git rev-parse --git-dir > /dev/null 2>&1
+# The function outputs the string of assosiative array.
+# To get outputs, you should write like below
+#   declare -A result="$(is_here_git_repo "/path/to/may/be/gitrepo")"
+# Result of 0 is true and the others is false.
+# List of status are like below.
+#   is_there_the_directory:
+#   is_the_directory_git:
+#   is_the_remote_correct:
+#   is_there_files_that_has_not_committed:
+#   is_there_un_pushed_changes:
+function get_git_directory_status() {
+    local target="$1"
+
+    declare -A result=(
+        [is_it_the_directory]=1
+        [is_the_directory_git]=1
+        [is_the_remote_correct]=1
+        [is_there_files_that_has_not_committed]=1
+        [is_there_un_pushed_changes]=1
+    )
+
+    if [[ -d "$target" ]]; then
+        result[is_it_the_directory]=0
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            result[is_the_directory_git]=0
+
+            local url="$(git remote get-url origin)"
+            if [[ "$url" = "git@github.com:TsutomuNakamura/dotfiles.git" ]] || [[ "$url" = "https://github.com/TsutomuNakamura/dotfiles.git" ]]; then
+                return 0
+            else
+                return 1
+            fi
+        fi
+    fi
+
+    declare -p result
 }
 
 function pushd() {
