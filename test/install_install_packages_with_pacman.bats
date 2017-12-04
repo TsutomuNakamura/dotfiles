@@ -18,9 +18,7 @@ function setup() {
     stub push_info_message_list
     stub push_warn_message_list
 }
-function teardown() {
-    restore sudo
-}
+# function teardown() {}
 
 @test '#install_packages_with_pacman should NOT call pacman -S with parameter "sed" when it was already installed' {
     run install_packages_with_pacman "sed"

@@ -5,6 +5,10 @@ trap 'echo "SIG INT was received. This program will be terminated." && exit 1' I
 DOTDIR=".dotfiles"
 # The directory that dotfiles resources will be backuped
 BACKUPDIR=".backup_of_dotfiles"
+# Git repository location over https
+GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
+# Git repository location over ssh
+GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
 # Cache of absolute backup dir
 CASH_ABSOLUTE_BACKUPDIR=
 # Distribution of this environment
@@ -40,7 +44,7 @@ function main() {
     local flag_no_install_packages=0
     local branch="master"
     local flag_cleanup=0
-    local repo="https://github.com/TsutomuNakamura/dotfiles"
+    local repo="$GIT_REPOSITORY_HTTPS"
 
     local error_count=0
 
@@ -59,7 +63,7 @@ function main() {
             c)
                 flag_cleanup=1;;
             g)
-                repo="git@github.com:TsutomuNakamura/dotfiles.git";;
+                repo="$GIT_REPOSITORY_SSH";;
             h | \?)
                 usage && return 0 ;;
         esac
@@ -157,7 +161,7 @@ function usage() {
 # Initialize dotfiles repo
 function init() {
     local branch=${1:-master}
-    local repo=${2:-https://github.com/TsutomuNakamura/dotfiles}
+    local repo=${2:-$GIT_REPOSITORY_HTTPS}
     local flag_no_install_packages=${3:-0}
 
     local result=0
@@ -282,7 +286,6 @@ function install_the_font() {
     local install_cmd="$1"
     local font_name="$2"
     # Append to front "\n  " if length of variable is greater than 0.
-    # local extra_msg_on_already_installed="${3:+\\n\ \ $3}"
     local extra_msg_on_already_installed="${3:+\n  $3}"
     local extra_msg_on_installed="${4:+\n  $4}"
     local extra_msg_on_failed="${5:+\n  $5}"
@@ -995,6 +998,37 @@ function init_repo() {
         return 1
     }
 
+    local target="${HOME}/${DOTDIR}"
+
+    if [[ -d "$target" ]]; then
+        if git -C "$target" rev-parse --git-dir > /dev/null 2>&1; then
+            
+            local remote_url="$(git -C "$target" remote get-url origin)"
+            if [[ "$url" = "$GIT_REPOSITORY_SSH" ]] || [[ "$url" = "$GIT_REPOSITORY_HTTPS" ]]; then
+                # if [[ "$(git -C "$target" status --porcelain | wc -l)" -eq 0 ]]; then
+                #     if [[ "$(git -C "$target" cherry -v | wc -l)" -eq 0 ]]; then
+                #         # Update!!!
+                #     else
+                #         # question then reinstall
+                #     fi
+                # else
+                #     # question then reinstall
+                # fi
+                $(git -C "$target" status --porcelain | wc -l)
+            else
+                # Remote url is not match of dotfiles.
+                # question then reinstall
+            fi
+        else
+            # It is not a git repository.
+            # question then reinstall
+        fi
+    else
+        # reinstall
+    fi
+    
+
+
     # Is here the git repo?
     declare -A stats_of_dir=$(get_git_directory_status "${HOME}/${DOTDIR}")
     # TOOD:
@@ -1108,32 +1142,38 @@ function get_distribution_name() {
 #   declare -A result="$(is_here_git_repo "/path/to/may/be/gitrepo")"
 # Result of 0 is true and the others is false.
 # List of status are like below.
-#   is_there_the_directory:
-#   is_the_directory_git:
-#   is_the_remote_correct:
-#   is_there_files_that_has_not_committed:
-#   is_there_un_pushed_changes:
+#   directory <int>:                 0 is true (there is the directory) otherwise false
+#   git_directory <int>:             0 is true (it is a git repository) otherwise false
+#   dotfiles_remote <int>:           0 is true (the repo refers $GIT_REPOSITORY_HTTPS or $GIT_REPOSITORY_SSH) otherwise false
+#   files_should_be_committed <int>: 0 is true (there are files should be committed or handled) otherwise false
+#   changes_should_be_pusshed <int>: 0 is true (there are changes should be pushed) otherwise false
+#   remote_is_origin <int>:          0 is true (remote is origin). Currentry this script only support remote origin
+#   branch_name <string>:            branch name on HEAD
 function get_git_directory_status() {
     local target="$1"
 
     declare -A result=(
-        [is_it_the_directory]=1
-        [is_the_directory_git]=1
-        [is_the_remote_correct]=1
-        [is_there_files_that_has_not_committed]=1
-        [is_there_un_pushed_changes]=1
+        [existence_of_directory]=1
+        [existence_of_git_repository]=1
+        [correctness_of_dotfiles_remote]=1
+        [absence_of_files_should_be_committed]=1
+        [absence_of_changes_should_be_pushed]=1
+        [branch_name]=""
     )
 
     if [[ -d "$target" ]]; then
-        result[is_it_the_directory]=0
+        result[existence_of_directory]=0
         if git rev-parse --git-dir > /dev/null 2>&1; then
-            result[is_the_directory_git]=0
+            result[existence_of_git_repository]=0
 
             local url="$(git remote get-url origin)"
-            if [[ "$url" = "git@github.com:TsutomuNakamura/dotfiles.git" ]] || [[ "$url" = "https://github.com/TsutomuNakamura/dotfiles.git" ]]; then
-                return 0
-            else
-                return 1
+            if [[ "$url" = "$GIT_REPOSITORY_SSH" ]] || [[ "$url" = "$GIT_REPOSITORY_HTTPS" ]]; then
+                # It is the dotfiles repository
+                result[correctness_of_dotfiles_remote]=0
+
+                [[ "$(git status --porcelain | wc -l)" -eq 0 ]] && result[absence_of_files_should_be_committed]=0
+                [[ "$(git cherry -v | wc -l)" -eq 0 ]]          && result[absence_of_changes_should_be_pushed]=0
+                result[branch_name]="$(git rev-parse --abbrev-ref HEAD)"
             fi
         fi
     fi
