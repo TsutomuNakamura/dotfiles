@@ -1005,33 +1005,35 @@ function init_repo() {
             
             local remote_url="$(git -C "$target" remote get-url origin)"
             if [[ "$url" = "$GIT_REPOSITORY_SSH" ]] || [[ "$url" = "$GIT_REPOSITORY_HTTPS" ]]; then
-                # if [[ "$(git -C "$target" status --porcelain | wc -l)" -eq 0 ]]; then
-                #     if [[ "$(git -C "$target" cherry -v | wc -l)" -eq 0 ]]; then
-                #         # Update!!!
-                #     else
-                #         # question then reinstall
-                #     fi
-                # else
-                #     # question then reinstall
-                # fi
-                $(git -C "$target" status --porcelain | wc -l)
+
+                # is_there_updates: 0 -> Updates are existed, 1: Updates are not existed
+                local is_there_updates="$([[ "$(git -C "$target" status --porcelain | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+                # is_there_pushes: 0 -> Files should be pushed are existed, 1: Files should be pushed are not existed
+                local is_there_pushes="$([[ "$(git -C "$target" cherry -v | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+
+                if [[ "$is_there_pushes" -eq 0 ]]; then
+                    # TODO: Question then reinstall
+                else
+                    if [[ "$is_there_updates" -eq 0 ]]; then
+                        # TODO: Question then "git reset --hard" and remove untrackedfiles then update
+                    else
+                        # TODO: Update!!
+                    fi
+                fi
             else
                 # Remote url is not match of dotfiles.
-                # question then reinstall
+                # TODO: Question then reinstall
             fi
         else
             # It is not a git repository.
-            # question then reinstall
+            # TODO: Question then reinstall
         fi
     else
-        # reinstall
+        # TODO: (Re)install!!
     fi
-    
-
 
     # Is here the git repo?
     declare -A stats_of_dir=$(get_git_directory_status "${HOME}/${DOTDIR}")
-    # TOOD:
 
     # if is_here_the_git_repo; then
     #     echo "The repository ${repo} is already existed. Pulling from \"origin $branch\""
