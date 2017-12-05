@@ -987,6 +987,32 @@ function do_i_have_admin_privileges() {
     [ "$(whoami)" == "root" ] || ((command -v sudo > /dev/null 2>&1) && (sudo -v 2> /dev/null))
 }
 
+
+# 0:   Just clone as a new repository.
+#      Because the directory is not existed.
+#
+# 1:   Remove the directory then just clone as new repository.
+#      Because the directory is existed but it is not git repository.
+#
+# 2:   Remove the directory then just clone as new repository.
+#      Because the directory is existed and it is a git repository but the reference of remote is wrong.
+#
+# 3:   Remove the directory then just clone as new repository.
+#      Because the directory is existed and it is a git repository but commits that should be puhed are remaining.
+#
+# 4:   Reset the directory hardly then remove untracked files then pull the repository.
+#      Because the directory is existed and it is a git repository but files that un committed are existed.
+#
+# 5:   Just pull as a existing repository.
+#      Because the directory is exist and it is a git repository collectly.
+#
+# 255: Aboarded to isntall or update repository.
+#      Because the user declined to update the repository with some reason.
+function determin_update_type_of_repository() {
+    local directory="$1"
+    
+}
+
 # Initialize dotfiles repo
 function init_repo() {
     local branch="$1"
