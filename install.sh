@@ -987,6 +987,32 @@ function do_i_have_admin_privileges() {
     [ "$(whoami)" == "root" ] || ((command -v sudo > /dev/null 2>&1) && (sudo -v 2> /dev/null))
 }
 
+
+# 0:   Just clone as a new repository.
+#      Because the directory is not existed.
+#
+# 1:   Remove the directory then just clone as new repository.
+#      Because the directory is existed but it is not git repository.
+#
+# 2:   Remove the directory then just clone as new repository.
+#      Because the directory is existed and it is a git repository but the reference of remote is wrong.
+#
+# 3:   Remove the directory then just clone as new repository.
+#      Because the directory is existed and it is a git repository but commits that should be puhed are remaining.
+#
+# 4:   Reset the directory hardly then remove untracked files then pull the repository.
+#      Because the directory is existed and it is a git repository but files that un committed are existed.
+#
+# 5:   Just pull as a existing repository.
+#      Because the directory is exist and it is a git repository collectly.
+#
+# 255: Aboarded to isntall or update repository.
+#      Because the user declined to update the repository with some reason.
+function determin_update_type_of_repository() {
+    local directory="$1"
+    
+}
+
 # Initialize dotfiles repo
 function init_repo() {
     local branch="$1"
@@ -1005,16 +1031,21 @@ function init_repo() {
             
             local remote_url="$(git -C "$target" remote get-url origin)"
             if [[ "$url" = "$GIT_REPOSITORY_SSH" ]] || [[ "$url" = "$GIT_REPOSITORY_HTTPS" ]]; then
-                # if [[ "$(git -C "$target" status --porcelain | wc -l)" -eq 0 ]]; then
-                #     if [[ "$(git -C "$target" cherry -v | wc -l)" -eq 0 ]]; then
-                #         # Update!!!
-                #     else
-                #         # question then reinstall
-                #     fi
-                # else
-                #     # question then reinstall
-                # fi
-                $(git -C "$target" status --porcelain | wc -l)
+
+                # is_there_updates: 0 -> Updates are existed, 1: Updates are not existed
+                local is_there_updates="$([[ "$(git -C "$target" status --porcelain | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+                # is_there_pushes: 0 -> Files should be pushed are existed, 1: Files should be pushed are not existed
+                local is_there_pushes="$([[ "$(git -C "$target" cherry -v | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+
+                if [[ "$is_there_pushes" -eq 0 ]]; then
+                    # TODO: Question then reinstall
+                else
+                    if [[ "$is_there_updates" -eq 0 ]]; then
+                        # TODO: Question then "git reset --hard" and remove untrackedfiles then update
+                    else
+                        # TODO: Update!!
+                    fi
+                fi
             else
                 # Remote url is not match of dotfiles.
                 # question then reinstall
@@ -1029,12 +1060,9 @@ function init_repo() {
         # reinstall
         true        # TODO:
     fi
-    
-
 
     # Is here the git repo?
     declare -A stats_of_dir=$(get_git_directory_status "${HOME}/${DOTDIR}")
-    # TOOD:
 
     # if is_here_the_git_repo; then
     #     echo "The repository ${repo} is already existed. Pulling from \"origin $branch\""
