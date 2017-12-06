@@ -18,6 +18,31 @@ declare -a INFO_MESSAGES=()
 # Messages of warn or error
 declare -a WARN_MESSAGES=()
 
+# Answer status for question() yes
+ANSWER_OF_QUESTION_YES=0
+# Answer status for question() no
+ANSWER_OF_QUESTION_NO=1
+# Answer status for question() aborted
+ANSWER_OF_QUESTION_ABORTED=255
+
+# Types of git re-install(re-clone or update) type.
+# These variables will be used determin_update_type_of_repository()
+
+# Git update type: just clone
+GIT_UPDATE_TYPE_JUST_CLONE=0
+# Git update type: remote then clone due to not git repository
+GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY=1
+# Git update type: remove then clone due to wrong remote
+GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE=2
+# Git update type: remove then clone due do un pushed yet
+GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET=3
+# Git update type: reset then remove untracked files then pull
+GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL=4
+# Git update type: just pull
+GIT_UPDATE_TYPE_JUST_PULL=5
+# Git update type: can not get git-update-type due to some reason
+GIT_UPDATE_TYPE_ABOARTED=255
+
 function main() {
 
     is_customized_xdg_base_directories || {
@@ -165,6 +190,7 @@ function init() {
     local flag_no_install_packages=${3:-0}
 
     local result=0
+    local answer_of_question
 
     if [[ "$flag_no_install_packages" == 0 ]]; then
         if do_i_have_admin_privileges; then
@@ -184,20 +210,12 @@ function init() {
             echo "Process of installing packages will be skipped."
             echo "================================================================="
 
-            local answer
-            local read_counter=0
-            while true; do
-                (( read_counter++ ))
-                echo -n "Do you continue to install the dotfiles without dependency packages? [Y/n]: "
-                read answer
-                if [[ "${answer^^}" =~ ^Y(ES)?$ ]]; then
-                    break
-                elif [[ "${answer^^}" =~ ^N(O)?$ ]]; then
-                    echo "INFO: Installing the dotfiles has been aborted."
-                    return 255
-                fi
-                [[ "$read_counter" -gt 2 ]] && return 255
-            done
+            question "Do you continue to install the dotfiles without dependency packages? [Y/n]: "
+            answer_of_question=$?
+            if [[ "$answer_of_question" -eq "$ANSWER_OF_QUESTION_NO" ]] || \
+                    [[ "$answer_of_question" -eq "$ANSWER_OF_QUESTION_ABORTED" ]]; then
+                return 255
+            fi
         fi
     fi
 
@@ -988,6 +1006,7 @@ function do_i_have_admin_privileges() {
 }
 
 
+
 # 0:   Just clone as a new repository.
 #      Because the directory is not existed.
 #
@@ -1006,11 +1025,29 @@ function do_i_have_admin_privileges() {
 # 5:   Just pull as a existing repository.
 #      Because the directory is exist and it is a git repository collectly.
 #
-# 255: Aboarded to isntall or update repository.
+# 255: Aboarted to isntall or update repository.
 #      Because the user declined to update the repository with some reason.
 function determin_update_type_of_repository() {
     local directory="$1"
-    
+    # TODO: test
+}
+
+# Get git remote alias.
+# For instance, origin.
+function get_git_remote_alias() {
+    # TODO: test
+    local directory="$1"
+
+    # TODO: This script is not supported other than remote "origin".
+    #       So if the dotfiles repository has set only other than "origin", the installing process of this script will be aborted.
+    declare -a outputs
+    IFS=$'\n' outputs="$(git remote)"
+
+    for r in "${outputs[@]}"; do
+        [[ "${r}" = "origin" ]] && echo "origin"
+    done
+
+    echo ""
 }
 
 # Initialize dotfiles repo
@@ -1239,10 +1276,11 @@ function question() {
     return 255
 }
 
+# Alias of silent push
 function pushd() {
     command pushd "$@" > /dev/null
 }
-
+# Alias of silent popd
 function popd() {
     command popd "$@" > /dev/null
 }
