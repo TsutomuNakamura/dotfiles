@@ -1018,13 +1018,16 @@ function init_repo() {
             else
                 # Remote url is not match of dotfiles.
                 # question then reinstall
+                true        # TODO:
             fi
         else
             # It is not a git repository.
             # question then reinstall
+            true        # TODO:
         fi
     else
         # reinstall
+        true        # TODO:
     fi
     
 
@@ -1179,6 +1182,33 @@ function get_git_directory_status() {
     fi
 
     declare -p result
+}
+
+# Question to user.
+# Return codes are...
+#   0:   The user answerd yes
+#   1:   The user answerd no
+#   255: Failed to get the answers due to the user did not answer within max_times.
+function question() {
+    local message="$1"
+    local max_times="${2:-3}"
+    local count=0
+    local answer
+
+    while [[ "$count" -lt "$max_times" ]]; do
+        ((count++))
+        echo -n "$message"
+        read answer
+        if [[ "${answer^^}" =~ ^Y(ES)?$ ]]; then
+            # The user answers yes
+            return 0
+        elif [[ "${answer^^}" =~ ^N(O)?$ ]]; then
+            # The user answers no
+            return 1
+        fi
+    done
+
+    return 255
 }
 
 function pushd() {
