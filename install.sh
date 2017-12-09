@@ -1041,10 +1041,10 @@ function get_git_remote_alias() {
     # TODO: This script is not supported other than remote "origin".
     #       So if the dotfiles repository has set only other than "origin", the installing process of this script will be aborted.
     declare -a outputs
-    IFS=$'\n' outputs="$(git remote)"
+    IFS=$'\n' outputs=($(git -C "$directory" remote 2> /dev/null))
 
-    for r in "${outputs[@]}"; do
-        [[ "${r}" = "origin" ]] && echo "origin"
+    for remote in "${outputs[@]}"; do
+        [[ "${remote}" = "origin" ]] && echo "origin" && return
     done
 
     echo ""
@@ -1063,6 +1063,8 @@ function init_repo() {
 
     local target="${HOME}/${DOTDIR}"
 
+    
+
     if [[ -d "$target" ]]; then
         if git -C "$target" rev-parse --git-dir > /dev/null 2>&1; then
             
@@ -1076,11 +1078,14 @@ function init_repo() {
 
                 if [[ "$is_there_pushes" -eq 0 ]]; then
                     # TODO: Question then reinstall
+                    true
                 else
                     if [[ "$is_there_updates" -eq 0 ]]; then
                         # TODO: Question then "git reset --hard" and remove untrackedfiles then update
+                        true
                     else
                         # TODO: Update!!
+                        true
                     fi
                 fi
             else
