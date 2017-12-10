@@ -40,6 +40,8 @@ GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET=3
 GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL=4
 # Git update type: just pull
 GIT_UPDATE_TYPE_JUST_PULL=5
+# Git update type: remove then clone due to the branch name that going to be installed is different from current branch name
+GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT=6
 # Git update type: can not get git-update-type due to some reason
 GIT_UPDATE_TYPE_ABOARTED=255
 
@@ -141,6 +143,20 @@ function main() {
         fi
     fi
     return $error_count
+}
+
+# Output the message to stdout then push it to info message list.
+function logger_info() {
+    local message="$1"
+    echo -e "$message"
+    push_info_message_list "$message"
+}
+
+# Output the message to errout then push it to warn message list.
+function logger_warn() {
+    local message="$1"
+    echo -e "$message" >&2
+    push_warn_message_list "$message"
 }
 
 # Push a message into info message list
@@ -689,7 +705,7 @@ function install_packages_with_homebrew() {
 function should_the_dotfile_be_skipped() {
     local target="$1"
 
-    [[ "$target" = ".git" ]] ||                        \
+    [[ "$target" = ".git" ]] ||                         \
             [[ "$target" =  ".DS_Store" ]] ||           \
             [[ "$target" =  ".gitignore" ]] ||          \
             [[ "$target" =  ".gitmodules" ]] ||         \
@@ -1005,8 +1021,13 @@ function do_i_have_admin_privileges() {
     [ "$(whoami)" == "root" ] || ((command -v sudo > /dev/null 2>&1) && (sudo -v 2> /dev/null))
 }
 
-
-
+# @param target:
+#      Target of git repository
+# @param remote:
+#      Target of remote for example origin
+# @param need_question:
+#      Necessity of question for user if some instructions that is destroying files is needed for update
+#
 # 0:   Just clone as a new repository.
 #      Because the directory is not existed.
 #
@@ -1028,26 +1049,96 @@ function do_i_have_admin_privileges() {
 # 255: Aboarted to isntall or update repository.
 #      Because the user declined to update the repository with some reason.
 function determin_update_type_of_repository() {
-    local directory="$1"
-    # TODO: test
+    local target="$1"
+    local remote="$2"
+    local url="$3"
+    local branch="$4"
+    local need_question="$5"
+
+    local msg
+    local ret
+
+    if [[ -d "$target" ]]; then
+        if git -C "$target" rev-parse --git-dir > /dev/null 2>&1; then
+
+            local remote_url="$(git -C "$target" remote get-url origin 2> /dev/null)"
+
+            if [[ "$remote_url" == "$url" ]]; then
+                local current_branch="$(git -C "$target" rev-parse --abbrev-ref HEAD 2> /dev/null)"
+
+                if [[ "$current_branch" != "$branch" ]]; then
+                    if [[ "$need_question" -eq 0 ]]; then
+                        msg="The local branch(${current_branch}) in repository that located in \"${target}\" is differ from the branch(${branch}) that going to be updated."
+                        msg+="\nDo you want to remove the git repository and reclone it newly? [y/N]: "
+                        question "$msg"
+                        ret=$?
+                        [[ "$ret" -ne 0 ]] && echo "Recloning \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                    fi
+                    return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT
+                fi
+
+                # is_there_updates: 0 -> Updates are existed, 1: Updates are not existed
+                local is_there_updates="$([[ "$(git -C "$target" status --porcelain 2> /dev/null | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+                # is_there_pushes: 0 -> Files should be pushed are existed, 1: Files should be pushed are not existed
+                local is_there_pushes="$([[ "$(git -C "$target" cherry -v 2> /dev/null | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+
+                if [[ "$is_there_pushes" -eq 0 ]]; then
+                    # Question then reinstall
+                    if [[ "$need_question" -eq 0 ]]; then
+                        question "The git repository located in \"${target}\" has some unpushed commits.\nDo you want to remove the git repository and reclone it newly? [y/N]: "
+                        ret=$?
+                        [[ "$ret" -ne 0 ]] && echo "Recloning \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                    fi
+                    return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET
+                else
+                    # Question then "git reset --hard" and remove untrackedfiles then update
+                    if [[ "$is_there_updates" -eq 0 ]]; then
+                        if [[ "$need_question" -eq 0 ]]; then
+                            question "The git repository located in \"${target}\" has some uncommitted files.\nDo you want to remove them and update the git repository? [y/N]: "
+                            local ret=$?
+                            [[ "$ret" -ne 0 ]] && echo "Updating git repository \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                        fi
+                        return $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL
+                    else
+                        # Update!!
+                        return $GIT_UPDATE_TYPE_JUST_PULL
+                    fi
+                fi
+            else
+                # Question then reinstall if the remote url is not match.
+                if [[ "$need_question" -eq 0 ]]; then
+                    question "The git repository located in \"${target}\" is refering unexpected remote \"${remote_url}\" (expected is \"${url}\").\nDo you want to remove the git repository and reclone it newly? [y/N]: "
+                    local ret=$?
+                    [[ "$ret" -ne 0 ]] && echo "Recloning \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                fi
+                return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE
+            fi
+        else
+            # Question then reinstall if it is not a git repository.
+            if [[ "$need_question" -eq 0 ]]; then
+                question "The directory (or file) \"${target}\" is not a git repository.\nDo you want to remove it and clone the repository? [y/N]: "
+                local ret=$?
+                [[ "$ret" -ne 0 ]] && echo "Cloning the repository \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+            fi
+            return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY
+        fi
+    fi
+
+    return $GIT_UPDATE_TYPE_JUST_CLONE
 }
 
 # Get git remote alias.
 # For instance, origin.
 function get_git_remote_alias() {
-    # TODO: test
     local directory="$1"
+    local name_of_result_array="$2"
 
-    # TODO: This script is not supported other than remote "origin".
-    #       So if the dotfiles repository has set only other than "origin", the installing process of this script will be aborted.
-    declare -a outputs
-    IFS=$'\n' outputs=($(git -C "$directory" remote 2> /dev/null))
-
-    for remote in "${outputs[@]}"; do
-        [[ "${remote}" = "origin" ]] && echo "origin" && return
-    done
-
-    echo ""
+    eval "declare -a \"${name_of_result_array}\""
+    local e
+    while read e; do
+        eval "${name_of_result_array}+=(\"${e}\")"
+    done < <(git -C "$directory" remote 2> /dev/null)
+    eval "declare -p \"${name_of_result_array}\""
 }
 
 # Initialize dotfiles repo
@@ -1057,51 +1148,15 @@ function init_repo() {
 
     mkdir -p "${HOME}/${DOTDIR}"
     [[ -d "${HOME}/${DOTDIR}" ]] || {
-        echo "Failed to create the directory ${HOME}/${DOTDIR}."
+        echo "ERROR: Failed to create the directory ${HOME}/${DOTDIR}." >&2
+        push_warn_message_list "ERROR: Failed to create the directory ${HOME}/${DOTDIR}."
         return 1
     }
 
     local target="${HOME}/${DOTDIR}"
+    local install_dir_of_repo="$(dirname "$target")"
 
-    
-
-    if [[ -d "$target" ]]; then
-        if git -C "$target" rev-parse --git-dir > /dev/null 2>&1; then
-            
-            local remote_url="$(git -C "$target" remote get-url origin)"
-            if [[ "$url" = "$GIT_REPOSITORY_SSH" ]] || [[ "$url" = "$GIT_REPOSITORY_HTTPS" ]]; then
-
-                # is_there_updates: 0 -> Updates are existed, 1: Updates are not existed
-                local is_there_updates="$([[ "$(git -C "$target" status --porcelain | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
-                # is_there_pushes: 0 -> Files should be pushed are existed, 1: Files should be pushed are not existed
-                local is_there_pushes="$([[ "$(git -C "$target" cherry -v | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
-
-                if [[ "$is_there_pushes" -eq 0 ]]; then
-                    # TODO: Question then reinstall
-                    true
-                else
-                    if [[ "$is_there_updates" -eq 0 ]]; then
-                        # TODO: Question then "git reset --hard" and remove untrackedfiles then update
-                        true
-                    else
-                        # TODO: Update!!
-                        true
-                    fi
-                fi
-            else
-                # Remote url is not match of dotfiles.
-                # question then reinstall
-                true        # TODO:
-            fi
-        else
-            # It is not a git repository.
-            # question then reinstall
-            true        # TODO:
-        fi
-    else
-        # reinstall
-        true        # TODO:
-    fi
+    update_git_repo "$install_dir_of_repo" "$repo" "$branch" "$DOTDIR"
 
     # Is here the git repo?
     declare -A stats_of_dir=$(get_git_directory_status "${HOME}/${DOTDIR}")
@@ -1130,13 +1185,145 @@ function init_repo() {
     # fi
 
     # Freeze .gitconfig for not to push username and email
-    [ -f .gitconfig ] && git update-index --assume-unchanged .gitconfig
+    [[ -f .gitconfig ]] && git update-index --assume-unchanged .gitconfig
 
     echo "Updating submodules..."
     git submodule init
     git submodule update
 
     popd
+}
+
+# Update dotfile's git repository
+function update_git_repo() {
+    local install_dir_of_repo="$1"
+    local git_url="$2"
+    local git_branch="$3"
+    local dir_of_repo="$4"
+
+    [[ -z "$dir_of_repo" ]] && {
+        # Fetch end of the url and remove its suffix ".git"
+        dir_of_repo="$(basename "$git_url")"
+        dir_of_repo=${dir_of_repo%.git}
+    }
+
+    [[ ! -d "$install_dir_of_repo" ]] && {
+        mkdir -p "$install_dir_of_repo" || {
+            logger_warn "ERROR: Failed to create the directory \"${install_dir_of_repo}\""
+            return 1
+        }
+    }
+
+    # Create the directory path string of git
+    local length_of_install_dir_of_repo=${#install_dir_of_repo}
+    local last_char_of_install_dir_of_repo="${install_dir_of_repo:length_of_install_dir_of_repo-1:1}"
+    [[ "$last_char_of_install_dir_of_repo" != "/" ]] && install_dir_of_repo="${install_dir_of_repo}/"
+    # path/to/repo/${dir_of_repo}
+    local path_to_git_directory="${install_dir_of_repo}${dir_of_repo}"
+
+    pushd "$install_dir_of_repo" || {
+        logger_warn "ERROR: Failed to change the working directory to \"${install_dir_of_repo}\"."
+        return 1
+    }
+
+    # Declare an array named "remotes" that has remote names
+    eval "$(get_git_remote_aliases "$path_to_git_directory" remotes)"
+    local remote
+    if [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" = "origin" ]]; then
+        remote="${remotes[0]}"
+    else
+        # TODO: Doesn't supported other than origin now
+        logger_warn "ERROR: Sorry, this script only supports single remote \"origin\". Failed to get remote origin from \"${target}\""
+        return 1
+    fi
+
+    determin_update_type_of_repository "$path_to_git_directory" "$remote" "$git_url" "$git_branch" 0
+    local update_type=$?
+
+    _do_update_git_repository "$git_url" "${remote:-origin}" "$git_branch" "$dir_of_repo" "$update_type" || return 1
+    popd
+
+    return 0
+}
+
+# Do update git repository.
+# Checking parameters were not implemented because the function is assumed to be called to update_git_repo() that is implementing checking parameters.
+# This function called when the current process is in the location that want to clone the repository.
+function _do_update_git_repository () {
+    local git_url="$1"
+    local remote="$2"
+    local git_branch="$3"
+    local dir_of_repo="$4"
+    local update_type="$5"
+
+    case $update_type in
+        $GIT_UPDATE_TYPE_JUST_CLONE )
+            git clone -b "$git_branch" "$git_url" "$dir_of_repo"
+            ;;
+        $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
+            rm -rf "$dir_of_repo"
+            git clone -b "$git_branch" "$git_url" "$dir_of_repo"
+            ;;
+        $GIT_UPDATE_TYPE_ABOARTED )
+            logger_info "Updating or cloning repository \"${git_url}\" has been aborted."
+            return $GIT_UPDATE_TYPE_ABOARTED
+            ;;
+        * )
+            if [[ "$remote" != "origin" ]]; then
+                # TODO: Does not supported remote referencing other than origin yet.
+                logger_warn "ERROR: Sorry, this script only supports remote \"origin\". Failed to get remote origin from \"${target}\""
+                return 1
+            fi
+
+            # Get branch name
+            local branch=$(git -C "$target" rev-parse --abbrev-ref HEAD 2> /dev/null)
+            if [[ -z "$branch" ]]; then
+                logger_warn "ERROR: Failed to get git branch name from \"${target}\""
+                return 1
+            fi
+
+            pushd "$dir_of_repo"
+
+            # Return error if the status of git update type is unknown
+            case $update_type in
+                $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL )
+                    # Reset and remove untracked files in git repository
+                    git reset --hard || {
+                        logger_warn "ERROR: Failed to reset git repository at \"${target}\" for some readson."
+                        return 1
+                    }
+                    remove_all_untracked_files "$PWD"
+                    ;;
+                # $GIT_UPDATE_TYPE_JUST_PULL )
+                #     ;;
+                * )
+                    logger_warn "ERROR: Invalid git update type (${update_type}). Some error occured when determining git update type of \"${target}\"."
+                    return 1
+                    ;;
+            esac
+
+            git pull "$remote" "$branch" || {
+                logger_warn "ERROR: Failed to pull \"$remote\" \"$branch\"."
+                return 1
+            }
+
+            popd
+            ;;
+    esac
+
+}
+
+# Remove all files or directories untracked in git repository
+function remove_all_untracked_files() {
+    local directory="$1"
+    local file
+
+    while read f; do
+        rm -rf "$file"
+    done < <(git -C "$directory" status --porcelain 2> /dev/null | grep -P '^\?\? .*' | cut -d ' ' -f 2)
 }
 
 # Initialize vim environment
@@ -1267,7 +1454,7 @@ function question() {
 
     while [[ "$count" -lt "$max_times" ]]; do
         ((count++))
-        echo -n "$message"
+        echo -en "$message"
         read answer
         if [[ "${answer^^}" =~ ^Y(ES)?$ ]]; then
             # The user answers yes
