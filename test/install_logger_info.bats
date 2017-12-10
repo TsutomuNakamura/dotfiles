@@ -12,6 +12,7 @@ function setup() {
 
     echo "$output"
     [[ "$status" -eq 0 ]]
+    [[ "$output" == "$(echo -e "INFO: foo\n\"bar\"")" ]]
     stub_called_with_exactly_times push_info_message_list 1 "INFO: foo\n\"bar\""
 }
 
