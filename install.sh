@@ -1061,7 +1061,7 @@ function determin_update_type_of_repository() {
     if [[ -d "$target" ]]; then
         if git -C "$target" rev-parse --git-dir > /dev/null 2>&1; then
 
-            local remote_url="$(git -C "$target" remote get-url origin 2> /dev/null)"
+            local remote_url="$(git -C "$target" remote get-url "$remote" 2> /dev/null)"
 
             if [[ "$remote_url" == "$url" ]]; then
                 local current_branch="$(git -C "$target" rev-parse --abbrev-ref HEAD 2> /dev/null)"
