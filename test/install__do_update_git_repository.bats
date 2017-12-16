@@ -243,7 +243,7 @@ function teardown() {
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" rev-parse --abbrev-ref HEAD
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" reset --hard
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" pull "origin" "master"
-    stub_called_with_exactly_times remove_all_untracked_files 1 "$PWD"
+    stub_called_with_exactly_times remove_all_untracked_files 1 "/var/tmp/.dotfiles"
     stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to pull \"origin\" \"master\"."
 }
 
