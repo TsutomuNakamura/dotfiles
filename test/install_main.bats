@@ -9,9 +9,8 @@ function setup() {
     stub backup_current_dotfiles
     stub init
     stub deploy
-    stub print_a_success_message
-    stub is_warn_messages_empty
-    stub print_warn_messages
+    stub print_info_message_list
+    stub print_warn_message_list
 }
 
 # function teardown() {}
@@ -251,49 +250,6 @@ function setup() {
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
 }
 
-@test "#main should call print_warn_messages() when some error has occured and is_warn_messages_empty() returns false" {
-    stub_and_eval init '{ false; }'
-    stub_and_eval is_warn_messages_empty '{ false; }'
-
-    run main -i
-    echo "$output"
-    IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" == "ERROR: init() has failed." ]]
-    [[ "${outputs[1]}" == "Some error or warning are occured." ]]
-
-    [[ "$status"                                                    -eq 1 ]]
-    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
-    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
-    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
-    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
-    [[ "$(stub_called_times init)"                                  -eq 1 ]]
-    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
-    [[ "$(stub_called_times is_warn_messages_empty)"                -eq 1 ]]
-    [[ "$(stub_called_times print_warn_messages)"                   -eq 1 ]]
-}
-
-@test "#main should NOT call print_warn_messages() when some error has occured and is_warn-messages_empty() returns true" {
-    stub_and_eval init '{ false; }'
-
-    run main -i
-    echo "$output"
-    IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" == "ERROR: init() has failed." ]]
-    [[ "${outputs[1]}" == "Some error or warning are occured." ]]
-
-    [[ "$status"                                                    -eq 1 ]]
-    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
-    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
-    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
-    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
-    [[ "$(stub_called_times init)"                                  -eq 1 ]]
-    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
-    [[ "$(stub_called_times is_warn_messages_empty)"                -eq 1 ]]
-    [[ "$(stub_called_times print_warn_messages)"                   -eq 0 ]]
-}
-
 @test "#main should call init() with parameters 'develop' and 1 and 'git@github.com:TsutomuNakamura/dotfiles.git' when -d and -g and -n flag is specified" {
     run main -b 'develop' -g -n
     echo "$output"
@@ -306,8 +262,8 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 1 ]]
-    [[ "$(stub_called_times is_warn_messages_empty)"                -eq 0 ]]
-    [[ "$(stub_called_times print_warn_messages)"                   -eq 0 ]]
+    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
 
     stub_called_with_exactly_times init 1 'develop' 1 'git@github.com:TsutomuNakamura/dotfiles.git'
 }
@@ -324,9 +280,86 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 1 ]]
-    [[ "$(stub_called_times is_warn_messages_empty)"                -eq 0 ]]
-    [[ "$(stub_called_times print_warn_messages)"                   -eq 0 ]]
+    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
 
     stub_called_with_exactly_times init 1 'master' 0 'https://github.com/TsutomuNakamura/dotfiles.git'
 }
 
+@test "#main should call print_warn_message_list() when some error has occured and WARN_MESSAGES list is NOT empty" {
+    stub_and_eval init '{ push_warn_message_list "ERROR: Some error has occured"; false; }'
+
+    run main -i
+    echo "$output"
+    local outputs; IFS=$'\n' outputs=($output)
+    [[ "${outputs[0]}" == "ERROR: init() has failed." ]]
+
+    [[ "$status"                                                    -eq 1 ]]
+    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
+    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
+    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
+    [[ "$(stub_called_times init)"                                  -eq 1 ]]
+    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_warn_message_list)"               -eq 1 ]]
+}
+
+@test "#main should NOT call print_warn_message_list() when some error has occured and WARN_MESSAGE list is empty" {
+    stub_and_eval init '{ false; }'
+
+    run main -i
+    echo "$output"
+    local outputs; IFS=$'\n' outputs=($output)
+    [[ "${outputs[0]}" == "ERROR: init() has failed." ]]
+
+    [[ "$status"                                                    -eq 1 ]]
+    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
+    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
+    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
+    [[ "$(stub_called_times init)"                                  -eq 1 ]]
+    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+}
+
+@test "#main should call print_info_message_list() when some error has occured and INFO_MESSAGES list is NOT empty" {
+    stub_and_eval init '{ push_warn_message_list "INFO: Some info message"; true; }'
+
+    run main -i
+    echo "$output"
+    local outputs; IFS=$'\n' outputs=($output)
+
+    [[ "$status"                                                    -eq 0 ]]
+    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
+    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
+    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
+    [[ "$(stub_called_times init)"                                  -eq 1 ]]
+    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_warn_message_list)"               -eq 1 ]]
+}
+
+@test "#main should NOT call print_info_message_list() when some error has occured and INFO_MESSAGE list is empty" {
+    stub_and_eval init '{ true; }'
+
+    run main -i
+    echo "$output"
+    local outputs; IFS=$'\n' outputs=($output)
+
+    [[ "$status"                                                    -eq 0 ]]
+    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
+    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
+    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
+    [[ "$(stub_called_times init)"                                  -eq 1 ]]
+    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+}

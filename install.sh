@@ -134,14 +134,9 @@ function main() {
         fi
     fi
 
-    if [[ "$error_count" -eq 0 ]]; then
-        print_a_success_message
-    else
-        echo "Some error or warning are occured."
-        if ! is_warn_messages_empty; then
-            print_warn_messages
-        fi
-    fi
+    [[ "${#INFO_MESSAGES[@]}" -ne 0 ]] && print_info_message_list
+    [[ "${#WARN_MESSAGES[@]}" -ne 0 ]] && print_warn_message_list
+
     return $error_count
 }
 
