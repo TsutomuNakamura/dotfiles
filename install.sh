@@ -1145,6 +1145,8 @@ function init_repo() {
     local homedir_of_repo="${HOME%/}"
     local dirname_of_repo="${DOTDIR%/}"
 
+    pushd "$homedir_of_repo"
+
     mkdir -p "${homedir_of_repo}/${dirname_of_repo}"
     [[ -d "${homedir_of_repo}/${dirname_of_repo}" ]] || {
         echo "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}." >&2
@@ -1152,7 +1154,10 @@ function init_repo() {
         return 1
     }
 
-    update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch"
+    update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch" || {
+        echo "init_repo() was aborted" >&2
+        return 1
+    }
 
     # Is here the git repo?
     declare -A stats_of_dir=$(get_git_directory_status "${homedir_of_repo}/${dirname_of_repo}")
