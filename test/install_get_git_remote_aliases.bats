@@ -28,17 +28,27 @@ load helpers
     stub_and_eval git '{ echo "aaaa"; echo "origin"; }'
     run get_git_remote_alias "~/testdir" remotes
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
-    [[ "$output" == "declare -a remotes=([0]=\"origin\" [1]=\"aaaa\")" ]]
+    [[ "$output" == "declare -a remotes=([0]=\"aaaa\" [1]=\"origin\")" ]]
     [[ $(stub_called_times git) -eq 1 ]]
 }
 
 @test '#get_git_remote_alias should output empty array if the git commands outputs empty string.' {
-    stub_and_eval git '{ echo; }'
+    stub_and_eval git '{ true; }'
     run get_git_remote_alias "~/testdir" remotes
 
     [[ "$output" == "declare -a remotes" ]]
     [[ $(stub_called_times git) -eq 1 ]]
 }
+
+@test '#get_git_remote_alias should output an element empty if the git commands outputs empty line(empty string and break line).' {
+    stub_and_eval git '{ echo; }'
+    run get_git_remote_alias "~/testdir" remotes
+
+    [[ "$output" == "declare -a remotes=([0]=\"\")" ]]
+    [[ $(stub_called_times git) -eq 1 ]]
+}
+
 
 
