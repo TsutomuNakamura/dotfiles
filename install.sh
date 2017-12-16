@@ -1174,8 +1174,8 @@ function init_repo() {
 
 # Update dotfile's git repository
 function update_git_repo() {
-    local homedir_of_repo="$1"
-    local dirname_of_repo="$2"
+    local homedir_of_repo="${1%/}"
+    local dirname_of_repo="${2%/}"
     local url_of_repo="$3"
     local branch="$4"
 
@@ -1192,21 +1192,16 @@ function update_git_repo() {
         }
     }
 
-    pushd "$homedir_of_repo" || {
-        logger_warn "ERROR: Failed to change the working directory to \"${homedir_of_repo}\"."
-        return 1
-    }
     # Create the directory path string of git
     local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
 
     # Declare an array named "remotes" that has remote names
     eval "$(get_git_remote_aliases "$path_to_git_repo" remotes)"
-    local remote
     if [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" = "origin" ]]; then
-        remote="${remotes[0]}"
+        local remote="${remotes[0]}"
     else
         # TODO: Doesn't supported other than origin now
-        logger_warn "ERROR: Sorry, this script only supports single remote \"origin\". Failed to get remote origin from \"${target}\""
+        logger_warn "ERROR: Sorry, this script only supports single remote \"origin\". Failed to get remote origin from \"${path_to_git_repo}\""
         return 1
     fi
 
@@ -1214,7 +1209,6 @@ function update_git_repo() {
     local update_type=$?
 
     _do_update_git_repository "$path_to_git_repo" "$url_of_repo" "${remote:-origin}" "$branch" "$update_type" || return 1
-    popd
 
     return 0
 }
