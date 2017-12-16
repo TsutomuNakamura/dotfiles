@@ -327,6 +327,6 @@ function setup() {
     [[ "$(stub_called_times is_warn_messages_empty)"                -eq 0 ]]
     [[ "$(stub_called_times print_warn_messages)"                   -eq 0 ]]
 
-    stub_called_with_exactly_times init 1 'master' 0 'https://github.com/TsutomuNakamura/dotfiles'
+    stub_called_with_exactly_times init 1 'master' 0 'https://github.com/TsutomuNakamura/dotfiles.git'
 }
 
