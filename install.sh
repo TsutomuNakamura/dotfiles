@@ -1271,7 +1271,7 @@ function _do_update_git_repository () {
                     logger_warn "ERROR: Failed to reset git repository at \"${path_to_git_repo}\" for some readson."
                     return 1
                 }
-                remove_all_untracked_files "$PWD"
+                remove_all_untracked_files "$path_to_git_repo"
             elif [[ "$update_type" -ne $GIT_UPDATE_TYPE_JUST_PULL ]]; then
                 logger_warn "ERROR: Invalid git update type (${update_type}). Some error occured when determining git update type of \"${path_to_git_repo}\"."
                 return 1
@@ -1291,10 +1291,10 @@ function _do_update_git_repository () {
 # Remove all files or directories untracked in git repository
 function remove_all_untracked_files() {
     local directory="$1"
-    local file
+    local f
 
     while read f; do
-        rm -rf "$file"
+        rm -rf "${directory}/${f}"
     done < <(git -C "$directory" status --porcelain 2> /dev/null | grep -P '^\?\? .*' | cut -d ' ' -f 2)
 }
 
