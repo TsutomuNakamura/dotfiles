@@ -17,6 +17,7 @@ function setup() {
     echo "$output"
     declare -a outputs; IFS=$'\n' outputs=($output)
 
+    echo "$outputs"
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
@@ -25,7 +26,7 @@ function setup() {
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
 
-    stub_called_with_exactly_times init_repo 1 "develop" "git@github.com:TsutomuNakamura/dotfiles.git"
+    stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop" 
 }
 
 @test '#init should use default parameters if no parameters were specified' {
@@ -41,7 +42,7 @@ function setup() {
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
 
-    stub_called_with_exactly_times init_repo 1 "master" "https://github.com/TsutomuNakamura/dotfiles"
+    stub_called_with_exactly_times init_repo 1 "https://github.com/TsutomuNakamura/dotfiles.git" "master"
 }
 
 @test '#init should not call install_packages() if flag_no_install_packages was specified as 1(not 0).' {
@@ -57,7 +58,7 @@ function setup() {
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
 
-    stub_called_with_exactly_times init_repo 1 "develop" "git@github.com:TsutomuNakamura/dotfiles.git"
+    stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop"
 }
 
 @test '#init should should call following instructions except call install_packages() if the do_i_have_admin_privileges() returns false and the user accept to be not able to install dependency packages.' {
@@ -76,7 +77,7 @@ function setup() {
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
     [[ "$(stub_called_times read)"                          -eq 1 ]]
 
-    stub_called_with_exactly_times init_repo 1 "develop" "git@github.com:TsutomuNakamura/dotfiles.git"
+    stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop"
 }
 
 @test '#init should should return 255 if the do_i_have_admin_privileges() returns false and the user inputs to question with invalid answer over 3 times.' {

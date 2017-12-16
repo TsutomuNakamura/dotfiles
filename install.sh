@@ -217,6 +217,7 @@ function init() {
                 m+="\n  If you want to continue following processes that after installing packages, you can specify the option \"-n (no-install-packages)\"."
                 m+="\n  ex)"
                 m+="\n    curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -n"
+
                 push_warn_message_list "$m"
                 return 1
             }
@@ -237,7 +238,7 @@ function init() {
 
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
-    init_repo "$repo" "$branch" || {
+    init_repo "$url_of_repo" "$branch" || {
         echo "ERROR: Failed to initializing repository. Remaining install process will be aborted." >&2
         return 1
     }
