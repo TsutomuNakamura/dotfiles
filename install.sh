@@ -1130,7 +1130,7 @@ function determin_update_type_of_repository() {
 
 # Get git remote alias.
 # For instance, origin.
-function get_git_remote_alias() {
+function get_git_remote_aliases() {
     local directory="$1"
     local name_of_result_array="$2"
 
