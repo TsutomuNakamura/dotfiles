@@ -202,7 +202,7 @@ function usage() {
 # Initialize dotfiles repo
 function init() {
     local branch=${1:-master}
-    local repo=${2:-$GIT_REPOSITORY_HTTPS}
+    local url_of_repo=${2:-$GIT_REPOSITORY_HTTPS}
     local flag_no_install_packages=${3:-0}
 
     local result=0
@@ -237,7 +237,7 @@ function init() {
 
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
-    init_repo "$branch" "$repo" || {
+    init_repo "$repo" "$branch" || {
         echo "ERROR: Failed to initializing repository. Remaining install process will be aborted." >&2
         return 1
     }
@@ -1143,46 +1143,23 @@ function get_git_remote_alias() {
 
 # Initialize dotfiles repo
 function init_repo() {
-    local branch="$1"
-    local repo="$2"
+    local url_of_repo="$1"
+    local branch="$2"
 
-    mkdir -p "${HOME}/${DOTDIR}"
-    [[ -d "${HOME}/${DOTDIR}" ]] || {
-        echo "ERROR: Failed to create the directory ${HOME}/${DOTDIR}." >&2
-        push_warn_message_list "ERROR: Failed to create the directory ${HOME}/${DOTDIR}."
+    local homedir_of_repo="${HOME%/}"
+    local dirname_of_repo="${DOTDIR%/}"
+
+    mkdir -p "${homedir_of_repo}/${dirname_of_repo}"
+    [[ -d "${homedir_of_repo}/${dirname_of_repo}" ]] || {
+        echo "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}." >&2
+        push_warn_message_list "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}."
         return 1
     }
 
-    local target="${HOME}/${DOTDIR}"
-    local install_dir_of_repo="$(dirname "$target")"
-
-    update_git_repo "$install_dir_of_repo" "$repo" "$branch" "$DOTDIR"
+    update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch"
 
     # Is here the git repo?
-    declare -A stats_of_dir=$(get_git_directory_status "${HOME}/${DOTDIR}")
-
-    # if is_here_the_git_repo; then
-    #     echo "The repository ${repo} is already existed. Pulling from \"origin $branch\""
-
-    #     # TODO:
-    #     if [[ "$(git status --porcelain | grep -v -P '^\?\?.*' | wc -l)" -ne 0 ]]; then
-    #         
-    #     fi
-
-
-    #     git pull origin $branch
-    # else
-
-    #     local files=$(shopt -s nullglob dotglob; echo ${HOME}/${DOTDIR}/*)
-    #     if (( ${#files} )); then
-    #         # Contains some files
-    #         echo "Couldn't clone the dotfiles repository because of the directory ${HOME}/${DOTDIR}/ is not empty"
-    #         return 1
-    #     fi
-
-    #     echo "The repository is not existed. Cloning branch from ${repo} then checkout branch ${branch}"
-    #     git clone -b $branch $repo .
-    # fi
+    declare -A stats_of_dir=$(get_git_directory_status "${homedir_of_repo}/${dirname_of_repo}")
 
     # Freeze .gitconfig for not to push username and email
     [[ -f .gitconfig ]] && git update-index --assume-unchanged .gitconfig
@@ -1196,38 +1173,33 @@ function init_repo() {
 
 # Update dotfile's git repository
 function update_git_repo() {
-    local install_dir_of_repo="$1"
-    local git_url="$2"
-    local git_branch="$3"
-    local dir_of_repo="$4"
+    local homedir_of_repo="$1"
+    local dirname_of_repo="$2"
+    local url_of_repo="$3"
+    local branch="$4"
 
-    [[ -z "$dir_of_repo" ]] && {
+    [[ -z "$dirname_of_repo" ]] && {
         # Fetch end of the url and remove its suffix ".git"
-        dir_of_repo="$(basename "$git_url")"
-        dir_of_repo=${dir_of_repo%.git}
+        dirname_of_repo="$(basename "$url_of_repo")"
+        dirname_of_repo=${dirname_of_repo%.git}
     }
 
-    [[ ! -d "$install_dir_of_repo" ]] && {
-        mkdir -p "$install_dir_of_repo" || {
-            logger_warn "ERROR: Failed to create the directory \"${install_dir_of_repo}\""
+    [[ ! -d "$homedir_of_repo" ]] && {
+        mkdir -p "$homedir_of_repo" || {
+            logger_warn "ERROR: Failed to create the directory \"${homedir_of_repo}\""
             return 1
         }
     }
 
-    # Create the directory path string of git
-    local length_of_install_dir_of_repo=${#install_dir_of_repo}
-    local last_char_of_install_dir_of_repo="${install_dir_of_repo:length_of_install_dir_of_repo-1:1}"
-    [[ "$last_char_of_install_dir_of_repo" != "/" ]] && install_dir_of_repo="${install_dir_of_repo}/"
-    # path/to/repo/${dir_of_repo}
-    local path_to_git_directory="${install_dir_of_repo}${dir_of_repo}"
-
-    pushd "$install_dir_of_repo" || {
-        logger_warn "ERROR: Failed to change the working directory to \"${install_dir_of_repo}\"."
+    pushd "$homedir_of_repo" || {
+        logger_warn "ERROR: Failed to change the working directory to \"${homedir_of_repo}\"."
         return 1
     }
+    # Create the directory path string of git
+    local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
 
     # Declare an array named "remotes" that has remote names
-    eval "$(get_git_remote_aliases "$path_to_git_directory" remotes)"
+    eval "$(get_git_remote_aliases "$path_to_git_repo" remotes)"
     local remote
     if [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" = "origin" ]]; then
         remote="${remotes[0]}"
@@ -1237,10 +1209,10 @@ function update_git_repo() {
         return 1
     fi
 
-    determin_update_type_of_repository "$path_to_git_directory" "$remote" "$git_url" "$git_branch" 0
+    determin_update_type_of_repository "$path_to_git_repo" "$remote" "$url_of_repo" "$branch" 0
     local update_type=$?
 
-    _do_update_git_repository "$git_url" "${remote:-origin}" "$git_branch" "$dir_of_repo" "$update_type" || return 1
+    _do_update_git_repository "$path_to_git_repo" "$url_of_repo" "${remote:-origin}" "$branch" "$update_type" || return 1
     popd
 
     return 0
@@ -1250,70 +1222,70 @@ function update_git_repo() {
 # Checking parameters were not implemented because the function is assumed to be called to update_git_repo() that is implementing checking parameters.
 # This function called when the current process is in the location that want to clone the repository.
 function _do_update_git_repository () {
-    local git_url="$1"
-    local remote="$2"
-    local git_branch="$3"
-    local dir_of_repo="$4"
+    local path_to_git_repo="$1"
+    local url_of_repo="$2"
+    local remote="$3"
+    local branch="$4"
     local update_type="$5"
+
+    local dirname_of_repo="$(basename ${path_to_git_repo})"
 
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
-            git clone -b "$git_branch" "$git_url" "$dir_of_repo"
+            git -C "$path_to_git_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
+                logger_warn "ERROR: Failed to clone the repository(git -C \"$path_to_git_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                return 1
+            }
             ;;
         $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
-            rm -rf "$dir_of_repo"
-            git clone -b "$git_branch" "$git_url" "$dir_of_repo"
+            rm -rf "$path_to_git_repo"
+            git -C "$path_to_git_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
+                logger_warn "ERROR: Failed to clone the repository(git -C \"$path_to_git_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                return 1
+            }
             ;;
         $GIT_UPDATE_TYPE_ABOARTED )
-            logger_info "Updating or cloning repository \"${git_url}\" has been aborted."
+            logger_info "Updating or cloning repository \"${url_of_repo}\" has been aborted."
             return $GIT_UPDATE_TYPE_ABOARTED
             ;;
         * )
             if [[ "$remote" != "origin" ]]; then
                 # TODO: Does not supported remote referencing other than origin yet.
-                logger_warn "ERROR: Sorry, this script only supports remote \"origin\". Failed to get remote origin from \"${target}\""
+                logger_warn "ERROR: Sorry, this script only supports remote as \"origin\". The repository had been going to clone remote as \"${remote}\""
                 return 1
             fi
 
             # Get branch name
-            local branch=$(git -C "$target" rev-parse --abbrev-ref HEAD 2> /dev/null)
+            local branch=$(git -C "$path_to_git_repo" rev-parse --abbrev-ref HEAD 2> /dev/null)
             if [[ -z "$branch" ]]; then
-                logger_warn "ERROR: Failed to get git branch name from \"${target}\""
+                logger_warn "ERROR: Failed to get git branch name from \"${path_to_git_repo}\""
                 return 1
             fi
 
-            pushd "$dir_of_repo"
-
-            # Return error if the status of git update type is unknown
-            case $update_type in
-                $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL )
-                    # Reset and remove untracked files in git repository
-                    git reset --hard || {
-                        logger_warn "ERROR: Failed to reset git repository at \"${target}\" for some readson."
-                        return 1
-                    }
-                    remove_all_untracked_files "$PWD"
-                    ;;
-                # $GIT_UPDATE_TYPE_JUST_PULL )
-                #     ;;
-                * )
-                    logger_warn "ERROR: Invalid git update type (${update_type}). Some error occured when determining git update type of \"${target}\"."
+            if [[ "$update_type" -eq $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL ]]; then
+                # Reset and remove untracked files in git repository
+                git -C "$path_to_git_repo" reset --hard || {
+                    logger_warn "ERROR: Failed to reset git repository at \"${path_to_git_repo}\" for some readson."
                     return 1
-                    ;;
-            esac
-
-            git pull "$remote" "$branch" || {
+                }
+                remove_all_untracked_files "$PWD"
+            elif [[ "$update_type" -ne $GIT_UPDATE_TYPE_JUST_PULL ]]; then
+                logger_warn "ERROR: Invalid git update type (${update_type}). Some error occured when determining git update type of \"${path_to_git_repo}\"."
+                return 1
+            fi
+            # Type of GIT_UPDATE_TYPE_JUST_PULL will also reach this section.
+            git -C "$path_to_git_repo" pull "$remote" "$branch" || {
                 logger_warn "ERROR: Failed to pull \"$remote\" \"$branch\"."
                 return 1
             }
 
-            popd
             ;;
     esac
 
+    return 0
 }
 
 # Remove all files or directories untracked in git repository
