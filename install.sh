@@ -521,25 +521,33 @@ function _install_font_ipafont() {
 function _install_font_noto_emoji() {
 
     if [[ -e "NotoColorEmoji.ttf" ]] && [[ -e "NotoEmoji-Regular.ttf" ]] && \
-            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] && [[ $(wc -c < "NotoEmoji-Regular.ttf") ]]; then
+            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] && [[ $(wc -c < "NotoEmoji-Regular.ttf") -ne 0 ]]; then
         # Already installed
         return 0
     fi
     rm -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
+    local ret=0
 
-    local ret_of_noto=0
     curl -fLo "NotoColorEmoji.ttf" \
-            https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf || (( ret_of_noto++ ))
+            https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf || {
+        push_warn_message_list "ERROR: Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
+        (( ret++ ))
+    }
     curl -fLo "NotoEmoji-Regular.ttf" \
-            https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf  || (( ret_of_noto++ ))
+            https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf || {
+        push_warn_message_list "ERROR: Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
+        (( ret++ ))
+    }
 
-    if [[ "$ret_of_noto" -ne 0 ]] || [[ -e "NotoColorEmoji.ttf" ]] || [[ -e "NotoEmoji-Regular.ttf" ]] || \
-            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] || [[ $(wc -c < "NotoEmoji-Regular.ttf") -ne 0 ]]; then
-        rm -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
-        return 2
+    if [[ "$ret" -eq 0 ]] && \
+            [[ -e "NotoColorEmoji.ttf" ]] && [[ -e "NotoEmoji-Regular.ttf" ]] && \
+            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] && [[ $(wc -c < "NotoEmoji-Regular.ttf") -ne 0 ]]; then
+        # Success
+        return 1
     fi
 
-    return 1
+    rm -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
+    return 2
 }
 
 # Installing packages with apt
