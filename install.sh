@@ -71,7 +71,7 @@ function main() {
     local flag_no_install_packages=0
     local branch="master"
     local flag_cleanup=0
-    local repo="$GIT_REPOSITORY_HTTPS"
+    local url_of_repo="$GIT_REPOSITORY_HTTPS"
 
     local error_count=0
 
@@ -90,7 +90,7 @@ function main() {
             c)
                 flag_cleanup=1;;
             g)
-                repo="$GIT_REPOSITORY_SSH";;
+                url_of_repo="$GIT_REPOSITORY_SSH";;
             h | \?)
                 usage && return 0 ;;
         esac
@@ -114,7 +114,7 @@ function main() {
             (( error_count++ ))
         }
     elif [ "$flag_init" == "1" ]; then
-        init "$branch" "$flag_no_install_packages" "$repo" || {
+        init "$branch" "$url_of_repo" "$flag_no_install_packages" || {
             echo "ERROR: init() has failed." >&2
             (( error_count++ ))
         }
@@ -122,7 +122,7 @@ function main() {
         deploy
     elif [ "$flag_init" != "1" ] && [ "$flag_deploy" != "1" ]; then
         # It's a default behavior.
-        init "$branch" "$flag_no_install_packages" "$repo" || {
+        init "$branch" "$url_of_repo" "$flag_no_install_packages" || {
             echo "ERROR: init() has failed." >&2
             (( error_count++ ))
         }
@@ -1235,7 +1235,7 @@ function _do_update_git_repository () {
 
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
-            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" 2> /dev/null || {
+            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
                 logger_warn "ERROR: Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
                 return 1
             }

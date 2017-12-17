@@ -27,6 +27,10 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 1 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
+    stub_called_with_exactly_times deploy 1
 }
 
 @test "#main should return 1 when unexpected XDG_CONFIG_HOME was set" {
@@ -52,6 +56,8 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
 }
 
 @test "#main should return 1 when unexpected XDG_DATA_HOME was set" {
@@ -77,6 +83,8 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
 }
 
 @test "#main should return 1 when opsions -o(only_install_packages), -n(no_install_packages) are set" {
@@ -93,6 +101,8 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
 }
 
 @test "#main should call install_packages() when opsions -o(only_install_packages) is set" {
@@ -108,6 +118,10 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times do_i_have_admin_privileges 1
+    stub_called_with_exactly_times install_packages 1
 }
 
 @test "#main should return 1 when opsions -o(only_install_packages) is set and install_packages is failed" {
@@ -125,6 +139,10 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times do_i_have_admin_privileges 1
+    stub_called_with_exactly_times install_packages 1
 }
 
 @test "#main should not call install_packages() and return 1 when opsions -o(only_install_packages) is set and do_i_have_admin_privileges returns false" {
@@ -143,11 +161,13 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times do_i_have_admin_privileges 1
 }
 
 @test "#main should call backup_current_dotfiles() when the option -c(clean_up) is set" {
     run main -c
-    echo "$output"
     # IFS=$'\n' outputs=($output)
     # [[ "${outputs[0]}" == "Sorry, you don't have privileges to install packages." ]]
 
@@ -159,14 +179,16 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times backup_current_dotfiles 1
 }
 
 @test "#main should return 1 when the option -c(clean_up) is set and backup_current_dotfiles() is failed" {
     stub_and_eval backup_current_dotfiles '{ false; }'
-
     run main -c
-    echo "$output"
-    IFS=$'\n' outputs=($output)
+
+    local outputs; IFS=$'\n' outputs=($output)
     [[ "${outputs[0]}" == "ERROR: Cleaning up and backup current dotfiles are failed." ]]
 
     [[ "$status"                                                    -eq 1 ]]
@@ -177,6 +199,9 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times backup_current_dotfiles 1
 }
 
 @test "#main should call init() when the option -i(init) is set" {
@@ -193,6 +218,9 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 "master" "https://github.com/TsutomuNakamura/dotfiles.git" "0"
 }
 
 @test "#main should return 1 when the option -i(init) is set and it is failed" {
@@ -211,6 +239,9 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 "master" "https://github.com/TsutomuNakamura/dotfiles.git" "0"
 }
 
 # Pattern of init() and deploy() are called is already tested
@@ -230,6 +261,10 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 1 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
+    stub_called_with_exactly_times deploy 1
 }
 
 @test "#main should call init() (but not deploy()) and returns 1 when no option has passed and init() is is failed" {
@@ -248,6 +283,9 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
 }
 
 @test "#main should call init() with parameters 'develop' and 1 and 'git@github.com:TsutomuNakamura/dotfiles.git' when -d and -g and -n flag is specified" {
@@ -265,7 +303,9 @@ function setup() {
     [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
     [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
 
-    stub_called_with_exactly_times init 1 'develop' 1 'git@github.com:TsutomuNakamura/dotfiles.git'
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 'develop' 'git@github.com:TsutomuNakamura/dotfiles.git' 1
+    stub_called_with_exactly_times deploy 1
 }
 
 @test "#main should call init() with parameters 'master' and 0 and 'https://github.com/TsutomuNakamura/dotfiles' when no parameters are specified" {
@@ -283,7 +323,9 @@ function setup() {
     [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
     [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
 
-    stub_called_with_exactly_times init 1 'master' 0 'https://github.com/TsutomuNakamura/dotfiles.git'
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 'master' 'https://github.com/TsutomuNakamura/dotfiles.git' 0
+    stub_called_with_exactly_times deploy 1
 }
 
 @test "#main should call print_warn_message_list() when some error has occured and WARN_MESSAGES list is NOT empty" {
@@ -304,13 +346,17 @@ function setup() {
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
     [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
     [[ "$(stub_called_times print_warn_message_list)"               -eq 1 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 'master' 'https://github.com/TsutomuNakamura/dotfiles.git' 0
+    stub_called_with_exactly_times print_warn_message_list 1
 }
 
 @test "#main should NOT call print_warn_message_list() when some error has occured and WARN_MESSAGE list is empty" {
     stub_and_eval init '{ false; }'
 
     run main -i
-    echo "$output"
+
     local outputs; IFS=$'\n' outputs=($output)
     [[ "${outputs[0]}" == "ERROR: init() has failed." ]]
 
@@ -324,14 +370,15 @@ function setup() {
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
     [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
     [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
 }
 
 @test "#main should call print_info_message_list() when some error has occured and INFO_MESSAGES list is NOT empty" {
-    stub_and_eval init '{ push_warn_message_list "INFO: Some info message"; true; }'
+    stub_and_eval init '{ push_info_message_list "INFO: Some info message"; true; }'
 
     run main -i
-    echo "$output"
-    local outputs; IFS=$'\n' outputs=($output)
 
     [[ "$status"                                                    -eq 0 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
@@ -341,16 +388,18 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
-    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
-    [[ "$(stub_called_times print_warn_message_list)"               -eq 1 ]]
+    [[ "$(stub_called_times print_info_message_list)"               -eq 1 ]]
+    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
+    stub_called_with_exactly_times print_info_message_list 1
 }
 
 @test "#main should NOT call print_info_message_list() when some error has occured and INFO_MESSAGE list is empty" {
     stub_and_eval init '{ true; }'
 
     run main -i
-    echo "$output"
-    local outputs; IFS=$'\n' outputs=($output)
 
     [[ "$status"                                                    -eq 0 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
@@ -362,4 +411,7 @@ function setup() {
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
     [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
     [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+
+    stub_called_with_exactly_times is_customized_xdg_base_directories 1
+    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
 }
