@@ -3,6 +3,7 @@ load helpers
 
 function setup() {
     rm -rf /var/tmp/{..?*,.[!.]*,*}
+    mkdir -p /var/tmp/foo; touch /var/tmp/foo/bar.txt
 }
 function teardown() {
     rm -rf /var/tmp/{..?*,.[!.]*,*}
@@ -15,19 +16,23 @@ function teardown() {
     [[ "$(stub_called_times git)" -eq 0 ]]
 }
 
+
+
 @test '#determin_update_type_of_repository should return GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY if target directory was existed but not git repository.' {
-    mkdir -p /var/tmp
+    command rm -rf /var/tmp/foo
+    command mkdir -p /var/tmp/foo
+    command touch /var/tmp/foo/bar.txt
     stub_and_eval git '{
         [[ "$1" == "-C" ]] && [[ "$3" == "rev-parse" ]] && [[ "$4" == "--git-dir" ]] && {
             return 1        # Failer
         }
     }'
-    run determin_update_type_of_repository /var/tmp origin "https://github.com/TsutomuNakamura/dotfiles.git" master 1
+    run determin_update_type_of_repository /var/tmp/foo origin "https://github.com/TsutomuNakamura/dotfiles.git" master 1
 
     echo "$status"
     [[ "$status" -eq $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    stub_called_with_exactly_times git 1 -C "/var/tmp" rev-parse --git-dir
+    stub_called_with_exactly_times git 1 -C "/var/tmp/foo" rev-parse --git-dir
 }
 
 @test '#determin_update_type_of_repository should return GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY if target directory was existed but not git repository after the user answerd yes by the question.' {

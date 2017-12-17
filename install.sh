@@ -1055,6 +1055,10 @@ function determin_update_type_of_repository() {
     local ret
 
     if [[ -d "$target" ]]; then
+
+        # Is the directory empty? If so, return GIT_UPDATE_TYPE_JUST_CLONE
+        [[ -z "$(ls -A "$target")" ]] && return $GIT_UPDATE_TYPE_JUST_CLONE
+
         if git -C "$target" rev-parse --git-dir > /dev/null 2>&1; then
 
             local remote_url="$(git -C "$target" remote get-url "$remote" 2> /dev/null)"
@@ -1147,12 +1151,12 @@ function init_repo() {
 
     pushd "$homedir_of_repo"
 
-    mkdir -p "${homedir_of_repo}/${dirname_of_repo}"
-    [[ -d "${homedir_of_repo}/${dirname_of_repo}" ]] || {
-        echo "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}." >&2
-        push_warn_message_list "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}."
-        return 1
-    }
+    # mkdir -p "${homedir_of_repo}/${dirname_of_repo}"
+    # [[ -d "${homedir_of_repo}/${dirname_of_repo}" ]] || {
+    #     echo "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}." >&2
+    #     push_warn_message_list "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}."
+    #     return 1
+    # }
 
     update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch" || {
         echo "init_repo() was aborted" >&2
