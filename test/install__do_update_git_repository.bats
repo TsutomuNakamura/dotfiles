@@ -14,12 +14,12 @@ function teardown() {
     command rm -rf "/var/tmp/.dotfiles"
 }
 
-@test '#_do_update_git_repository should call "git clone -b master <url> <dir>" if the update_type is GIT_UPDATE_TYPE_JUST_CLONE' {
+@test '#_do_update_git_repository should call "git -C <repo_home> clone -b master <url> <dir>" if the update_type is GIT_UPDATE_TYPE_JUST_CLONE' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_JUST_CLONE
 
     [[ "$status" -eq 0 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_JUST_CLONE and git-clone has failed' {
@@ -29,18 +29,18 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
     [[ $(stub_called_times logger_warn) -eq 1 ]]
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp/.dotfiles\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
-@test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir>" if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY' {
+@test '#_do_update_git_repository should call rm then "git -C <repo_home> clone -b master <url> <dir>" if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY
 
     [[ "$status" -eq 0 ]]
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY and git-clone has failed' {
@@ -52,18 +52,18 @@ function teardown() {
     [[ $(stub_called_times git) -eq 1 ]]
     [[ $(stub_called_times logger_warn) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp/.dotfiles\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
-@test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE"' {
+@test '#_do_update_git_repository should call rm then "git clone -C <repo_home> -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE"' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE
 
     [[ "$status" -eq 0 ]]
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE and git-clone has failed"' {
@@ -75,18 +75,18 @@ function teardown() {
     [[ $(stub_called_times git) -eq 1 ]]
     [[ $(stub_called_times logger_warn) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp/.dotfiles\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
-@test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET"' {
+@test '#_do_update_git_repository should call rm then "git -C <repo_home> clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET"' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET
 
     [[ "$status" -eq 0 ]]
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET"' {
@@ -98,8 +98,8 @@ function teardown() {
     [[ $(stub_called_times git) -eq 1 ]]
     [[ $(stub_called_times logger_warn) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp/.dotfiles\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
 @test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT"' {
@@ -109,7 +109,7 @@ function teardown() {
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT"' {
@@ -121,8 +121,8 @@ function teardown() {
     [[ $(stub_called_times git) -eq 1 ]]
     [[ $(stub_called_times logger_warn) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp/.dotfiles\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
+    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
 

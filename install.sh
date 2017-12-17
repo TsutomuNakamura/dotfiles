@@ -1230,12 +1230,13 @@ function _do_update_git_repository () {
     local branch="$4"
     local update_type="$5"
 
+    local homedir_of_repo="$(dirname ${path_to_git_repo})"
     local dirname_of_repo="$(basename ${path_to_git_repo})"
 
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
-            git -C "$path_to_git_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_warn "ERROR: Failed to clone the repository(git -C \"$path_to_git_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" 2> /dev/null || {
+                logger_warn "ERROR: Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
                 return 1
             }
             ;;
@@ -1244,8 +1245,8 @@ function _do_update_git_repository () {
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
             rm -rf "$path_to_git_repo"
-            git -C "$path_to_git_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_warn "ERROR: Failed to clone the repository(git -C \"$path_to_git_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
+                logger_warn "ERROR: Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
                 return 1
             }
             ;;
@@ -1283,7 +1284,6 @@ function _do_update_git_repository () {
                 logger_warn "ERROR: Failed to pull \"$remote\" \"$branch\"."
                 return 1
             }
-
             ;;
     esac
 
