@@ -1194,21 +1194,24 @@ function update_git_repo() {
 
     # Create the directory path string of git
     local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
-
     # Declare an array named "remotes" that has remote names
     eval "$(get_git_remote_aliases "$path_to_git_repo" remotes)"
-    if [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" = "origin" ]]; then
+    if [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" == "origin" ]]; then
         local remote="${remotes[0]}"
+    elif [[ "${#remotes[@]}" -eq 0 ]] || ( [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" == "" ]] ); then
+        # The directory may be not git repository. And it will be cloned as new git repository
+        local remote="origin"
     else
         # TODO: Doesn't supported other than origin now
-        logger_warn "ERROR: Sorry, this script only supports single remote \"origin\". Failed to get remote origin from \"${path_to_git_repo}\""
+        local msg_remotes="${remotes[@]}"
+        logger_warn "ERROR: Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"${msg_remotes}\""
         return 1
     fi
 
     determin_update_type_of_repository "$path_to_git_repo" "$remote" "$url_of_repo" "$branch" 0
     local update_type=$?
 
-    _do_update_git_repository "$path_to_git_repo" "$url_of_repo" "${remote:-origin}" "$branch" "$update_type" || return 1
+    _do_update_git_repository "$path_to_git_repo" "$url_of_repo" "${remote}" "$branch" "$update_type" || return 1
 
     return 0
 }
