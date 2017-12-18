@@ -1178,16 +1178,17 @@ function init_repo() {
         echo "init_repo() was aborted" >&2
         return 1
     }
+    local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
 
     # Is here the git repo?
-    declare -A stats_of_dir=$(get_git_directory_status "${homedir_of_repo}/${dirname_of_repo}")
+    declare -A stats_of_dir=$(get_git_directory_status "$path_to_git_repo")
 
     # Freeze .gitconfig for not to push username and email
-    [[ -f .gitconfig ]] && git update-index --assume-unchanged .gitconfig
+    [[ -f .gitconfig ]] && git -C "$path_to_git_repo" update-index --assume-unchanged .gitconfig
 
     echo "Updating submodules..."
-    git submodule init
-    git submodule update
+    git -C "$path_to_git_repo" submodule init
+    git -C "$path_to_git_repo" submodule update
 
     popd
 }
