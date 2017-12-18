@@ -178,6 +178,7 @@ function print_warn_message_list() {
 function print_boarder() {
     local width=$(( $(tput cols) - 2 ))
     printf '=%.0s' $(seq 1 ${width})
+    echo
 }
 
 # Print messages
@@ -347,13 +348,14 @@ function install_the_font() {
     esac
 
     # This function would be finished successfully if return code of install_cmd() is 0(already installed) or 1(install has successfully).
-    [[ $ret -le 1 ]]
+    return $ret
 }
 
 # Installe font
 function install_fonts() {
     local result=0
     local distribution_name="$(get_distribution_name)"
+    local flag_fc_cache=0
 
     if [[ "$distribution_name" = "mac" ]]; then
         local font_dir="$(get_xdg_data_home)/Fonts"
@@ -372,7 +374,8 @@ function install_fonts() {
             "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary." \
             "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
     local ret_install_font_inconsolata_nerd=$?
-    (( result += $ret_install_font_inconsolata_nerd ))
+    [[ $ret_install_font_inconsolata_nerd -eq 1 ]] && (( flag_fc_cache++ ))
+    [[ $ret_install_font_inconsolata_nerd -gt 1 ]] && (( result++ ))
 
     install_the_font "_install_font_migu1m" \
             "Migu 1M Font" \
@@ -381,7 +384,8 @@ function install_fonts() {
             "The program will install IPA font alternatively." \
             "The program will install IPA font alternatively."
     local ret_install_font_migu1m=$?
-    (( result += $ret_install_font_migu1m ))
+    [[ $ret_install_font_migu1m -eq 1 ]] && (( flag_fc_cache++ ))
+    [[ $ret_install_font_migu1m -gt 1 ]] && (( result++ ))
 
     if [[ "$distribution_name" != "mac" ]]; then
         # Installing the emoji font only on Linux because Mac has already supported it.
@@ -392,19 +396,23 @@ function install_fonts() {
                 "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary." \
                 "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary."
         local ret_install_font_noto_emoji=$?
-        (( result += $ret_install_font_noto_emoji ))
+        [[ $ret_install_font_noto_emoji -eq 1 ]] && (( flag_fc_cache++ ))
+        [[ $ret_install_font_noto_emoji -gt 1 ]] && (( result++ ))
     fi
 
-    if [[ $ret_install_font_migu1m -ne 0 ]]; then
+    if [[ $ret_install_font_migu1m -gt 1 ]]; then
         install_the_font "_install_font_ipafont" "IPA Font" "" "" "" ""
         local ret_install_font_ipafont=$?
-        (( result += $ret_install_font_ipafont ))
+        [[ $ret_install_font_ipafont -eq 1 ]] && (( flag_fc_cache++ ))
+        [[ $ret_install_font_ipafont -gt 1 ]] && (( result++ )) || (( result-- ))
     fi
 
     popd
 
-    echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
-    fc-cache -f $font_dir && push_info_message_list "INFO: Font cache was recreated."
+    if [[ "$flag_fc_cache" -ne 0 ]]; then
+        echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
+        fc-cache -f $font_dir && push_info_message_list "INFO: Font cache was recreated."
+    fi
 
     return $result
 }
