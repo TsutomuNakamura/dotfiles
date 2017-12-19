@@ -136,46 +136,63 @@ function main() {
         fi
     fi
 
-    [[ "${#INFO_MESSAGES[@]}" -ne 0 ]] && print_info_message_list
-    [[ "${#WARN_MESSAGES[@]}" -ne 0 ]] && print_warn_message_list
-
+    print_post_message_list
     return $error_count
+}
+
+function print_post_message_list() {
+    # TODO:
+    [[ ${#POST_MESSAGES[@]} -ne 0 ]] && {
+        print_boarder
+        for line in "${POST_MESSAGES[@]}"; do
+            echo -e "* $line"
+        done
+        print_boarder
+    }
 }
 
 # Output the message to stdout then push it to info message list.
 function logger_info() {
     local message="$1"
     echo -e "$message"
-    push_info_message_list "$message"
+    push_post_message_list "$message"
 }
 
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
     local message="$1"
     echo -e "$message" >&2
-    push_warn_message_list "$message"
+    # TODO:
+    push_post_message_list "$message"
+}
+
+function logger_err() {
+    local message="$1"
+    echo -e "$message" >&2
+    # TODO:
+    push_post_message_list "$message"
 }
 
 # Push a message into info message list
-function push_info_message_list() {
-    INFO_MESSAGES+=("$1")
-}
-# Push a message into warn message list
-function push_warn_message_list() {
-    WARN_MESSAGES+=("$1")
-}
+# function push_info_message_list() {
+#     INFO_MESSAGES+=("$1")
+# }
+# # Push a message into warn message list
+# function push_warn_message_list() {
+#     WARN_MESSAGES+=("$1")
+# }
 
 # Print info messages
-function print_info_message_list() {
-    print_boarder
-    _print_message_list 'INFO_MESSAGES[@]'
-}
-
-# Print warn messages
-function print_warn_message_list() {
-    print_boarder
-    _print_message_list 'WARN_MESSAGES[@]'
-}
+# function print_info_message_list() {
+#     print_boarder
+#     _print_message_list 'INFO_MESSAGES[@]'
+# }
+# 
+# # Print warn messages
+# function print_warn_message_list() {
+#     print_boarder
+#     _print_message_list 'WARN_MESSAGES[@]'
+# }
 # Print boarder on console
 function print_boarder() {
     local width=$(( $(tput cols) - 2 ))
@@ -183,15 +200,15 @@ function print_boarder() {
     echo
 }
 
-# Print messages
-function _print_message_list() {
-    local msg_list="$1"
-    if [[ ! -z "${msg_list}" ]]; then
-        for m in "${!msg_list}"; do
-            echo -e "* ${m}"
-        done
-    fi
-}
+# # Print messages
+# function _print_message_list() {
+#     local msg_list="$1"
+#     if [[ ! -z "${msg_list}" ]]; then
+#         for m in "${!msg_list}"; do
+#             echo -e "* ${m}"
+#         done
+#     fi
+# }
 
 function usage() {
     echo "usage"
