@@ -1167,21 +1167,11 @@ function init_repo() {
 
     pushd "$homedir_of_repo"
 
-    # mkdir -p "${homedir_of_repo}/${dirname_of_repo}"
-    # [[ -d "${homedir_of_repo}/${dirname_of_repo}" ]] || {
-    #     echo "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}." >&2
-    #     push_warn_message_list "ERROR: Failed to create the directory ${homedir_of_repo}/${dirname_of_repo}."
-    #     return 1
-    # }
-
     update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch" || {
         echo "init_repo() was aborted" >&2
         return 1
     }
     local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
-
-    # Is here the git repo?
-    declare -A stats_of_dir=$(get_git_directory_status "$path_to_git_repo")
 
     # Freeze .gitconfig for not to push username and email
     [[ -f .gitconfig ]] && git -C "$path_to_git_repo" update-index --assume-unchanged .gitconfig
@@ -1385,51 +1375,6 @@ function get_distribution_name() {
     [[ ! -z ${DISTRIBUTION} ]] && echo "${DISTRIBUTION}" && return
 
     echo "unknown"
-}
-
-# Check current directory is whether git repo or not.
-# The function outputs the string of assosiative array.
-# To get outputs, you should write like below
-#   declare -A result="$(is_here_git_repo "/path/to/may/be/gitrepo")"
-# Result of 0 is true and the others is false.
-# List of status are like below.
-#   directory <int>:                 0 is true (there is the directory) otherwise false
-#   git_directory <int>:             0 is true (it is a git repository) otherwise false
-#   dotfiles_remote <int>:           0 is true (the repo refers $GIT_REPOSITORY_HTTPS or $GIT_REPOSITORY_SSH) otherwise false
-#   files_should_be_committed <int>: 0 is true (there are files should be committed or handled) otherwise false
-#   changes_should_be_pusshed <int>: 0 is true (there are changes should be pushed) otherwise false
-#   remote_is_origin <int>:          0 is true (remote is origin). Currentry this script only support remote origin
-#   branch_name <string>:            branch name on HEAD
-function get_git_directory_status() {
-    local target="$1"
-
-    declare -A result=(
-        [existence_of_directory]=1
-        [existence_of_git_repository]=1
-        [correctness_of_dotfiles_remote]=1
-        [absence_of_files_should_be_committed]=1
-        [absence_of_changes_should_be_pushed]=1
-        [branch_name]=""
-    )
-
-    if [[ -d "$target" ]]; then
-        result[existence_of_directory]=0
-        if git rev-parse --git-dir > /dev/null 2>&1; then
-            result[existence_of_git_repository]=0
-
-            local url="$(git remote get-url origin)"
-            if [[ "$url" = "$GIT_REPOSITORY_SSH" ]] || [[ "$url" = "$GIT_REPOSITORY_HTTPS" ]]; then
-                # It is the dotfiles repository
-                result[correctness_of_dotfiles_remote]=0
-
-                [[ "$(git status --porcelain | wc -l)" -eq 0 ]] && result[absence_of_files_should_be_committed]=0
-                [[ "$(git cherry -v | wc -l)" -eq 0 ]]          && result[absence_of_changes_should_be_pushed]=0
-                result[branch_name]="$(git rev-parse --abbrev-ref HEAD)"
-            fi
-        fi
-    fi
-
-    declare -p result
 }
 
 # Question to user.
