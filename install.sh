@@ -109,7 +109,9 @@ function main() {
             (( error_count++ ))
         fi
     elif [ "$flag_cleanup" == "1" ]; then
-        backup_current_dotfiles || {
+        backup_current_dotfiles && {
+            logger_info "INFO: Files have backuped into $(get_backup_dir)."
+        } || {
             echo "ERROR: Cleaning up and backup current dotfiles are failed." >&2
             (( error_count++ ))
         }
@@ -781,7 +783,7 @@ function get_target_dotfiles() {
 # Backup current dotfiles
 function backup_current_dotfiles() {
 
-    [ ! -d "${HOME}/${DOTDIR}" ] && {
+    [[ ! -d "${HOME}/${DOTDIR}" ]] && {
         echo "There are no dotfiles to backup."
         return
     }
@@ -900,7 +902,7 @@ function deploy() {
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         if should_it_make_deep_link_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
-            declare link_of_destinations=()
+            declare -a link_of_destinations=()
             [[ ! -e "${dotfiles[i]}" ]] && mkdir ${dotfiles[i]}
             [[ ! -d "${dotfiles[i]}" ]] && {
                 echo "ERROR: ${dotfiles[i]} is already exists and cannot make directory"
