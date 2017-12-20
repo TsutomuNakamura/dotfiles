@@ -4,7 +4,7 @@ load helpers
 function setup() {
     rm -rf /var/tmp/{..?*,.[!.]*,*}
     stub mkdir
-    stub logger_warn
+    stub logger_err
     stub_and_eval get_git_remote_aliases '{ echo "declare -a remotes=([0]=\"origin\")"; }'
     stub _do_update_git_repository
     stub_and_eval determin_update_type_of_repository '{ return $GIT_UPDATE_TYPE_JUST_CLONE; }'
@@ -108,7 +108,7 @@ function teardown() {
     [[ "$(stub_called_times determin_update_type_of_repository)" -eq 0 ]]
     [[ "$(stub_called_times _do_update_git_repository)" -eq 0 ]]
     stub_called_with_exactly_times mkdir 1 -p "/var/tmp/foo"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to create the directory \"/var/tmp/foo\""
+    stub_called_with_exactly_times logger_err 1 "Failed to create the directory \"/var/tmp/foo\""
 }
 
 @test '#update_git_repo should call determin_update_type_of_repository() with one of a parameter path_to_git_directory is "/var/tmp/.dotfiles (end of slash)"' {
@@ -135,7 +135,7 @@ function teardown() {
     [[ "$(stub_called_times _do_update_git_repository)" -eq 0 ]]
 
     stub_called_with_exactly_times get_git_remote_aliases 1 "/var/tmp/.dotfiles" remotes
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"origine\""
+    stub_called_with_exactly_times logger_err 1 "Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"origine\""
 }
 
 @test '#update_git_repo should return 1 if get_git_remote_aliases() returns an array "remotes=([0]="origin" [1]="develop")" (not only origin)' {
@@ -149,7 +149,7 @@ function teardown() {
     [[ "$(stub_called_times _do_update_git_repository)" -eq 0 ]]
     echo "$output"
     stub_called_with_exactly_times get_git_remote_aliases 1 "/var/tmp/.dotfiles" remotes
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"origin develop\""
+    stub_called_with_exactly_times logger_err 1 "Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"origin develop\""
 }
 
 @test '#update_git_repo should return 0 and set remote as origin if get_git_remote_aliases() returns an empty array.' {
@@ -159,7 +159,7 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times mkdir)" -eq 0 ]]
     [[ "$(stub_called_times get_git_remote_aliases)" -eq 1 ]]
-    [[ "$(stub_called_times logger_warn)" -eq 0 ]]
+    [[ "$(stub_called_times logger_err)" -eq 0 ]]
     [[ "$(stub_called_times get_git_remote_aliases)" -eq 1 ]]
     [[ "$(stub_called_times determin_update_type_of_repository)" -eq 1 ]]
     [[ "$(stub_called_times _do_update_git_repository)" -eq 1 ]]
@@ -176,7 +176,7 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times mkdir)" -eq 0 ]]
     [[ "$(stub_called_times get_git_remote_aliases)" -eq 1 ]]
-    [[ "$(stub_called_times logger_warn)" -eq 0 ]]
+    [[ "$(stub_called_times logger_err)" -eq 0 ]]
     [[ "$(stub_called_times get_git_remote_aliases)" -eq 1 ]]
     [[ "$(stub_called_times determin_update_type_of_repository)" -eq 1 ]]
     [[ "$(stub_called_times _do_update_git_repository)" -eq 1 ]]

@@ -7,7 +7,7 @@ function setup() {
     stub git
     stub rm
     stub logger_info
-    stub logger_warn
+    stub logger_err
 }
 function teardown() {
     cd ~
@@ -28,9 +28,9 @@ function teardown() {
 
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times logger_err 1 "Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
 @test '#_do_update_git_repository should call rm then "git -C <repo_home> clone -b master <url> <dir>" if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY' {
@@ -50,10 +50,10 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
     stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times logger_err 1 "Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
 @test '#_do_update_git_repository should call rm then "git clone -C <repo_home> -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE"' {
@@ -73,10 +73,10 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
     stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times logger_err 1 "Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
 @test '#_do_update_git_repository should call rm then "git -C <repo_home> clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET"' {
@@ -96,10 +96,10 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
     stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times logger_err 1 "Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
 @test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT"' {
@@ -119,10 +119,10 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times rm) -eq 1 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times rm 1 -rf "/var/tmp/.dotfiles"
     stub_called_with_exactly_times git 1 -C "/var/tmp" clone -b "master" "https://github.com/TsutomuNakamura/dotfiles.git" ".dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
+    stub_called_with_exactly_times logger_err 1 "Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 }
 
 
@@ -166,8 +166,8 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times remove_all_untracked_files) -eq 0 ]]
     [[ $(stub_called_times git) -eq 0 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Sorry, this script only supports remote as \"origin\". The repository had been going to clone remote as \"origine\""
+    [[ $(stub_called_times logger_err) -eq 1 ]]
+    stub_called_with_exactly_times logger_err 1 "Sorry, this script only supports remote as \"origin\". The repository had been going to clone remote as \"origine\""
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL and git-rev-parse has failed' {
@@ -182,8 +182,8 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times remove_all_untracked_files) -eq 0 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to get git branch name from \"/var/tmp/.dotfiles\""
+    [[ $(stub_called_times logger_err) -eq 1 ]]
+    stub_called_with_exactly_times logger_err 1 "Failed to get git branch name from \"/var/tmp/.dotfiles\""
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is unknown' {
@@ -200,9 +200,9 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times remove_all_untracked_files) -eq 0 ]]
     [[ $(stub_called_times git) -eq 1 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" rev-parse --abbrev-ref HEAD
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Invalid git update type (97). Some error occured when determining git update type of \"/var/tmp/.dotfiles\"."
+    stub_called_with_exactly_times logger_err 1 "Invalid git update type (97). Some error occured when determining git update type of \"/var/tmp/.dotfiles\"."
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL and git-reset has failed' {
@@ -219,10 +219,10 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times remove_all_untracked_files) -eq 0 ]]
     [[ $(stub_called_times git) -eq 2 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" rev-parse --abbrev-ref HEAD
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" reset --hard
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to reset git repository at \"/var/tmp/.dotfiles\" for some readson."
+    stub_called_with_exactly_times logger_err 1 "Failed to reset git repository at \"/var/tmp/.dotfiles\" for some readson."
 }
 
 @test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL and git-pull has failed' {
@@ -239,12 +239,12 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ $(stub_called_times remove_all_untracked_files) -eq 1 ]]
     [[ $(stub_called_times git) -eq 3 ]]
-    [[ $(stub_called_times logger_warn) -eq 1 ]]
+    [[ $(stub_called_times logger_err) -eq 1 ]]
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" rev-parse --abbrev-ref HEAD
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" reset --hard
     stub_called_with_exactly_times git 1 -C "/var/tmp/.dotfiles" pull "origin" "master"
     stub_called_with_exactly_times remove_all_untracked_files 1 "/var/tmp/.dotfiles"
-    stub_called_with_exactly_times logger_warn 1 "ERROR: Failed to pull \"origin\" \"master\"."
+    stub_called_with_exactly_times logger_err 1 "Failed to pull \"origin\" \"master\"."
 }
 
 @test '#_do_update_git_repository should just call git pull if the update_type is GIT_UPDATE_TYPE_JUST_PULL"' {

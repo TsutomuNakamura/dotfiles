@@ -25,9 +25,6 @@ ANSWER_OF_QUESTION_NO=1
 # Answer status for question() aborted
 ANSWER_OF_QUESTION_ABORTED=255
 
-# Types of git re-install(re-clone or update) type.
-# These variables will be used determin_update_type_of_repository()
-
 # Git update type: just clone
 GIT_UPDATE_TYPE_JUST_CLONE=0
 # Git update type: remote then clone due to not git repository
@@ -44,6 +41,15 @@ GIT_UPDATE_TYPE_JUST_PULL=5
 GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT=6
 # Git update type: can not get git-update-type due to some reason
 GIT_UPDATE_TYPE_ABOARTED=255
+
+# Color of font red
+FONT_COLOR_GREEN='\032[0;31m'
+# Color of font yello
+FONT_COLOR_YELLOW='\032[0;33m'
+# Color of font red
+FONT_COLOR_RED='\032[0;31m'
+# Color of font end
+FONT_COLOR_END='\033[0m'
 
 function main() {
 
@@ -109,9 +115,7 @@ function main() {
             (( error_count++ ))
         fi
     elif [ "$flag_cleanup" == "1" ]; then
-        backup_current_dotfiles && {
-            logger_info "INFO: Files have backuped into $(get_backup_dir)."
-        } || {
+        backup_current_dotfiles || {
             echo "ERROR: Cleaning up and backup current dotfiles are failed." >&2
             (( error_count++ ))
         }
@@ -143,7 +147,7 @@ function main() {
 function print_post_message_list() {
     # TODO:
     [[ ${#POST_MESSAGES[@]} -ne 0 ]] && {
-        print_boarder
+        print_boarder " Summary of the instruction  "
         for line in "${POST_MESSAGES[@]}"; do
             echo -e "* $line"
         done
@@ -154,61 +158,35 @@ function print_post_message_list() {
 # Output the message to stdout then push it to info message list.
 function logger_info() {
     local message="$1"
-    echo -e "$message"
+    echo -e "INFO: $message"
+    message="${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: $message"
     push_post_message_list "$message"
 }
 
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
     local message="$1"
+    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: $message"
     echo -e "$message" >&2
-    # TODO:
     push_post_message_list "$message"
 }
 
 function logger_err() {
     local message="$1"
+    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $message"
     echo -e "$message" >&2
-    # TODO:
     push_post_message_list "$message"
 }
 
-# Push a message into info message list
-# function push_info_message_list() {
-#     INFO_MESSAGES+=("$1")
-# }
-# # Push a message into warn message list
-# function push_warn_message_list() {
-#     WARN_MESSAGES+=("$1")
-# }
-
-# Print info messages
-# function print_info_message_list() {
-#     print_boarder
-#     _print_message_list 'INFO_MESSAGES[@]'
-# }
-# 
-# # Print warn messages
-# function print_warn_message_list() {
-#     print_boarder
-#     _print_message_list 'WARN_MESSAGES[@]'
-# }
 # Print boarder on console
 function print_boarder() {
-    local width=$(( $(tput cols) - 2 ))
+    local subject="$1"
+
+    echo -n "==${subject}"
+    local width=$(( $(tput cols) - 2 - ${#subject} ))
     printf '=%.0s' $(seq 1 ${width})
     echo
 }
-
-# # Print messages
-# function _print_message_list() {
-#     local msg_list="$1"
-#     if [[ ! -z "${msg_list}" ]]; then
-#         for m in "${!msg_list}"; do
-#             echo -e "* ${m}"
-#         done
-#     fi
-# }
 
 function usage() {
     echo "usage"
@@ -1217,7 +1195,7 @@ function update_git_repo() {
 
     [[ ! -d "$homedir_of_repo" ]] && {
         mkdir -p "$homedir_of_repo" || {
-            logger_warn "ERROR: Failed to create the directory \"${homedir_of_repo}\""
+            logger_err "Failed to create the directory \"${homedir_of_repo}\""
             return 1
         }
     }
@@ -1234,7 +1212,7 @@ function update_git_repo() {
     else
         # TODO: Doesn't supported other than origin now
         local msg_remotes="${remotes[@]}"
-        logger_warn "ERROR: Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"${msg_remotes}\""
+        logger_err "Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"${msg_remotes}\""
         return 1
     fi
 
@@ -1262,7 +1240,7 @@ function _do_update_git_repository () {
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
             git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_warn "ERROR: Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                logger_err "Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
                 return 1
             }
             ;;
@@ -1272,7 +1250,7 @@ function _do_update_git_repository () {
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
             rm -rf "$path_to_git_repo"
             git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_warn "ERROR: Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                logger_err "Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
                 return 1
             }
             ;;
@@ -1283,31 +1261,31 @@ function _do_update_git_repository () {
         * )
             if [[ "$remote" != "origin" ]]; then
                 # TODO: Does not supported remote referencing other than origin yet.
-                logger_warn "ERROR: Sorry, this script only supports remote as \"origin\". The repository had been going to clone remote as \"${remote}\""
+                logger_err "Sorry, this script only supports remote as \"origin\". The repository had been going to clone remote as \"${remote}\""
                 return 1
             fi
 
             # Get branch name
             local branch=$(git -C "$path_to_git_repo" rev-parse --abbrev-ref HEAD 2> /dev/null)
             if [[ -z "$branch" ]]; then
-                logger_warn "ERROR: Failed to get git branch name from \"${path_to_git_repo}\""
+                logger_err "Failed to get git branch name from \"${path_to_git_repo}\""
                 return 1
             fi
 
             if [[ "$update_type" -eq $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL ]]; then
                 # Reset and remove untracked files in git repository
                 git -C "$path_to_git_repo" reset --hard || {
-                    logger_warn "ERROR: Failed to reset git repository at \"${path_to_git_repo}\" for some readson."
+                    logger_err "Failed to reset git repository at \"${path_to_git_repo}\" for some readson."
                     return 1
                 }
                 remove_all_untracked_files "$path_to_git_repo"
             elif [[ "$update_type" -ne $GIT_UPDATE_TYPE_JUST_PULL ]]; then
-                logger_warn "ERROR: Invalid git update type (${update_type}). Some error occured when determining git update type of \"${path_to_git_repo}\"."
+                logger_err "Invalid git update type (${update_type}). Some error occured when determining git update type of \"${path_to_git_repo}\"."
                 return 1
             fi
             # Type of GIT_UPDATE_TYPE_JUST_PULL will also reach this section.
             git -C "$path_to_git_repo" pull "$remote" "$branch" || {
-                logger_warn "ERROR: Failed to pull \"$remote\" \"$branch\"."
+                logger_err "Failed to pull \"$remote\" \"$branch\"."
                 return 1
             }
             ;;
