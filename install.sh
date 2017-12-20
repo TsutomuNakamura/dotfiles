@@ -13,10 +13,9 @@ GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
 CASH_ABSOLUTE_BACKUPDIR=
 # Distribution of this environment
 DISTRIBUTION=
-# Messages of info
-declare -a INFO_MESSAGES=()
-# Messages of warn or error
-declare -a WARN_MESSAGES=()
+
+# Post message list
+declare -a POST_MESSAGES=()
 
 # Answer status for question() yes
 ANSWER_OF_QUESTION_YES=0
@@ -176,6 +175,11 @@ function logger_err() {
     message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
+}
+
+function push_post_message_list() {
+    local message="$1"
+    POST_MESSAGES+=("$message")
 }
 
 # Print boarder on console
