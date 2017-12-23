@@ -413,7 +413,7 @@ function install_fonts() {
 
     if [[ "$flag_fc_cache" -ne 0 ]]; then
         echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
-        fc-cache -f $font_dir && push_info_message_list "INFO: Font cache was recreated."
+        fc-cache -f $font_dir && logger_info "Font cache was recreated."
     fi
 
     return $result

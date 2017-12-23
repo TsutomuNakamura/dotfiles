@@ -10,7 +10,7 @@ function setup() {
     stub popd
     stub fc-cache
     stub install_the_font
-    stub push_info_message_list
+    stub logger_info
 }
 
 function teardown() {
@@ -96,14 +96,14 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    [[ "$(stub_called_times logger_info)" -eq 1 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         0
 
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 1 if _install_font_inconsolata_nerd() returns 2 (installing the font has failed).' {
@@ -112,14 +112,14 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         0
 
     # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    # stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 1 if _install_font_inconsolata_nerd() returns 3 (installing the font has failed by unknown error).' {
@@ -128,14 +128,14 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         0
 
     # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    # stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 0 if _install_font_noto_emoji() returns 1 (installing the font has succeeded).' {
@@ -144,13 +144,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    [[ "$(stub_called_times logger_info)" -eq 1 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         0
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 1 if _install_font_noto_emoji() returns 2 (installing the font has failed).' {
@@ -159,13 +159,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         0
     # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    # stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 1 if _install_font_noto_emoji() returns 2 (installing the font has failed by unknown error).' {
@@ -174,13 +174,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         0
     # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    # stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 0 if _install_font_migu1m() returns 1 (installing the font has succeeded).' {
@@ -189,13 +189,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    [[ "$(stub_called_times logger_info)" -eq 1 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         0
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 0 then call _install_font_ipafont if _install_font_migu1m() returns 2 (installing the font has failed) then _install_font_ipafont() returns 0.' {
@@ -204,13 +204,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         1
     stub_called_with_exactly_times fc-cache 0 -f ${HOME}/.local/share/fonts
-    stub_called_with_exactly_times push_info_message_list 0 "INFO: Font cache was recreated."
+    stub_called_with_exactly_times logger_info 0 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 1 then call _install_font_ipafont if _install_font_migu1m() returns 3 (installing the font has failed by unknown error) then _install_font_ipafont() returns 0.' {
@@ -219,13 +219,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         1
     stub_called_with_exactly_times fc-cache 0 -f ${HOME}/.local/share/fonts
-    stub_called_with_exactly_times push_info_message_list 0 "INFO: Font cache was recreated."
+    stub_called_with_exactly_times logger_info 0 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 0 if _install_font_ipafont() returns 0 (installing the font has succeeded).' {
@@ -238,13 +238,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         1
     #stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    #stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    #stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 0 and called fc-cache if _install_font_ipafont() returns 1 (installing the font has succeeded).' {
@@ -257,13 +257,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    [[ "$(stub_called_times logger_info)" -eq 1 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         1
     stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 2 if _install_font_ipafont() returns 2 (installing the font has failed).' {
@@ -276,13 +276,13 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 2 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         1
     #stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    #stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    #stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
 @test '#install_fonts should return 2 if _install_font_ipafont() returns 3 (installing the font has failed by unknown error).' {
@@ -295,12 +295,12 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 2 ]]
     [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
     assert_install_the_ipa_font         1
     #stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
-    #stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+    #stub_called_with_exactly_times logger_info 1 "Font cache was recreated."
 }
 
