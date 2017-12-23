@@ -9,9 +9,8 @@ function setup() {
     stub backup_current_dotfiles
     stub init
     stub deploy
-    stub print_info_message_list
-    stub print_warn_message_list
-}
+    stub print_post_message_list
+ }
 
 # function teardown() {}
 
@@ -300,8 +299,7 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 1 ]]
-    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
-    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_post_message_list)"               -eq 1 ]]
 
     stub_called_with_exactly_times is_customized_xdg_base_directories 1
     stub_called_with_exactly_times init 1 'develop' 'git@github.com:TsutomuNakamura/dotfiles.git' 1
@@ -320,83 +318,14 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 1 ]]
-    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
-    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_post_message_list)"               -eq 1 ]]
 
     stub_called_with_exactly_times is_customized_xdg_base_directories 1
     stub_called_with_exactly_times init 1 'master' 'https://github.com/TsutomuNakamura/dotfiles.git' 0
     stub_called_with_exactly_times deploy 1
 }
 
-@test "#main should call print_warn_message_list() when some error has occured and WARN_MESSAGES list is NOT empty" {
-    stub_and_eval init '{ push_warn_message_list "ERROR: Some error has occured"; false; }'
-
-    run main -i
-    echo "$output"
-    local outputs; IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" == "ERROR: init() has failed." ]]
-
-    [[ "$status"                                                    -eq 1 ]]
-    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
-    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
-    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
-    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
-    [[ "$(stub_called_times init)"                                  -eq 1 ]]
-    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
-    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
-    [[ "$(stub_called_times print_warn_message_list)"               -eq 1 ]]
-
-    stub_called_with_exactly_times is_customized_xdg_base_directories 1
-    stub_called_with_exactly_times init 1 'master' 'https://github.com/TsutomuNakamura/dotfiles.git' 0
-    stub_called_with_exactly_times print_warn_message_list 1
-}
-
-@test "#main should NOT call print_warn_message_list() when some error has occured and WARN_MESSAGE list is empty" {
-    stub_and_eval init '{ false; }'
-
-    run main -i
-
-    local outputs; IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" == "ERROR: init() has failed." ]]
-
-    [[ "$status"                                                    -eq 1 ]]
-    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
-    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
-    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
-    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
-    [[ "$(stub_called_times init)"                                  -eq 1 ]]
-    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
-    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
-    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
-
-    stub_called_with_exactly_times is_customized_xdg_base_directories 1
-    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
-}
-
-@test "#main should call print_info_message_list() when some error has occured and INFO_MESSAGES list is NOT empty" {
-    stub_and_eval init '{ push_info_message_list "INFO: Some info message"; true; }'
-
-    run main -i
-
-    [[ "$status"                                                    -eq 0 ]]
-    [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
-    [[ "$(stub_called_times usage)"                                 -eq 0 ]]
-    [[ "$(stub_called_times do_i_have_admin_privileges)"            -eq 0 ]]
-    [[ "$(stub_called_times install_packages)"                      -eq 0 ]]
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
-    [[ "$(stub_called_times init)"                                  -eq 1 ]]
-    [[ "$(stub_called_times deploy)"                                -eq 0 ]]
-    [[ "$(stub_called_times print_info_message_list)"               -eq 1 ]]
-    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
-
-    stub_called_with_exactly_times is_customized_xdg_base_directories 1
-    stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
-    stub_called_with_exactly_times print_info_message_list 1
-}
-
-@test "#main should NOT call print_info_message_list() when some error has occured and INFO_MESSAGE list is empty" {
+@test "#main should call print_post_message_list() when some error has occured and INFO_MESSAGE list is empty" {
     stub_and_eval init '{ true; }'
 
     run main -i
@@ -409,8 +338,7 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 1 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
-    [[ "$(stub_called_times print_info_message_list)"               -eq 0 ]]
-    [[ "$(stub_called_times print_warn_message_list)"               -eq 0 ]]
+    [[ "$(stub_called_times print_post_message_list)"               -eq 1 ]]
 
     stub_called_with_exactly_times is_customized_xdg_base_directories 1
     stub_called_with_exactly_times init 1 master "https://github.com/TsutomuNakamura/dotfiles.git" "0"
