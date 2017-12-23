@@ -255,18 +255,22 @@ function init() {
 function install_packages() {
     local result=0
 
-    if [[ "$(get_distribution_name)" = "debian" ]]; then
+    if [[ "$(get_distribution_name)" == "debian" ]]; then
         install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger               || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "centos" ]]; then
+    elif [[ "$(get_distribution_name)" == "centos" ]]; then
         # TODO: ranger not supported in centos
-        push_info_message_list "INFO: Package \"ranger\" will not be installed, so please instlal it manually."
-        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal          || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "fedora" ]]; then
+        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal \
+            && logger_info "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
+            || (( result++ ))
+    elif [[ "$(get_distribution_name)" == "fedora" ]]; then
         install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger        || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "arch" ]]; then
+    elif [[ "$(get_distribution_name)" == "arch" ]]; then
         install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal ranger    || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "mac" ]]; then
+    elif [[ "$(get_distribution_name)" == "mac" ]]; then
         install_packages_with_homebrew vim ctags tmux zsh unzip                             || (( result++ ))
+    else
+        logger_err "Failed to get OS distribution to install packages."
+        (( result++ ))
     fi
 
     return $result
