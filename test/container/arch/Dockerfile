@@ -6,7 +6,7 @@
 FROM base/archlinux
 
 # RUN pacman -Syu --noconfirm
-RUN pacman -Sy --noconfirm base base-devel sudo awk git
+RUN pacman -Sy --noconfirm base base-devel sudo awk git inotify-tools
 RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN useradd -d /home/foo -s /bin/bash -m foo
 RUN usermod -aG wheel foo

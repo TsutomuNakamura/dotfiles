@@ -2,211 +2,305 @@
 load helpers
 
 function setup() {
-    clear_call_count
-    mkdir -p ${HOME}/${DOTDIR}
+    cd "${HOME}"
+    function get_distribution_name  { echo "debian"; }
+    function get_xdg_data_home      { echo "${HOME}/.local/share"; }
+    stub mkdir
+    stub pushd
+    stub popd
+    stub fc-cache
+    stub install_the_font
+    stub push_info_message_list
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR}
-    cd ~
-    rm -rf .local Library migu-1m* Inconsolata\ for\ Powerline*
-    clear_call_count
+    cd "${HOME}"
 }
 
-function curl() {
-    increment_call_count "curl"
-    local option="$1"
-    local filename="$2"
-
-    fallocate -l 1 "$2"
+function assert_install_the_nerd_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} \
+            "_install_font_inconsolata_nerd" \
+            "Inconsolata for Powerline Nerd Font" \
+            "" \
+            "For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \
+            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary." \
+            "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
+}
+function assert_install_the_migu1m_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} \
+            "_install_font_migu1m" \
+            "Migu 1M Font" \
+            "" \
+            "For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"." \
+            "The program will install IPA font alternatively." \
+            "The program will install IPA font alternatively."
+}
+function assert_install_the_noto_emoji_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} \
+            "_install_font_noto_emoji" \
+            "NotoEmojiFont" \
+            "" \
+            "For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
+            "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary." \
+            "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary."
+}
+function assert_install_the_ipa_font() {
+    local count=$1
+    stub_called_with_exactly_times install_the_font ${count} "_install_font_ipafont" "IPA Font" "" "" "" ""
 }
 
-function unzip() {
-    increment_call_count "unzip"
-    local filename="$1"
-
-    if [[ ! "$filename" = "migu-1m-20150712.zip" ]]; then
-        return 1
-    fi
-
-    mkdir ${filename%.*}
-    pushd ${filename%.*}
-    fallocate -l 1 migu-1m-bold.ttf
-    fallocate -l 1 migu-1m-regular.ttf
-    fallocate -l 1 migu-README.txt
-    mkdir mplus-TESTFLIGHT-060
-    popd
-}
-
-function fc-cache() { increment_call_count "fc-cache"; }
-function install_packages_with_apt() { increment_call_count "install_packages_with_apt"; }
-function install_packages_with_dnf() { increment_call_count "install_packages_with_dnf"; }
-function install_packages_with_pacman() { increment_call_count "install_packages_with_pacman"; }
-
-@test '#install_fonts should install Inconsolata Powerline, Inconsolata Powerline Nerd, Migu 1M, but not ipa-font on arch' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 1; }
-
-    run install_fonts
-    ls -l ${HOME}/.local/share/fonts/
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 0 ]]
-}
-
-@test '#install_fonts should install Inconsolata Powerline Nerd, Migu 1M, but not ipa-font on debian' {
-    function get_distribution_name() { echo "debian"; }
-    function do_i_have_admin_privileges() { return 1; }
-
-    run install_fonts
-    ls -l ${HOME}/.local/share/fonts/
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
-    [[ "$(call_count install_packages_with_apt)" -eq 0 ]]
-}
-
-@test '#install_fonts should install Inconsolata Powerline, Inconsolata Powerline Nerd, Migu 1M, but not ipa-font on fedora' {
-    function get_distribution_name() { echo "fedora"; }
-    function do_i_have_admin_privileges() { return 1; }
-
-    run install_fonts
-    ls -l ${HOME}/.local/share/fonts/
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/.local/share/fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/.local/share/fonts/migu-1m-regular.ttf" ]]
-    [[ "$(call_count install_packages_with_dnf)" -eq 0 ]]
-}
-
-
-@test '#install_fonts should install Inconsolata Powerline, Inconsolata Powerline Nerd, Migu 1M on mac' {
-    function get_distribution_name() { echo "mac"; }
-    function do_i_have_admin_privileges() { return 1; }
-
+@test '#install_fonts should call install_the_font() for Nerd Font, Migu1M Font, Noto Emoji Font (but not IPA Font) on linux(debian).' {
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(call_count curl)" -eq 2 ]]
-    [[ "$(call_count unzip)" -eq 1 ]]
-    [[ "$(call_count fc-cache)" -eq 1 ]]
-    [[ "$(count ${HOME}/Library/Fonts/)" -eq 3 ]]
-    # [[ -f "${HOME}/Library/Fonts/Inconsolata for Powerline Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/Library/Fonts/Inconsolata Nerd Font Complete.otf" ]]
-    [[ -f "${HOME}/Library/Fonts/migu-1m-bold.ttf" ]]
-    [[ -f "${HOME}/Library/Fonts/migu-1m-regular.ttf" ]]
-}
-
-@test '#install_fonts should install ipafonts on arch if installing  mplus font has failed' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() { true "do nothing for installing mplus font"; }
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 1 ]]
-}
-
-@test '#install_fonts should install ipafonts on debian if installing  mplus font has failed' {
-    function get_distribution_name() { echo "debian"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() { true "do nothing for installing mplus font"; }
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_apt)" -eq 1 ]]
-}
-
-@test '#install_fonts should install ipafonts on fedora if installing  mplus font has failed' {
-    function get_distribution_name() { echo "fedora"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() { true "do nothing for installing mplus font"; }
-
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_dnf)" -eq 1 ]]
-}
-
-@test '#install_fonts should install ipafonts on arch if migu-1m-bold.ttf is emptry' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() {
-        increment_call_count "unzip"
-        local filename="$1"
-
-        if [[ ! "$filename" = "migu-1m-20150712.zip" ]]; then
-            return 1
-        fi
-
-        mkdir ${filename%.*}
-        pushd ${filename%.*}
-        touch migu-1m-bold.ttf
-        fallocate -l 1 migu-1m-regular.ttf
-        fallocate -l 1 migu-README.txt
-        mkdir mplus-TESTFLIGHT-060
-        popd
-    }
-    run install_fonts
-
-    [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 1 ]]
-
-    declare -a outputs=
+    declare -a outputs
     IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" = "WARN: Failed to install migu-fonts for some reason." ]]
-    [[ "${outputs[1]}" = "WARN: Attempting to install ipa fonts instead." ]]
+    # [[ ${outputs[0]} = "Building font information cache files with \"fc-cache -f ${HOME}/.local/share/fonts\"" ]]
+    stub_called_with_exactly_times mkdir 1 -p "${HOME}/.local/share/fonts"
+    stub_called_with_exactly_times pushd 1 "${HOME}/.local/share/fonts"
+    [[ "$(stub_called_times popd)"                -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"            -eq 0 ]]
+
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
 }
 
-@test '#install_fonts should install ipafonts on arch if migu-1m-regular.ttf is emptry' {
-    function get_distribution_name() { echo "arch"; }
-    function do_i_have_admin_privileges() { return 0; }
-    function unzip() {
-        increment_call_count "unzip"
-        local filename="$1"
+@test '#install_fonts should call install_the_font() for Nerd Font, Migu1M Font (but not Emoji font and IPA Font) on mac.' {
+    function get_distribution_name()                { echo "mac"; }
+    function get_xdg_data_home()                    { echo "${HOME}/Library"; }
 
-        if [[ ! "$filename" = "migu-1m-20150712.zip" ]]; then
-            return 1
-        fi
-
-        mkdir ${filename%.*}
-        pushd ${filename%.*}
-        fallocate -l 1 migu-1m-bold.ttf
-        touch migu-1m-regular.ttf
-        fallocate -l 1 migu-README.txt
-        mkdir mplus-TESTFLIGHT-060
-        popd
-    }
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(call_count install_packages_with_pacman)" -eq 1 ]]
+    declare -a outputs; IFS=$'\n' outputs=($output)
+    # [[ ${outputs[0]} = "Building font information cache files with \"fc-cache -f ${HOME}/Library/Fonts\"" ]]
+    stub_called_with_exactly_times mkdir 1 -p "${HOME}/Library/Fonts"
+    stub_called_with_exactly_times pushd 1 "${HOME}/Library/Fonts"
+    [[ "$(stub_called_times popd)"                -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"            -eq 0 ]]
 
-    declare -a outputs=
-    IFS=$'\n' outputs=($output)
-    [[ "${outputs[0]}" = "WARN: Failed to install migu-fonts for some reason." ]]
-    [[ "${outputs[1]}" = "WARN: Attempting to install ipa fonts instead." ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  0
+    assert_install_the_ipa_font         0
 }
+
+@test '#install_fonts should return 0 if _install_font_inconsolata_nerd() returns 1 (installing the font has succeeded).' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_inconsolata_nerd" ]] && return 1 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
+
+    stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 1 if _install_font_inconsolata_nerd() returns 2 (installing the font has failed).' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_inconsolata_nerd" ]] && return 2 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
+
+    # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 1 if _install_font_inconsolata_nerd() returns 3 (installing the font has failed by unknown error).' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_inconsolata_nerd" ]] && return 3 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
+
+    # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 0 if _install_font_noto_emoji() returns 1 (installing the font has succeeded).' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_noto_emoji" ]] && return 1 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
+    stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 1 if _install_font_noto_emoji() returns 2 (installing the font has failed).' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_noto_emoji" ]] && return 2 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
+    # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 1 if _install_font_noto_emoji() returns 2 (installing the font has failed by unknown error).' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_noto_emoji" ]] && return 3 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
+    # stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    # stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 0 if _install_font_migu1m() returns 1 (installing the font has succeeded).' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_migu1m" ]] && return 1 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         0
+    stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 0 then call _install_font_ipafont if _install_font_migu1m() returns 2 (installing the font has failed) then _install_font_ipafont() returns 0.' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_migu1m" ]] && return 2 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
+    stub_called_with_exactly_times fc-cache 0 -f ${HOME}/.local/share/fonts
+    stub_called_with_exactly_times push_info_message_list 0 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 1 then call _install_font_ipafont if _install_font_migu1m() returns 3 (installing the font has failed by unknown error) then _install_font_ipafont() returns 0.' {
+    stub_and_eval install_the_font '{ [[ "$1" = "_install_font_migu1m" ]] && return 3 || return 0; }'
+    run install_fonts
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
+    stub_called_with_exactly_times fc-cache 0 -f ${HOME}/.local/share/fonts
+    stub_called_with_exactly_times push_info_message_list 0 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 0 if _install_font_ipafont() returns 0 (installing the font has succeeded).' {
+    stub_and_eval install_the_font '{
+        [[ "$1" = "_install_font_migu1m" ]] && return 2
+        [[ "$1" = "_install_font_ipafont" ]] && return 0
+        return 0
+    }'
+    run install_fonts
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
+    #stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    #stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 0 and called fc-cache if _install_font_ipafont() returns 1 (installing the font has succeeded).' {
+    stub_and_eval install_the_font '{
+        [[ "$1" = "_install_font_migu1m" ]] && return 2
+        [[ "$1" = "_install_font_ipafont" ]] && return 1
+        return 0
+    }'
+    run install_fonts
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 1 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
+    stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 2 if _install_font_ipafont() returns 2 (installing the font has failed).' {
+    stub_and_eval install_the_font '{
+        [[ "$1" = "_install_font_migu1m" ]] && return 2
+        [[ "$1" = "_install_font_ipafont" ]] && return 2
+        return 0
+    }'
+    run install_fonts
+
+    [[ "$status" -eq 2 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
+    #stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    #stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
+@test '#install_fonts should return 2 if _install_font_ipafont() returns 3 (installing the font has failed by unknown error).' {
+    stub_and_eval install_the_font '{
+        [[ "$1" = "_install_font_migu1m" ]] && return 2
+        [[ "$1" = "_install_font_ipafont" ]] && return 3
+        return 0
+    }'
+    run install_fonts
+
+    [[ "$status" -eq 2 ]]
+    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
+    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
+    assert_install_the_nerd_font        1
+    assert_install_the_migu1m_font      1
+    assert_install_the_noto_emoji_font  1
+    assert_install_the_ipa_font         1
+    #stub_called_with_exactly_times fc-cache 1 -f ${HOME}/.local/share/fonts
+    #stub_called_with_exactly_times push_info_message_list 1 "INFO: Font cache was recreated."
+}
+
