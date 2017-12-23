@@ -540,12 +540,12 @@ function _install_font_noto_emoji() {
 
     curl -fLo "NotoColorEmoji.ttf" \
             https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf || {
-        push_warn_message_list "ERROR: Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
+        logger_err "Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
         (( ret++ ))
     }
     curl -fLo "NotoEmoji-Regular.ttf" \
             https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf || {
-        push_warn_message_list "ERROR: Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
+        logger_err "Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
         (( ret++ ))
     }
 
