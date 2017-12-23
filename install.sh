@@ -144,14 +144,15 @@ function main() {
 }
 
 function print_post_message_list() {
-    # TODO:
     [[ ${#POST_MESSAGES[@]} -ne 0 ]] && {
-        print_boarder " Summary of the instruction  "
+        print_boarder " Summary of the instruction "
         for line in "${POST_MESSAGES[@]}"; do
             echo -e "* $line"
         done
         print_boarder
     }
+
+    return 0
 }
 
 # Output the message to stdout then push it to info message list.
