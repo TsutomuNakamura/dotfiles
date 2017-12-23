@@ -568,15 +568,13 @@ function install_packages_with_apt() {
     local output
 
     ${prefix} apt-get update || {
-        echo "ERROR: Some error has occured when updating packages with apt-get update." >&2
-        push_warn_message_list "ERROR: Some error has occured when updating packages with apt-get update."
+        logger_err "Some error has occured when updating packages with apt-get update."
         return 1
     }
 
     local pkg_cache=$(apt list --installed 2> /dev/null | grep -v -P 'Listing...' | cut -d '/' -f 1)
     if [[ -z "$pkg_cache" ]]; then
-        echo "ERROR: Failed to get installed packages with apt list --installed." >&2
-        push_warn_message_list "ERROR: Failed to get installed packages with apt list --installed."
+        logger_err "Failed to get installed packages with apt list --installed."
         return 1
     fi
 
@@ -585,7 +583,7 @@ function install_packages_with_apt() {
 
         if (grep -P "^${p}$" &> /dev/null <<< "$pkg_cache"); then
             # Remove already installed packages
-            echo "INFO: ${p} has already installed. Skipped."
+            echo "${p} has already installed. Skipped."
             unset packages[i]
             continue
         fi
@@ -594,23 +592,20 @@ function install_packages_with_apt() {
     }
 
     if [[ "${#packages_will_be_installed[@]}" -eq 0 ]]; then
-        echo "INFO: There are no packages to install"
+        echo "There are no packages to install"
         return 0
     fi
 
-    echo "INFO: Installing ${packages_will_be_installed[@]}..."
+    echo "Installing ${packages_will_be_installed[@]}..."
 
     local output="$(${prefix} apt-get install -y ${packages_will_be_installed[@]} 2>&1)" || {
-        echo "ERROR: Some error occured when installing ${packages_will_be_installed[i]}" >&2
         echo "${output}" >&2
-        push_warn_message_list "ERROR: Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
+        logger_err "Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
         return 1
     }
 
-    # push_info_message_list "INFO: Packages ${packages_will_be_installed[@]} have been installed."
-
     local installed_packages="${packages_will_be_installed[@]}"
-    push_info_message_list "INFO: Packages ${installed_packages} have been installed."
+    logger_info "Packages ${installed_packages} have been installed."
 
     return 0
 }
