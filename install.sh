@@ -516,7 +516,7 @@ function _install_font_ipafont() {
 
         [[ "$ret_of_ipafont" -ne 0 ]] && result=2
     else
-        push_warn_message_list "ERROR: Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
+        logger_err "ERROR: Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
         result=2
     fi
 
