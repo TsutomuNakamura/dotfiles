@@ -42,11 +42,11 @@ GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT=6
 GIT_UPDATE_TYPE_ABOARTED=255
 
 # Color of font red
-FONT_COLOR_GREEN='\032[0;31m'
+FONT_COLOR_GREEN='\033[0;32m'
 # Color of font yello
-FONT_COLOR_YELLOW='\032[0;33m'
+FONT_COLOR_YELLOW='\033[0;33m'
 # Color of font red
-FONT_COLOR_RED='\032[0;31m'
+FONT_COLOR_RED='\033[0;31m'
 # Color of font end
 FONT_COLOR_END='\033[0m'
 
@@ -372,7 +372,7 @@ function install_fonts() {
     install_the_font "_install_font_inconsolata_nerd" \
             "Inconsolata for Powerline Nerd Font" \
             "" \
-            "For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \
+            "For more information about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \
             "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary." \
             "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
     local ret_install_font_inconsolata_nerd=$?
@@ -382,7 +382,7 @@ function install_fonts() {
     install_the_font "_install_font_migu1m" \
             "Migu 1M Font" \
             "" \
-            "For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"." \
+            "For more information about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"." \
             "The program will install IPA font alternatively." \
             "The program will install IPA font alternatively."
     local ret_install_font_migu1m=$?
@@ -394,7 +394,7 @@ function install_fonts() {
         install_the_font "_install_font_noto_emoji" \
                 "NotoEmojiFont" \
                 "" \
-                "For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
+                "For more information about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
                 "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary." \
                 "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary."
         local ret_install_font_noto_emoji=$?
