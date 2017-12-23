@@ -130,6 +130,6 @@ function teardown() {
     [[ "$(stub_called_times install_packages_with_pacman)"  -eq 0 ]]
     [[ "$(stub_called_times logger_err)"  -eq 1 ]]
 
-    stub_called_with_exactly_times logger_err 1 "ERROR: Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
+    stub_called_with_exactly_times logger_err 1 "Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
 }
 
