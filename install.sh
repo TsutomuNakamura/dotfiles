@@ -1170,17 +1170,24 @@ function init_repo() {
     pushd "$homedir_of_repo"
 
     update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch" || {
-        echo "init_repo() was aborted" >&2
+        logger_err "Updating repository of dotfiles was aborted due to previous error"
         return 1
     }
     local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
 
     # Freeze .gitconfig for not to push username and email
-    [[ -f .gitconfig ]] && git -C "$path_to_git_repo" update-index --assume-unchanged .gitconfig
+    [[ -f "${path_to_git_repo}/.gitconfig" ]] \
+            && git -C "$path_to_git_repo" update-index --assume-unchanged .gitconfig
 
-    echo "Updating submodules..."
-    git -C "$path_to_git_repo" submodule init
-    git -C "$path_to_git_repo" submodule update
+    git -C "$path_to_git_repo" submodule init || {
+        logger_err "\"git submodule init\" has failed. Submodules may not be installed correctly on your environment"
+        return 1
+    }
+
+    git -C "$path_to_git_repo" submodule update || {
+        logger_err "\"git submodule update\" has failed. Submodules may not be installed correctly on your environment"
+        return 1
+    }
 
     popd
 }
