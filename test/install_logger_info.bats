@@ -7,7 +7,7 @@ function setup() {
 
 # function teardown() {}
 
-@test "#logger_info should call echo and push_info_message_list()" {
+@test "#logger_info should call echo and push_post_message_list()" {
     run logger_info "foo\n\"bar\""
 
     [[ "$status" -eq 0 ]]

@@ -115,7 +115,6 @@ function setup() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times apt-get)" -eq 0 ]]
-    [[ "$(stub_called_times push_info_message_list)" -eq 0 ]]
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_err)" -eq 1 ]]
 
