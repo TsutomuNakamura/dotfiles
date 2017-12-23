@@ -654,7 +654,7 @@ function install_packages_with_pacman() {
     local i
     local result=0
     local installed_packages
-    local failed_to_installe_packages
+    local failed_to_install_packages
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         if ${prefix} pacman -Q "${packages[i]}"; then
@@ -676,7 +676,7 @@ function install_packages_with_pacman() {
             ${prefix} pacman -S --noconfirm ${packages_will_be_installed[@]} && {
                 installed_packages+="${packages_will_be_installed[@]} "
             }  || {
-                failed_to_installe_packages+="${packages_will_be_installed[@]} "
+                failed_to_install_packages+="${packages_will_be_installed[@]} "
                 ((result++))
             }
         fi
@@ -685,16 +685,16 @@ function install_packages_with_pacman() {
             ${prefix} pacman -S --noconfirm "${packages_may_conflict[i]}" && {
                 installed_packages+="${packages_may_conflict[i]} "
             } || {
-                failed_to_installe_packages+="${packages_may_conflict[i]} "
+                failed_to_install_packages+="${packages_may_conflict[i]} "
                 ((result++))
             }
         }
     fi
 
     [[ ! -z "$installed_packages" ]] && \
-            push_info_message_list "NOTICE: Package(s) \"${installed_packages% }\" have been installed on your OS."
-    [[ ! -z "$failed_to_installe_packages" ]] && \
-            push_warn_message_list "ERROR: Package(s) \"${failed_to_installe_packages% }\" have not been installed on your OS for some error.\n  Please install these packages manually."
+            logger_info "Package(s) \"${installed_packages% }\" have been installed on your OS."
+    [[ ! -z "$failed_to_install_packages" ]] && \
+            logger_err "Package(s) \"${failed_to_install_packages% }\" have not been installed on your OS for some error.\n  Please install these packages manually."
 
     return $result
 }
