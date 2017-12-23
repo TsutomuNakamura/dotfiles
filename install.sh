@@ -210,13 +210,12 @@ function init() {
         if do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
             install_packages || {
-                echo "ERROR: Failed to install dependency packages."
-                local m="ERROR: Failed to install dependency packages."
+                local m="Failed to install dependency packages."
                 m+="\n  If you want to continue following processes that after installing packages, you can specify the option \"-n (no-install-packages)\"."
-                m+="\n  ex)"
-                m+="\n    curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -n"
+                m+="\n  ex) "
+                m+="\n    bash -- <(curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh) -n"
 
-                push_warn_message_list "$m"
+                logger_err "$m"
                 return 1
             }
         else
@@ -237,15 +236,15 @@ function init() {
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
     init_repo "$url_of_repo" "$branch" || {
-        echo "ERROR: Failed to initializing repository. Remaining install process will be aborted." >&2
+        logger_err "Failed to initializing repository. Remaining install process will be aborted."
         return 1
     }
     install_fonts || {
-        echo "ERROR: Failed to installing fonts. Remaining install process will be aborted." >&2
+        logger_err "Failed to installing fonts. Remaining install process will be aborted."
         return 1
     }
     init_vim_environment || {
-        echo "ERROR: Failed to initializing vim environment. Remaining install process will be aborted." >&2
+        logger_err "Failed to initializing vim environment. Remaining install process will be aborted."
         return 1
     }
 
