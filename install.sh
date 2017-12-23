@@ -335,16 +335,13 @@ function install_the_font() {
             echo -e "INFO: ${font_name} has already installed.${extra_msg_on_already_installed}"
             ;;
         1 )
-            echo -e "INFO: ${font_name} has installed.${extra_msg_on_installed}"
-            push_info_message_list "INFO: ${font_name} has installed.${extra_msg_on_installed}"
+            logger_info "${font_name} has installed.${extra_msg_on_installed}"
             ;;
         2 )
-            echo -e "ERROR: Failed to install ${font_name}.${extra_msg_on_failed}" >&2
-            push_warn_message_list "ERROR: Failed to install ${font_name}.${extra_msg_on_failed}"
+            logger_err "Failed to install ${font_name}.${extra_msg_on_failed}"
             ;;
         * )
-            echo -e "ERROR: Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}" >&2
-            push_warn_message_list "ERROR: Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}"
+            logger_err "Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}"
             ;;
     esac
 
