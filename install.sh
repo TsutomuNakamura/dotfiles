@@ -372,7 +372,7 @@ function install_fonts() {
     install_the_font "_install_font_inconsolata_nerd" \
             "Inconsolata for Powerline Nerd Font" \
             "" \
-            "For more infotmation about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \
+            "For more information about the font, please see \"https://github.com/ryanoasis/nerd-fonts\"." \
             "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary." \
             "Please install it manually from \"https://github.com/ryanoasis/nerd-fonts\" if necessary."
     local ret_install_font_inconsolata_nerd=$?
@@ -382,7 +382,7 @@ function install_fonts() {
     install_the_font "_install_font_migu1m" \
             "Migu 1M Font" \
             "" \
-            "For more infotmation about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"." \
+            "For more information about the font, please see \"https://ja.osdn.net/projects/mix-mplus-ipa/\"." \
             "The program will install IPA font alternatively." \
             "The program will install IPA font alternatively."
     local ret_install_font_migu1m=$?
@@ -394,7 +394,7 @@ function install_fonts() {
         install_the_font "_install_font_noto_emoji" \
                 "NotoEmojiFont" \
                 "" \
-                "For more infotmation about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
+                "For more information about the font, please see \"https://github.com/googlei18n/noto-emoji\"." \
                 "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary." \
                 "Please install it manually from \"https://github.com/googlei18n/noto-emoji\" if necessary."
         local ret_install_font_noto_emoji=$?
