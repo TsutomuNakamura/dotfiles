@@ -4,7 +4,7 @@ load helpers
 function setup() {
     command mkdir -p "${HOME}/.local/share/fonts"
     command cd "${HOME}/.local/share/fonts"
-    stub push_warn_message_list
+    stub logger_err
     stub_and_eval rm '{ command rm "$@"; }'
     stub_and_eval curl '{
         if [[ "$2" == "NotoColorEmoji.ttf" ]]; then
@@ -130,11 +130,11 @@ function teardown() {
     [[ "$status" -eq 2 ]]
     [[ "$(stub_called_times curl)"                      -eq 2 ]]
     [[ "$(stub_called_times rm)"                        -eq 2 ]]
-    [[ "$(stub_called_times push_warn_message_list)"    -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                -eq 1 ]]
     stub_called_with_exactly_times rm 2 -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
     stub_called_with_exactly_times curl 1 -fLo "NotoColorEmoji.ttf" https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf
     stub_called_with_exactly_times curl 1 -fLo "NotoEmoji-Regular.ttf" https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf
-    stub_called_with_exactly_times push_warn_message_list 1 "ERROR: Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
+    stub_called_with_exactly_times logger_err 1 "Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
     [[ ! -e "NotoColorEmoji.ttf" ]]
     [[ ! -e "NotoEmoji-Regular.ttf" ]]
 }
@@ -154,11 +154,11 @@ function teardown() {
     [[ "$status" -eq 2 ]]
     [[ "$(stub_called_times curl)"                      -eq 2 ]]
     [[ "$(stub_called_times rm)"                        -eq 2 ]]
-    [[ "$(stub_called_times push_warn_message_list)"    -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"    -eq 1 ]]
     stub_called_with_exactly_times rm 2 -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
     stub_called_with_exactly_times curl 1 -fLo "NotoColorEmoji.ttf" https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf
     stub_called_with_exactly_times curl 1 -fLo "NotoEmoji-Regular.ttf" https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf
-    stub_called_with_exactly_times push_warn_message_list 1 "ERROR: Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
+    stub_called_with_exactly_times logger_err 1 "Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
     [[ ! -e "NotoColorEmoji.ttf" ]]
     [[ ! -e "NotoEmoji-Regular.ttf" ]]
 }

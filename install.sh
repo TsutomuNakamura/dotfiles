@@ -210,13 +210,12 @@ function init() {
         if do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
             install_packages || {
-                echo "ERROR: Failed to install dependency packages."
-                local m="ERROR: Failed to install dependency packages."
+                local m="Failed to install dependency packages."
                 m+="\n  If you want to continue following processes that after installing packages, you can specify the option \"-n (no-install-packages)\"."
-                m+="\n  ex)"
-                m+="\n    curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh | bash -s -- -n"
+                m+="\n  ex) "
+                m+="\n    bash -- <(curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/install.sh) -n"
 
-                push_warn_message_list "$m"
+                logger_err "$m"
                 return 1
             }
         else
@@ -237,15 +236,15 @@ function init() {
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
     init_repo "$url_of_repo" "$branch" || {
-        echo "ERROR: Failed to initializing repository. Remaining install process will be aborted." >&2
+        logger_err "Failed to initializing repository. Remaining install process will be aborted."
         return 1
     }
     install_fonts || {
-        echo "ERROR: Failed to installing fonts. Remaining install process will be aborted." >&2
+        logger_err "Failed to installing fonts. Remaining install process will be aborted."
         return 1
     }
     init_vim_environment || {
-        echo "ERROR: Failed to initializing vim environment. Remaining install process will be aborted." >&2
+        logger_err "Failed to initializing vim environment. Remaining install process will be aborted."
         return 1
     }
 
@@ -256,18 +255,22 @@ function init() {
 function install_packages() {
     local result=0
 
-    if [[ "$(get_distribution_name)" = "debian" ]]; then
+    if [[ "$(get_distribution_name)" == "debian" ]]; then
         install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger               || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "centos" ]]; then
+    elif [[ "$(get_distribution_name)" == "centos" ]]; then
         # TODO: ranger not supported in centos
-        push_info_message_list "INFO: Package \"ranger\" will not be installed, so please instlal it manually."
-        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal          || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "fedora" ]]; then
+        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal \
+            && logger_info "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
+            || (( result++ ))
+    elif [[ "$(get_distribution_name)" == "fedora" ]]; then
         install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger        || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "arch" ]]; then
+    elif [[ "$(get_distribution_name)" == "arch" ]]; then
         install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal ranger    || (( result++ ))
-    elif [[ "$(get_distribution_name)" = "mac" ]]; then
+    elif [[ "$(get_distribution_name)" == "mac" ]]; then
         install_packages_with_homebrew vim ctags tmux zsh unzip                             || (( result++ ))
+    else
+        logger_err "Failed to get OS distribution to install packages."
+        (( result++ ))
     fi
 
     return $result
@@ -336,16 +339,13 @@ function install_the_font() {
             echo -e "INFO: ${font_name} has already installed.${extra_msg_on_already_installed}"
             ;;
         1 )
-            echo -e "INFO: ${font_name} has installed.${extra_msg_on_installed}"
-            push_info_message_list "INFO: ${font_name} has installed.${extra_msg_on_installed}"
+            logger_info "${font_name} has installed.${extra_msg_on_installed}"
             ;;
         2 )
-            echo -e "ERROR: Failed to install ${font_name}.${extra_msg_on_failed}" >&2
-            push_warn_message_list "ERROR: Failed to install ${font_name}.${extra_msg_on_failed}"
+            logger_err "Failed to install ${font_name}.${extra_msg_on_failed}"
             ;;
         * )
-            echo -e "ERROR: Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}" >&2
-            push_warn_message_list "ERROR: Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}"
+            logger_err "Unknown error was occured when installing ${font_name}.${extra_msg_on_unknown_err}"
             ;;
     esac
 
@@ -413,7 +413,7 @@ function install_fonts() {
 
     if [[ "$flag_fc_cache" -ne 0 ]]; then
         echo "Building font information cache files with \"fc-cache -f ${font_dir}\""
-        fc-cache -f $font_dir && push_info_message_list "INFO: Font cache was recreated."
+        fc-cache -f $font_dir && logger_info "Font cache was recreated."
     fi
 
     return $result
@@ -516,7 +516,7 @@ function _install_font_ipafont() {
 
         [[ "$ret_of_ipafont" -ne 0 ]] && result=2
     else
-        push_warn_message_list "ERROR: Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
+        logger_err "Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
         result=2
     fi
 
@@ -540,12 +540,12 @@ function _install_font_noto_emoji() {
 
     curl -fLo "NotoColorEmoji.ttf" \
             https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf || {
-        push_warn_message_list "ERROR: Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
+        logger_err "Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
         (( ret++ ))
     }
     curl -fLo "NotoEmoji-Regular.ttf" \
             https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf || {
-        push_warn_message_list "ERROR: Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
+        logger_err "Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
         (( ret++ ))
     }
 
@@ -568,15 +568,13 @@ function install_packages_with_apt() {
     local output
 
     ${prefix} apt-get update || {
-        echo "ERROR: Some error has occured when updating packages with apt-get update." >&2
-        push_warn_message_list "ERROR: Some error has occured when updating packages with apt-get update."
+        logger_err "Some error has occured when updating packages with apt-get update."
         return 1
     }
 
     local pkg_cache=$(apt list --installed 2> /dev/null | grep -v -P 'Listing...' | cut -d '/' -f 1)
     if [[ -z "$pkg_cache" ]]; then
-        echo "ERROR: Failed to get installed packages with apt list --installed." >&2
-        push_warn_message_list "ERROR: Failed to get installed packages with apt list --installed."
+        logger_err "Failed to get installed packages with apt list --installed."
         return 1
     fi
 
@@ -585,7 +583,7 @@ function install_packages_with_apt() {
 
         if (grep -P "^${p}$" &> /dev/null <<< "$pkg_cache"); then
             # Remove already installed packages
-            echo "INFO: ${p} has already installed. Skipped."
+            echo "${p} has already installed. Skipped."
             unset packages[i]
             continue
         fi
@@ -594,23 +592,20 @@ function install_packages_with_apt() {
     }
 
     if [[ "${#packages_will_be_installed[@]}" -eq 0 ]]; then
-        echo "INFO: There are no packages to install"
+        echo "There are no packages to install"
         return 0
     fi
 
-    echo "INFO: Installing ${packages_will_be_installed[@]}..."
+    echo "Installing ${packages_will_be_installed[@]}..."
 
     local output="$(${prefix} apt-get install -y ${packages_will_be_installed[@]} 2>&1)" || {
-        echo "ERROR: Some error occured when installing ${packages_will_be_installed[i]}" >&2
         echo "${output}" >&2
-        push_warn_message_list "ERROR: Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
+        logger_err "Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
         return 1
     }
 
-    # push_info_message_list "INFO: Packages ${packages_will_be_installed[@]} have been installed."
-
     local installed_packages="${packages_will_be_installed[@]}"
-    push_info_message_list "INFO: Packages ${installed_packages} have been installed."
+    logger_info "Packages ${installed_packages} have been installed."
 
     return 0
 }
@@ -659,7 +654,7 @@ function install_packages_with_pacman() {
     local i
     local result=0
     local installed_packages
-    local failed_to_installe_packages
+    local failed_to_install_packages
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         if ${prefix} pacman -Q "${packages[i]}"; then
@@ -681,7 +676,7 @@ function install_packages_with_pacman() {
             ${prefix} pacman -S --noconfirm ${packages_will_be_installed[@]} && {
                 installed_packages+="${packages_will_be_installed[@]} "
             }  || {
-                failed_to_installe_packages+="${packages_will_be_installed[@]} "
+                failed_to_install_packages+="${packages_will_be_installed[@]} "
                 ((result++))
             }
         fi
@@ -690,16 +685,16 @@ function install_packages_with_pacman() {
             ${prefix} pacman -S --noconfirm "${packages_may_conflict[i]}" && {
                 installed_packages+="${packages_may_conflict[i]} "
             } || {
-                failed_to_installe_packages+="${packages_may_conflict[i]} "
+                failed_to_install_packages+="${packages_may_conflict[i]} "
                 ((result++))
             }
         }
     fi
 
     [[ ! -z "$installed_packages" ]] && \
-            push_info_message_list "NOTICE: Package(s) \"${installed_packages% }\" have been installed on your OS."
-    [[ ! -z "$failed_to_installe_packages" ]] && \
-            push_warn_message_list "ERROR: Package(s) \"${failed_to_installe_packages% }\" have not been installed on your OS for some error.\n  Please install these packages manually."
+            logger_info "Package(s) \"${installed_packages% }\" have been installed on your OS."
+    [[ ! -z "$failed_to_install_packages" ]] && \
+            logger_err "Package(s) \"${failed_to_install_packages% }\" have not been installed on your OS for some error.\n  Please install these packages manually."
 
     return $result
 }

@@ -6,7 +6,7 @@ function setup() {
     cd "${HOME}/.local/share/fonts"
     function do_i_have_admin_privileges() { return 0; }
     function get_distribution_name() { echo "debian"; }
-    stub push_warn_message_list
+    stub logger_err
 
     stub install_packages_with_apt
     stub install_packages_with_dnf
@@ -116,5 +116,20 @@ function teardown() {
     [[ "$(stub_called_times install_packages_with_pacman)"  -eq 0 ]]
     [[ "$(stub_called_times true)"                          -eq 1 ]]
     stub_called_with_exactly_times true 1
+}
+
+@test '#_install_font_ipafont should return 2 if the user does not hav admin priviledge' {
+    stub_and_eval do_i_have_admin_privileges '{ return 1; }'
+
+    run _install_font_ipafont
+
+    [[ "$status" -eq 2 ]]
+    [[ "$(stub_called_times install_packages_with_pacman)"  -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_apt)"     -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_dnf)"     -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_pacman)"  -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"  -eq 1 ]]
+
+    stub_called_with_exactly_times logger_err 1 "Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
 }
 

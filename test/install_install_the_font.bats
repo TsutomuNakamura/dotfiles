@@ -3,8 +3,8 @@ load helpers
 
 function setup() {
     cd "${HOME}"
-    stub push_info_message_list
-    stub push_warn_message_list
+    stub logger_info
+    stub logger_err
 }
 
 function teardown() {
@@ -17,9 +17,9 @@ function teardown() {
     unset -f eval
 
     [[ "$status" -eq 0 ]]
-    [[ "$output" = "$(echo -e "INFO: font name has already installed.\n  msg1")" ]]
-    [[ "$(stub_called_times push_info_message_list)" = "0" ]]
-    [[ "$(stub_called_times push_warn_message_list)" = "0" ]]
+    [[ "$output" == "$(echo -e "INFO: font name has already installed.\n  msg1")" ]]
+    [[ "$(stub_called_times logger_info)" = "0" ]]
+    [[ "$(stub_called_times logger_err)" = "0" ]]
 }
 
 @test '#install_the_font should return 0 and logged installe has successfully if the font has installed successfully.' {
@@ -27,12 +27,10 @@ function teardown() {
     run install_the_font "install_cmd" "font name" "msg1" "msg 2" "msg \"3\"" ""
     unset -f eval
 
-    echo -e "$output"
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times push_info_message_list)" = "1" ]]
-    [[ "$(stub_called_times push_warn_message_list)" = "0" ]]
-    [[ "$output" = "$(echo -e "INFO: font name has installed.\n  msg 2")" ]]
-    stub_called_with_exactly_times push_info_message_list 1 "INFO: font name has installed.\n  msg 2"
+    [[ "$(stub_called_times logger_info)" = "1" ]]
+    [[ "$(stub_called_times logger_err)" = "0" ]]
+    stub_called_with_exactly_times logger_info 1 "font name has installed.\n  msg 2"
 }
 
 @test '#install_the_font should return 1 and logged an error if the installing the font has been failed.' {
@@ -40,10 +38,9 @@ function teardown() {
     run install_the_font "install_cmd" "font name" "msg1" "msg 2" "msg \"3\"" ""
 
     [[ "$status" -eq 2 ]]
-    [[ "$(stub_called_times push_info_message_list)" = "0" ]]
-    [[ "$(stub_called_times push_warn_message_list)" = "1" ]]
-    [[ "$output" = "$(echo -e "ERROR: Failed to install font name.\n  msg \"3\"")" ]]
-    stub_called_with_exactly_times push_warn_message_list 1 "ERROR: Failed to install font name.\n  msg \"3\""
+    [[ "$(stub_called_times logger_info)" = "0" ]]
+    [[ "$(stub_called_times logger_err)" = "1" ]]
+    stub_called_with_exactly_times logger_err 1 "Failed to install font name.\n  msg \"3\""
 }
 
 @test '#install_the_font should return 1 and logged an error if the installing the font has been encounted an unknown error.' {
@@ -51,10 +48,9 @@ function teardown() {
     run install_the_font "install_cmd" "font name" "msg1" "msg 2" "msg \"3\"" ""
 
     [[ "$status" -eq 3 ]]
-    [[ "$(stub_called_times push_info_message_list)" = "0" ]]
-    [[ "$(stub_called_times push_warn_message_list)" = "1" ]]
-    [[ "$output" = "ERROR: Unknown error was occured when installing font name." ]]
-    stub_called_with_exactly_times push_warn_message_list 1 "ERROR: Unknown error was occured when installing font name."
+    [[ "$(stub_called_times logger_info)" = "0" ]]
+    [[ "$(stub_called_times logger_err)" = "1" ]]
+    stub_called_with_exactly_times logger_err 1 "Unknown error was occured when installing font name."
 }
 
 
