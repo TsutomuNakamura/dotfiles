@@ -584,7 +584,6 @@ function install_packages_with_apt() {
         if (grep -P "^${p}$" &> /dev/null <<< "$pkg_cache"); then
             # Remove already installed packages
             echo "${p} has already installed. Skipped."
-            unset packages[i]
             continue
         fi
 
