@@ -610,10 +610,18 @@ function install_packages_with_apt() {
 }
 
 function install_packages_with_yum() {
+    [[ "${#@}" -eq 0 ]] && {
+        echo "ERROR: Failed to find packages to install at install_packages_with_yum()" >&2
+        return 1
+    }
     install_packages_on_redhat "yum" $@
 }
 
 function install_packages_with_dnf() {
+    [[ "${#@}" -eq 0 ]] && {
+        echo "ERROR: Failed to find packages to install at install_packages_with_dnf()" >&2
+        return 1
+    }
     install_packages_on_redhat "dnf" $@
 }
 
