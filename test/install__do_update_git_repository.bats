@@ -3,7 +3,7 @@ load helpers
 
 function setup() {
     cd ~
-    mkdir "/var/tmp/.dotfiles"
+    mkdir -p "/var/tmp/.dotfiles"
     stub git
     stub rm
     stub logger_info

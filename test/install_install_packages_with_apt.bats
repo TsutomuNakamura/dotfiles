@@ -6,6 +6,7 @@ function setup() {
     stub sudo
     stub logger_info
     stub logger_err
+    function command() { return 0; }
 }
 
 # function teardown() {}

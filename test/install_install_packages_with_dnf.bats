@@ -4,6 +4,7 @@ load helpers
 
 function setup() {
     stub install_packages_on_redhat
+    function command() { return 0; }
 }
 function teardown() {
     true
