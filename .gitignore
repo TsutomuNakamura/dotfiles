@@ -11,3 +11,5 @@
 .vim/snippets/bats.snippets
 .vim/snippets/chef.snippets
 
+test/lib/
+

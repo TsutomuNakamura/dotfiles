@@ -1,68 +1,77 @@
-#!/bin/bash
-SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-cd "${SCRIPT_DIR}"
+#!/usr/bin/env bash
 
-if (command -v hostname > /dev/null); then
-    HOST="$(hostname)"
-elif (command -v uname > /dev/null); then
-    HOST="$(uname -n)"
-fi
-[[ "${HOST}" = "arch-dot-test" ]] \
-        || [[ "${HOST}" = "fedora-dot-test" ]] \
-        || [[ "${HOST}" = "centos-dot-test" ]] \
-        || {
-    echo "ERROR: This test script is not allowed executing on unexpected host because of some instruction make destructive."
-    echo "ERROR: It is able to that running this script on the hostname \"arch-dot-test\", "centos-dot-test" and \"fedora-dot-test\"."
-    exit 1
-}
+URL_OF_BATS="https://github.com/sstephenson/bats.git"
+URL_OF_STUBSH="https://github.com/TsutomuNakamura/stub4bats.sh"
 
-# bats is installed or not?
-export PATH="${SCRIPT_DIR}/bats/bin:${PATH}"
-if ! (command -v bats > /dev/null); then
-    rm -rf bats.git bats
-    git clone --depth 1 https://github.com/sstephenson/bats.git bats.git
-    mkdir -p bats
-    cd bats.git
-    ./install.sh "${SCRIPT_DIR}/bats"
-    sync
-    cd ../
-fi
+function main() {
+    local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# stub.sh is installed or not
-if [[ ! -d "${SCRIPT_DIR}/stub4bats.sh" ]]; then
-    git clone --depth 1 https://github.com/TsutomuNakamura/stub4bats.sh
-fi
-# Only compatible for GNU getopt
-opts=$(getopt -o "t" --long "tap" -- "$@")
-[[ "$?" -ne 0 ]] && {
-    echo "ERROR: Some error was occured in getopt"
-    exit 1
-}
-eval set -- "$opts"
-opts_for_bats=""
+    # Is this container environment
+    if [[ ! -e "/.dockerenv" ]] && [[ "${TRAVIS}" != "true" ]]; then
+        echo "ERROR: This sciprt can run only on docker environment." >&2
+        echo "       If you want to run except the docker environment, specifi --no-docker-environment "
+        exit 1
+    fi
 
-while true; do
-    case "$1" in
-        -t | --tap)
-            opts_for_bats+="--tap "
-            shift
+    local dir_of_test_lib="${script_dir}/test/lib"
+    [[ ! -d "${dir_of_test_lib}" ]] && mkdir -p "${dir_of_test_lib}"
+
+    cd "${dir_of_test_lib}" || {
+        echo "ERROR: Failed to change directory ${dir_of_test_lib}."
+        return 1
+    }
+
+    # bats is installed or not?
+    export PATH="${dir_of_test_lib}/bats/bin:${PATH}"
+    ! (command -v bats > /dev/null 2>&1) && {
+        rm -rf bats.git bats
+        git clone --depth 1 "${URL_OF_BATS}" bats.git
+        mkdir -p bats
+        pushd bats.git
+        ./install.sh "${dir_of_test_lib}/bats"
+        sync
+        popd
+    }
+
+    # stub.sh is installed or not
+    [[ ! -d "./stub4bats.sh" ]] && {
+        rm -rf stub4bats.sh
+        git clone --depth 1 "${URL_OF_STUBSH}" stub4bats.sh
+    }
+
+    cd "$script_dir"
+
+    local optspec=":t-:"
+    local opts_for_bats=""
+
+    while getopts "$optspec" optchar; do
+        if [[ "$optchar" == "t" ]]; then
+            optchar="-" && OPTARG="tap"
+        fi
+
+        case "$optchar" in
+        - )
+            case "$OPTARG" in
+            tap )
+                opts_for_bats+="--tap "
+                ;;
+            ? )
+                echo "ERROR: Unknown option" >&2
+                return 1
+            esac
             ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            echo "ERROR: Some error occured at getopt"
-            exit 1
-            ;;
-    esac
-done
-
-if [[ "$#" -ne 0 ]]; then
-    for f in "$@"; do
-        bats $opts_for_bats $f
+        esac
     done
-else
-    bats $opts_for_bats ./test/*.bats
-fi
+
+    if [[ "$#" -ne 0 ]]; then
+        for f in "$@"; do
+            bats $opts_for_bats "$f"
+        done
+    else
+        bats $opts_for_bats ./test/*.bats
+    fi
+    exit
+}
+
+main "$@"
 

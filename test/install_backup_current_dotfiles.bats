@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers
+load helpers "install.sh"
 
 function setup() {
     mkdir -p ${HOME}/${DOTDIR}
@@ -9,6 +9,10 @@ function setup() {
 
 function teardown() {
     rm -rf ${HOME}/${DOTDIR} ${HOME}/${BACKUPDIR} ${HOME}/.config ${HOME}/.config2 ${HOME}/.local ${HOME}/.vim ${HOME}/bin ${HOME}/foo ${HOME}/bar
+}
+
+function count() {
+    find $1 -maxdepth 1 -mindepth 1 \( -type f -or -type d -or -type l \) | wc -l;
 }
 
 @test '#backup_current_dotfiles should print a message if dotfiles directory was not existed' {
@@ -27,7 +31,6 @@ function teardown() {
 
     run backup_current_dotfiles
 
-    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ ! -e ${HOME}/.vimrc ]]

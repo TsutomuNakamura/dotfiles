@@ -1,12 +1,18 @@
 #!/usr/bin/env bats
-load helpers
+load helpers "install.sh"
 
 function setup() {
     mkdir -p ${HOME}/${DOTDIR}
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR}
+    command rm -rf ${HOME}/${DOTDIR}
+}
+
+function contains() {
+    local e
+    for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+    return 1
 }
 
 @test '#get_target_dotfiles should get the file with the name that starts with dot' {
