@@ -9,11 +9,9 @@ function teardown() {
     command rm -rf ./.dotfiles ./.config ./.local ./Library
 }
 
-#                      On Linux               On Mac
-# XDG_CONFIG_HOME   -> ${HOME}/.config        ${HOME}/Library/Preferences
-# XDG_DATA_HOME     -> ${HOME}/.local/share   ${HOME}/Library
-## On Mac
-# 
+function count() {
+    find $1 -maxdepth 1 -mindepth 1 \( -type f -or -type d -or -type l \) | wc -l;
+}
 
 @test '#deploy_xdg_base_directory should deploy resources in "~/.dotfiles/XDG_CONFIG_HOME" to "~/.config" on Linux' {
     mkdir -p .dotfiles/XDG_CONFIG_HOME/foo
