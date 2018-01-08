@@ -15,6 +15,7 @@ function setup() {
         fi
         return 1
     }'
+    function command() { return 0; }
     stub logger_info
     stub logger_err
 }

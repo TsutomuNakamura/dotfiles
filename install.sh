@@ -560,7 +560,8 @@ function _install_font_noto_emoji() {
     return 2
 }
 
-# Installing packages with apt
+# Installing packages with apt.
+# Please call this function only after call do_i_have_admin_privileges() which the return-code is 0(true).
 function install_packages_with_apt() {
     declare -a packages=($@)
     declare -a packages_will_be_installed
@@ -625,6 +626,8 @@ function install_packages_with_dnf() {
     install_packages_on_redhat "dnf" $@
 }
 
+# Installing packages with yum or dnf on Red Hat like environments.
+# Please call this function only after call do_i_have_admin_privileges() which the return-code is 0(true).
 function install_packages_on_redhat() {
     local command="$1" ; shift
     declare -a packages=($@)
@@ -666,6 +669,8 @@ function install_packages_on_redhat() {
     return $ret
 }
 
+# Installing packages with pacman.
+# Please call this function only after call do_i_have_admin_privileges() which the return-code is 0(true).
 function install_packages_with_pacman() {
     declare -a packages=("$@")
     declare -a packages_will_be_installed=()
