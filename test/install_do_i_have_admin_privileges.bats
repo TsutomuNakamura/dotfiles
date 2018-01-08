@@ -1,6 +1,5 @@
 #!/usr/bin/env bats
-
-load helpers
+load helpers "install.sh"
 
 # This test case must be run the user that has root privileges or belong to sudoers.
 @test '#do_i_have_admin_privileges' {

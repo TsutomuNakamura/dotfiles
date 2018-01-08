@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers
+load helpers "install.sh"
 
 function setup() {
     stub push_post_message_list

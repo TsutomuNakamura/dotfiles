@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers
+load helpers "install.sh"
 
 function setup() {
     unset XDG_CONFIG_HOME

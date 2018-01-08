@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers
+load helpers "install.sh"
 
 # XDG_CONFIG_HOME
 #     "~/.config" (Linux)
