@@ -10,9 +10,10 @@ load helpers "install.sh"
     stub_and_eval git '{ echo "origin"; }'
     run get_git_remote_aliases "~/testdir" remotes
 
-    echo "$output"
+    eval "$output"
     [[ "$status" -eq 0 ]]
-    [[ "$output" == "declare -a remotes=([0]=\"origin\")" ]]
+    [[ "${#remotes[@]}" -eq 1 ]]
+    [[ "${remotes[0]}" == "origin" ]]
     [[ $(stub_called_times git) -eq 1 ]]
 }
 
@@ -20,9 +21,11 @@ load helpers "install.sh"
     stub_and_eval git '{ echo "aaaa"; echo "origin"; }'
     run get_git_remote_aliases "~/testdir" foo
 
-    echo "$output"
+    eval "$output"
     [[ "$status" -eq 0 ]]
-    [[ "$output" == "declare -a foo=([0]=\"aaaa\" [1]=\"origin\")" ]]
+    [[ "${#foo[@]}" -eq 2 ]]
+    [[ "${foo[0]}" == "aaaa" ]]
+    [[ "${foo[1]}" == "origin" ]]
     [[ $(stub_called_times git) -eq 1 ]]
 }
 
@@ -30,9 +33,11 @@ load helpers "install.sh"
     stub_and_eval git '{ echo "aaaa"; echo "origin"; }'
     run get_git_remote_aliases "~/testdir" remotes
 
-    echo "$output"
+    eval "$output"
     [[ "$status" -eq 0 ]]
-    [[ "$output" == "declare -a remotes=([0]=\"aaaa\" [1]=\"origin\")" ]]
+    [[ "${#remotes[@]}" -eq 2 ]]
+    [[ "${remotes[0]}" == "aaaa" ]]
+    [[ "${remotes[1]}" == "origin" ]]
     [[ $(stub_called_times git) -eq 1 ]]
 }
 
@@ -40,8 +45,8 @@ load helpers "install.sh"
     stub_and_eval git '{ true; }'
     run get_git_remote_aliases "~/testdir" remotes
 
-    echo "$output"
-    [[ "$output" == "declare -a remotes" ]]
+    eval "$output"
+    [[ "${#remotes[@]}" -eq 0 ]]
     [[ $(stub_called_times git) -eq 1 ]]
 }
 
@@ -49,8 +54,9 @@ load helpers "install.sh"
     stub_and_eval git '{ echo; }'
     run get_git_remote_aliases "~/testdir" remotes
 
-    echo "$output"
-    [[ "$output" == "declare -a remotes=([0]=\"\")" ]]
+    eval "$output"
+    [[ "${#remotes[@]}" -eq 1 ]]
+    [[ "${remotes[0]}" == "" ]]
     [[ $(stub_called_times git) -eq 1 ]]
 }
 
