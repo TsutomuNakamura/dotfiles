@@ -6,7 +6,7 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf ${HOME}/${DOTDIR}
+    command rm -rf ${HOME}/${DOTDIR}
 }
 
 @test '#get_target_dotfiles should get the file with the name that starts with dot' {

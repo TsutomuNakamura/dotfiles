@@ -2,7 +2,7 @@
 load helpers "install.sh"
 
 function setup() {
-    rm -rf /var/tmp/{..?*,.[!.]*,*}
+    command rm -rf /var/tmp/{foo,bar,baz}
     stub mkdir
     stub logger_err
     stub_and_eval get_git_remote_aliases '{ echo "declare -a remotes=([0]=\"origin\")"; }'
@@ -10,7 +10,7 @@ function setup() {
     stub_and_eval determin_update_type_of_repository '{ return $GIT_UPDATE_TYPE_JUST_CLONE; }'
 }
 function teardown() {
-    rm -rf /var/tmp/{..?*,.[!.]*,*}
+    command rm -rf /var/tmp/{foo,bar,baz}
 }
 
 @test '#update_git_repo should call _do_update_git_repository()' {

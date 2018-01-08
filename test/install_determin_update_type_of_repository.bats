@@ -2,11 +2,11 @@
 load helpers "install.sh"
 
 function setup() {
-    rm -rf /var/tmp/{..?*,.[!.]*,*}
+    command rm -rf /var/tmp/{foo,bar,baz}
     mkdir -p /var/tmp/foo; touch /var/tmp/foo/bar.txt
 }
 function teardown() {
-    rm -rf /var/tmp/{..?*,.[!.]*,*}
+    command rm -rf /var/tmp/{foo,bar,baz}
 }
 
 @test '#determin_update_type_of_repository should return GIT_UPDATE_TYPE_JUST_CLONE if target directory was not existed.' {

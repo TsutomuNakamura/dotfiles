@@ -6,7 +6,7 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf ./.dotfiles ./.config ./.local ./Library
+    command rm -rf ./.dotfiles ./.config ./.local ./Library
 }
 
 #                      On Linux               On Mac

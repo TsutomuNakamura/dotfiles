@@ -13,7 +13,7 @@ function setup() {
 
 function teardown() {
     cd "${HOME}"
-    rm -rf .gitconfig ${HOME%/}/.dotfiles/
+    command rm -rf .gitconfig ${HOME%/}/.dotfiles/
 }
 
 @test '#init_repo should return 0 if no errors have occured' {

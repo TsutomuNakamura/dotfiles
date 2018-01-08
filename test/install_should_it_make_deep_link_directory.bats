@@ -9,7 +9,7 @@ function setup() {
 
 function teardown() {
     pushd ${HOME}
-    rm -rf ${DOTDIR}
+    command rm -rf ${DOTDIR}
     popd
 }
 
