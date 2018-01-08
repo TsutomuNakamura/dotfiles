@@ -628,29 +628,42 @@ function install_packages_with_dnf() {
 function install_packages_on_redhat() {
     local command="$1" ; shift
     declare -a packages=($@)
+    declare -a packages_will_be_installed
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
     local output
-    local flag_deleted=1
+    local ret=0
 
-    local pkg_cache="$(rpm -qa --queryformat="%{NAME}\n")"
+    local pkg_cache
+    pkg_cache="$(rpm -qa --queryformat="%{NAME}\n")"
+    ret=$?
+    [[ "$ret" -ne 0 ]] && {
+        echo "ERROR: Failed to get installed packages at install_packages_on_redhat()" >&2
+        return 1
+    }
 
     for ((i = 0; i < ${#packages[@]}; i++)) {
         while read n; do
-            if [[ "${packages[i]}" = "$n" ]]; then
+            if [[ "${packages[i]}" == "$n" ]]; then
                 echo "$n is already installed"
-                unset packages[i]
-                flag_deleted=0
+                continue 2
             fi
         done <<< "$pkg_cache"
+
+        packages_will_be_installed+=("${packages[i]}")
     }
 
-    packages=("${packages[@]}")
+    [[ "${#packages_will_be_installed[@]}" -eq 0 ]] && {
+        echo "There are no packages to install"
+        return 0
+    }
 
-    [[ "${#packages[@]}" -eq 0 ]] && echo "There are no packages to install" && return 0
+    echo "Installing ${packages_will_be_installed[@]}..."
 
-    echo "Installing ${packages[@]}..."
+    ${prefix} ${command} install -y ${packages_will_be_installed[@]}
+    ret=$?
+    [[ "$ret" -ne 0 ]] && echo "ERROR: Failed to install packages ${packages_will_be_installed[@]}" >&2
 
-    ${prefix} ${command} install -y ${packages[@]}
+    return $ret
 }
 
 function install_packages_with_pacman() {
