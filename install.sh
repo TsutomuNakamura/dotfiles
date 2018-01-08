@@ -1167,17 +1167,31 @@ function determin_update_type_of_repository() {
 
 # Get git remote alias.
 # For instance, origin.
+
 function get_git_remote_aliases() {
     local directory="$1"
-    local name_of_result_array="$2"
 
-    eval "declare -a \"${name_of_result_array}\""
+    local counter=0
     local e
     while read e; do
-        eval "${name_of_result_array}+=(\"${e}\")"
+        [[ "$counter" -ne 0 ]] && echo -n ","
+        echo -n "$e"
+        (( ++counter ))
     done < <(git -C "$directory" remote 2> /dev/null)
-    eval "declare -p \"${name_of_result_array}\""
 }
+
+### TODO: Bash version older than 4.4 is not compatible like this method.
+## function get_git_remote_aliases() {
+##     local directory="$1"
+##     local name_of_result_array="$2"
+## 
+##     eval "declare -a \"${name_of_result_array}\""
+##     local e
+##     while read e; do
+##         eval "${name_of_result_array}+=(\"${e}\")"
+##     done < <(git -C "$directory" remote 2> /dev/null)
+##     eval "declare -p \"${name_of_result_array}\""
+## }
 
 # Initialize dotfiles repo
 function init_repo() {
@@ -1235,7 +1249,14 @@ function update_git_repo() {
     # Create the directory path string of git
     local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
     # Declare an array named "remotes" that has remote names
-    eval "$(get_git_remote_aliases "$path_to_git_repo" remotes)"
+    ## ----------------------------------------------------------
+    ## TODO: This method is not supported older than bash version 4.4
+    #eval "$(get_git_remote_aliases "$path_to_git_repo" remotes)"
+    ## ----------------------------------------------------------
+    local csv_remotes=$(get_git_remote_aliases "$path_to_git_repo")
+    declare -a remotes=(${csv_remotes//,/ })
+    ## ----------------------------------------------------------
+
     if [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" == "origin" ]]; then
         local remote="${remotes[0]}"
     elif [[ "${#remotes[@]}" -eq 0 ]] || ( [[ "${#remotes[@]}" -eq 1 ]] && [[ "${remotes[0]}" == "" ]] ); then
