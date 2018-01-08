@@ -10,6 +10,7 @@ load helpers "install.sh"
     stub_and_eval git '{ echo "origin"; }'
     run get_git_remote_aliases "~/testdir" remotes
 
+    echo "$output"
     eval "$output"
     [[ "$status" -eq 0 ]]
     [[ "${#remotes[@]}" -eq 1 ]]
@@ -21,6 +22,7 @@ load helpers "install.sh"
     stub_and_eval git '{ echo "aaaa"; echo "origin"; }'
     run get_git_remote_aliases "~/testdir" foo
 
+    echo "$output"
     eval "$output"
     [[ "$status" -eq 0 ]]
     [[ "${#foo[@]}" -eq 2 ]]
@@ -33,6 +35,7 @@ load helpers "install.sh"
     stub_and_eval git '{ echo "aaaa"; echo "origin"; }'
     run get_git_remote_aliases "~/testdir" remotes
 
+    echo "$output"
     eval "$output"
     [[ "$status" -eq 0 ]]
     [[ "${#remotes[@]}" -eq 2 ]]
@@ -45,6 +48,7 @@ load helpers "install.sh"
     stub_and_eval git '{ true; }'
     run get_git_remote_aliases "~/testdir" remotes
 
+    echo "$output"
     eval "$output"
     [[ "${#remotes[@]}" -eq 0 ]]
     [[ $(stub_called_times git) -eq 1 ]]
@@ -54,6 +58,7 @@ load helpers "install.sh"
     stub_and_eval git '{ echo; }'
     run get_git_remote_aliases "~/testdir" remotes
 
+    echo "$output"
     eval "$output"
     [[ "${#remotes[@]}" -eq 1 ]]
     [[ "${remotes[0]}" == "" ]]
