@@ -1,0 +1,11 @@
+#!/bin/bash
+
+MAC=${1,,}
+
+[[ "$MAC" =~ [0-9a-f]{2}(:[0-9e-f]{2}){5} ]] || {
+    echo "Usage: $0 <mac-address (xx:xx:xx:xx:xx:xx)>"
+    exit 1
+}
+
+echo -e $(echo $(printf 'f%.0s' {1..12}; printf "$(echo $MAC | sed 's/://g')%.0s" {1..16}) | sed -e 's/../\\x&/g') | nc -w 1 -u -b 255.255.255.255 4000
+
