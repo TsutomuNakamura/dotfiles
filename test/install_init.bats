@@ -7,6 +7,7 @@ function setup() {
     stub init_repo
     stub install_fonts
     stub init_vim_environment
+    stub install_bin_utils
     stub_and_eval question '{ return $ANSWER_OF_QUESTION_YES; }'
 
     stub logger_err
@@ -22,6 +23,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
     [[ "$(stub_called_times question)"                      -eq 0 ]]
 
     stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop" 
@@ -37,12 +39,13 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
     [[ "$(stub_called_times question)"                      -eq 0 ]]
 
     stub_called_with_exactly_times init_repo 1 "https://github.com/TsutomuNakamura/dotfiles.git" "master"
 }
 
-@test '#init should return   use default parameters if no parameters were specified' {
+@test '#init should return 1 if install_packages return 1' {
     stub_and_eval  install_packages '{ return 1; }'
     run init
 
@@ -53,6 +56,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
     [[ "$(stub_called_times question)"                      -eq 0 ]]
 
     local m="Failed to install dependency packages."
@@ -72,6 +76,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
     [[ "$(stub_called_times question)"                      -eq 0 ]]
 
     stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop"
@@ -88,6 +93,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
     [[ "$(stub_called_times question)"                      -eq 1 ]]
 
     stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop"
@@ -107,6 +113,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
     [[ "$(stub_called_times question)"                      -eq 1 ]]
 
     stub_called_with_exactly_times question 1 "Do you continue to install the dotfiles without dependency packages? [Y/n]: "
@@ -124,6 +131,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
     [[ "$(stub_called_times question)"                      -eq 1 ]]
 
     stub_called_with_exactly_times question 1 "Do you continue to install the dotfiles without dependency packages? [Y/n]: "
@@ -141,6 +149,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
     [[ "$(stub_called_times question)"                      -eq 0 ]]
 }
 
@@ -156,6 +165,7 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
     [[ "$(stub_called_times question)"                      -eq 0 ]]
 
     stub_called_with_exactly_times logger_err 1 "Failed to installing fonts. Remaining install process will be aborted."
@@ -173,8 +183,27 @@ function setup() {
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
     [[ "$(stub_called_times question)"                      -eq 0 ]]
 
     stub_called_with_exactly_times logger_err 1 "Failed to initializing vim environment. Remaining install process will be aborted."
+}
+
+@test '#init should return 1 if the install_bin_utils() returns 1.' {
+    stub_and_eval install_bin_utils '{ return 1; }'
+
+    run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
+    [[ "$(stub_called_times install_packages)"              -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
+    [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
+    [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
+    [[ "$(stub_called_times question)"                      -eq 0 ]]
+
+    stub_called_with_exactly_times logger_err 1 "Failed to installing bin utils that will be installed in ~/bin. Remaining install process will be aborted."
 }
 
