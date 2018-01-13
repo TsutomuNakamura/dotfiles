@@ -1392,7 +1392,7 @@ function _install_emojify() {
         logger_err "Failed to download emojify from https://raw.githubusercontent.com/mrowa44/emojify/master/emojify"
         return 1
     }
-    chmod +x /usr/local/bin/emojify
+    chmod +x "${DOTDIR}/bin/emojify"
 }
 
 # Get your OS distribution name
