@@ -29,7 +29,7 @@ This script can clone this specific branch or tag of repository for developers o
 bash -- <(curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/develop/install.sh) -b develop
 ```
 This command will clone the develop branch of the repository.
-
+aaa
 
 + Images
 ![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy01.png)

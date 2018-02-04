@@ -247,6 +247,10 @@ function init() {
         logger_err "Failed to initializing vim environment. Remaining install process will be aborted."
         return 1
     }
+    install_bin_utils || {
+        logger_err "Failed to installing bin utils that will be installed in ~/bin. Remaining install process will be aborted."
+        return 1
+    }
 
     return $result
 }
@@ -265,7 +269,7 @@ function install_packages() {
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
         install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger        || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
-        install_packages_with_pacman git gvim ctags tmux zsh unzip gnome-terminal ranger    || (( result++ ))
+        install_packages_with_pacman vim git ctags tmux zsh unzip gnome-terminal ranger     || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
         install_packages_with_homebrew vim ctags tmux zsh unzip                             || (( result++ ))
     else
@@ -1375,6 +1379,20 @@ function init_vim_environment() {
 
     popd
     popd
+}
+
+# Install command utilities in "${DOTDIR}/bin/emojify"
+function install_bin_utils() {
+    _install_emojify || return 1
+    return 0
+}
+
+function _install_emojify() {
+    curl https://raw.githubusercontent.com/mrowa44/emojify/master/emojify -o "${HOME}/${DOTDIR}/bin/emojify" || {
+        logger_err "Failed to download emojify from https://raw.githubusercontent.com/mrowa44/emojify/master/emojify"
+        return 1
+    }
+    chmod +x "${DOTDIR}/bin/emojify"
 }
 
 # Get your OS distribution name
