@@ -132,7 +132,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_pacman 1 git ctags tmux zsh unzip gnome-terminal ranger
+    stub_called_with_exactly_times install_packages_with_pacman 1 gvim git ctags tmux zsh unzip gnome-terminal ranger
 }
 
 @test '#install_packages return 1 if install packages has failed on arch' {
@@ -150,7 +150,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_pacman 1 git ctags tmux zsh unzip gnome-terminal ranger
+    stub_called_with_exactly_times install_packages_with_pacman 1 gvim git ctags tmux zsh unzip gnome-terminal ranger
 }
 
 @test '#install_packages return 1 if install packages has succeeded on mac' {
