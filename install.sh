@@ -269,7 +269,7 @@ function install_packages() {
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
         install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger        || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
-        install_packages_with_pacman git ctags tmux zsh unzip gnome-terminal ranger         || (( result++ ))
+        install_packages_with_pacman vim git ctags tmux zsh unzip gnome-terminal ranger     || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
         install_packages_with_homebrew vim ctags tmux zsh unzip                             || (( result++ ))
     else
