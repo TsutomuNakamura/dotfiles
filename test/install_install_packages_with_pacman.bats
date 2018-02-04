@@ -17,6 +17,7 @@ function setup() {
     }'
     function command() { return 0; }
     stub logger_info
+    stub logger_warn
     stub logger_err
 }
 # function teardown() {}
@@ -67,7 +68,6 @@ function setup() {
 @test '#install_packages_with_pacman should call pacman with parameter "git" when it was not installed' {
     run install_packages_with_pacman "git"
 
-    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "${output##*$'\n'}" = "Installing git..." ]]
     [[ "$(stub_called_times sudo)" = "2" ]]
@@ -256,6 +256,7 @@ function setup() {
     [[ "$status" -eq 1 ]]
 
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
+    stub_called_with_exactly_times logger_warn 1 'Failed to install gvim. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options.'
     stub_called_with_exactly_times logger_err 1 'Package(s) "gvim" have not been installed on your OS for some error.\n  Please install these packages manually.'
 }
 
@@ -276,7 +277,6 @@ function setup() {
 
     run install_packages_with_pacman git curl vim gvim
 
-    echo "$output"
     declare -a outputs; IFS=$'\n' outputs=($output)
 
     [[ "$status" -eq 2 ]]
