@@ -715,6 +715,8 @@ function install_packages_with_pacman() {
                 installed_packages+="${packages_may_conflict[i]} "
             } || {
                 failed_to_install_packages+="${packages_may_conflict[i]} "
+                [[ "${packages_may_conflict[i]}" == "gvim" ]] && \
+                        logger_warn "Failed to install ${packages_may_conflict[i]}. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options."
                 ((result++))
             }
         }
