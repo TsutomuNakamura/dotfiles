@@ -1388,7 +1388,7 @@ function install_bin_utils() {
 }
 
 function _install_emojify() {
-    curl https://raw.githubusercontent.com/mrowa44/emojify/master/emojify -o "${DOTDIR}/bin/emojify" || {
+    curl https://raw.githubusercontent.com/mrowa44/emojify/master/emojify -o "${HOME}/${DOTDIR}/bin/emojify" || {
         logger_err "Failed to download emojify from https://raw.githubusercontent.com/mrowa44/emojify/master/emojify"
         return 1
     }
