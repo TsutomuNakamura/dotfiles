@@ -3,6 +3,7 @@ RDP_KNOWN_HOSTS=()
 HOST=
 PORT=
 USER=
+CONFIG_FILE="${HOME}/.rdp_known_hosts"
 
 main() {
     # saving password isn't supported yet
@@ -33,6 +34,8 @@ main() {
             add_flag=1 ; shift ;;
         -d | --delete )
             delete="$2" ; shift 2 ;;
+        -l | --list )
+            list_flag=1 ; shift ;;
         -h | --help )
             usage ; exit ;;
         -- )
@@ -104,25 +107,12 @@ connect() {
 
 connect_from_known_list() {
     choose_target_host_from_known_list
-    echo "TODO:"
+    return $?
 }
 
 choose_target_host_from_known_list() {
-    load_known_hosts
-    if [[ "$?" -eq 0 ]]; then
-        echo "ERROR: There are no known hosts yet." >&2
-        return 1
-    fi
+    list_known_hosts
 
-    local i
-    local entry
-    # name(15), host or ip(16), port(6), username
-    printf "%2s) %-15s%-16s%-6s%s\n" "No" "Name" "Host" "Port" "User"
-    echo "-------------------------------------------------------------"
-    for (( i=0; i<${#RDP_KNOWN_HOSTS[@]}; i++ )); do
-        entry=($(tr -s ',' ' ' <<< "${RDP_KNOWN_HOSTS[i]}"))
-        printf "%2s) %-15s%-16s%-6s%s\n" $(( ${i} + 1 )) ${entry[0]} ${entry[1]} ${entry[2]} ${entry[3]}
-    done
     local answer
     echo -n "Which host are you want to connect: "
     read answer
@@ -136,12 +126,33 @@ choose_target_host_from_known_list() {
     return $?
 }
 
-# Return number of entries
-load_known_hosts() {
-    if [[ ! -f ~/.rdp_known_hosts ]]; then
-        touch ~/.rdp_known_hosts
+# List known hosts
+list_known_hosts() {
+    load_known_hosts
+    local num_of_entries=$?
+
+    if [[ "$?" -eq 0 ]]; then
+        echo "ERROR: There are no known hosts yet." >&2
+        return 1
     fi
-    . ~/.rdp_known_hosts
+
+    local i
+    local entry
+    printf "%2s) %-17s%-16s%-6s%s\n" "No" "Name" "Host" "Port" "User"
+    echo "-------------------------------------------------------------"
+    for (( i=0; i<${#RDP_KNOWN_HOSTS[@]}; i++ )); do
+        entry=($(tr -s ',' ' ' <<< "${RDP_KNOWN_HOSTS[i]}"))
+        printf "%2s) %-17s%-16s%-6s%s\n" $(( ${i} + 1 )) ${entry[0]} ${entry[1]} ${entry[2]} ${entry[3]}
+    done
+}
+
+# Load known hosts list
+# @return num of entries
+load_known_hosts() {
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        touch "$CONFIG_FILE"
+    fi
+    eval "$(cat $CONFIG_FILE)"
 
     return ${#RDP_KNOWN_HOSTS[@]}
 }
