@@ -1,0 +1,157 @@
+#!/bin/bash
+RDP_KNOWN_HOSTS=()
+HOST=
+PORT=
+USER=
+
+main() {
+    # saving password isn't supported yet
+    SCRIPT_DIR="$(dirname "$(readlink -f $0)")"
+
+    . <(curl -Sso- https://raw.githubusercontent.com/TsutomuNakamura/getoptses/master/getoptses.sh)
+
+    local options
+    options=$(getoptses -o "p:u:ad:lh" --longoptions "port:,user:,add,delete:,list,help" -- "$@")
+    if [[ "$?" -ne 0 ]]; then
+        echo "Invalid options were specified" >&2
+        return 1
+    fi
+    eval set -- "$options"
+
+    local add_flag
+    local delete_value
+    local list_flag
+    local help_flag
+
+    while true; do
+        case "$1" in
+        -p | --port )
+            PORT="$2" ; shift 2 ;;
+        -u | --user )
+            USER="$2" ; shift 2 ;;
+        -a | --add )
+            add_flag=1 ; shift ;;
+        -d | --delete )
+            delete="$2" ; shift 2 ;;
+        -h | --help )
+            usage ; exit ;;
+        -- )
+            shift ; break ;;
+        * )
+            echo "Internal error has occured" >&2
+            return 1
+            ;;
+        esac
+    done
+
+    # exec each option
+    if [[ "$add_flag" -eq 1 ]]; then
+        # list known hosts
+        # TODO:
+        add_host
+        return $?
+    elif [[ "$delete_value" != "" ]]; then
+        # TODO:
+        delete "$delete_value"
+        return $?
+    elif [[ "$list_flag" -eq 1 ]]; then
+        # TODO:
+        list_known_hosts
+        return $?
+    fi
+
+    # If any of options and arguments are not existed, connect from known hosts.
+    if [[ ${#@} ]]; then
+        connect_from_known_list
+        return $?
+    fi
+
+    # Just connect at on demand
+    HOST=$1
+
+    if [[ "${HOST}" = "" ]]; then
+        echo "ERROR: Host name is empty"
+        usage
+        return 1
+    fi
+    if [[ ! "$PORT" =~ [0-9]+ ]]; then
+        echo "ERROR: Port number must be a number" >&2
+        echo "Invalid option \"-p $PORT\"" >&2
+        return 1
+    fi
+
+    connect "$HOST" "$PORT" "$USER"
+    return $?
+}
+
+# @param host
+# @param port
+# @param user
+connect() {
+    host="$1"
+    port="${2:-3389}"
+    user="$3"
+
+    if [[ "$user" = "" ]]; then
+        echo "COMMAND: xfreerdp /f +fonts +clipboard +nego +sec-rdp +sec-tls +sec-nla /v:${host}:${port}"
+        xfreerdp /f +fonts +clipboard +nego +sec-rdp +sec-tls +sec-nla /v:${host}:${port}
+    else
+        echo "COMMAND: xfreerdp /u:${user} /f +fonts +clipboard +nego +sec-rdp +sec-tls +sec-nla /v:${host}:${port}"
+        xfreerdp /u:${user} /f +fonts +clipboard +nego +sec-rdp +sec-tls +sec-nla /v:${host}:${port}
+    fi
+    return $?
+}
+
+connect_from_known_list() {
+    choose_target_host_from_known_list
+    echo "TODO:"
+}
+
+choose_target_host_from_known_list() {
+    load_known_hosts
+    if [[ "$?" -eq 0 ]]; then
+        echo "ERROR: There are no known hosts yet." >&2
+        return 1
+    fi
+
+    local i
+    local entry
+    # name(15), host or ip(16), port(6), username
+    for (( i=0; i<${#RDP_KNOWN_HOSTS[@]}; i++ )); do
+        entry=($(tr -s ',' ' ' <<< "${RDP_KNOWN_HOSTS[i]}"))
+        printf "$(( ${i} + 1 ))) %-15s%-16s%-6s%s\n" ${entry[0]} ${entry[1]} ${entry[2]} ${entry[3]}
+    done
+    local answer
+    echo -n "Which host are you want to connect: "
+    read answer
+    answer=$(( $answer - 1 ))
+
+    # TODO: Check user's input
+
+    entry=($(tr -s ',' ' ' <<< "${RDP_KNOWN_HOSTS[${answer}]}"))
+
+    connect "${entry[1]}" "${entry[2]}" "${entry[3]}"
+    return $?
+}
+
+# Return number of entries
+load_known_hosts() {
+    if [[ ! -f ~/.rdp_known_hosts ]]; then
+        touch ~/.rdp_known_hosts
+    fi
+    . ~/.rdp_known_hosts
+
+    return ${#RDP_KNOWN_HOSTS[@]}
+}
+
+usage() {
+    cat << EOF
+ -p, --port=PORT
+ex)
+ $0 -p 13389 winhost
+ $0    # This open a window from known hosts list
+EOF
+}
+
+main "$@"
+
