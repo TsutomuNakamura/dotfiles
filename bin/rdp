@@ -12,7 +12,7 @@ main() {
     . <(curl -Sso- https://raw.githubusercontent.com/TsutomuNakamura/getoptses/master/getoptses.sh)
 
     local options
-    options=$(getoptses -o "p:u:ad:lh" --longoptions "port:,user:,add,delete:,list,help" -- "$@")
+    options=$(getoptses -o "p:u:adlh" --longoptions "port:,user:,add,delete,list,help" -- "$@")
     if [[ "$?" -ne 0 ]]; then
         echo "Invalid options were specified" >&2
         return 1
@@ -20,7 +20,7 @@ main() {
     eval set -- "$options"
 
     local add_flag
-    local delete_value
+    local delete_flag
     local list_flag
     local help_flag
 
@@ -33,7 +33,7 @@ main() {
         -a | --add )
             add_flag=1 ; shift ;;
         -d | --delete )
-            delete="$2" ; shift 2 ;;
+            delete_flag=1 ; shift ;;
         -l | --list )
             list_flag=1 ; shift ;;
         -h | --help )
@@ -53,9 +53,9 @@ main() {
         # TODO:
         add_host
         return $?
-    elif [[ "$delete_value" != "" ]]; then
+    elif [[ "$delete_flag" -eq 1 ]]; then
         # TODO:
-        delete "$delete_value"
+        delete_host
         return $?
     elif [[ "$list_flag" -eq 1 ]]; then
         # TODO:
@@ -131,7 +131,7 @@ list_known_hosts() {
     load_known_hosts
     local num_of_entries=$?
 
-    if [[ "$?" -eq 0 ]]; then
+    if [[ "$num_of_entries" -eq 0 ]]; then
         echo "ERROR: There are no known hosts yet." >&2
         return 1
     fi
@@ -144,6 +144,67 @@ list_known_hosts() {
         entry=($(tr -s ',' ' ' <<< "${RDP_KNOWN_HOSTS[i]}"))
         printf "%2s) %-17s%-16s%-6s%s\n" $(( ${i} + 1 )) ${entry[0]} ${entry[1]} ${entry[2]} ${entry[3]}
     done
+}
+
+add_host() {
+    local name_of_connection
+    local host
+    local port
+    local user
+
+    while true; do
+        echo -n "Type the name of this connection: "
+        read name_of_connection
+        if [[ "$name_of_connection" != "" ]]; then
+            break
+        fi
+        echo "ERROR: Could not detect your input." >&2
+    done
+
+    while true; do
+        echo -n "Type the host: "
+        read host
+        if [[ "$host" != "" ]]; then
+            break
+        fi
+        echo "ERROR: Could not detect your input." >&2
+    done
+
+    echo -n "Type the port(3389): "
+    read port
+    port=${port:-3389}
+
+    local default_user="$(whoami)"
+    echo -n "Type the user(${default_user}): "
+    read user
+    user=${user:-${default_user}}
+
+    # Load hosts and append into it
+    load_known_hosts
+    RDP_KNOWN_HOSTS+=("${load_known_hosts[@]}" "${name_of_connection},${host},${port},${user}")
+    echo "declare -ag $(declare -p RDP_KNOWN_HOSTS | sed -e 's/^declare -a //g')" > "$CONFIG_FILE"
+}
+
+delete_host() {
+    list_known_hosts
+
+    local target
+    echo -n "Choose the number you want to delete: "
+    read target
+
+    target=$(($target - 1))
+
+    local entry="${RDP_KNOWN_HOSTS[${target}]}"
+    unset RDP_KNOWN_HOSTS[${target}]
+    echo "declare -ag $(declare -p RDP_KNOWN_HOSTS | sed -e 's/^declare -a //g')" > "$CONFIG_FILE"
+    local ret=$?
+
+    if [[ "$ret" -ne 0 ]]; then
+        echo "ERROR: Failed to delete entry -> $(tr -s ',' ' ' <<< "$entry")"
+        return $ret
+    fi
+
+    echo "One entry was deleted -> $(tr -s ',' ' ' <<< "$entry")"
 }
 
 # Load known hosts list
