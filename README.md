@@ -26,7 +26,8 @@ bash -- <(curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/ma
 ## Clone with specific branch or tag
 This script can clone this specific branch or tag of repository for developers or the man who want to use other main versions of dotfiles.
 ```
-bash -- <(curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/develop/install.sh) -b develop
+branch="develop"
+bash -- <(curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/${branch}/install.sh) -b ${branch}
 ```
 This command will clone the develop branch of the repository.
 aaa
