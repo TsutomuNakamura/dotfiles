@@ -52,6 +52,11 @@ FONT_COLOR_END='\033[0m'
 
 function main() {
 
+    cd "${HOME}" || {
+        echo "ERROR: Your home directory \"${HOME}\" isn't exist or you don't have permission to access it." >&2
+        return 1
+    }
+
     is_customized_xdg_base_directories || {
         echo "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
         echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
