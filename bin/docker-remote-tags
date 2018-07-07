@@ -1,0 +1,12 @@
+#!/bin/bash
+
+[[ "$#" -eq 0 ]] && {
+    echo "Usage: $0 <image name>"
+    exit 0
+}
+
+image="$1"
+[[ "$image" =~ ^.+/.+$ ]] || image="library/$image"
+
+curl -s -S "https://registry.hub.docker.com/v2/repositories/${image}/tags/" | jq '."results"[]["name"]' | sort -V
+
