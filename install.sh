@@ -265,16 +265,27 @@ function install_packages() {
     local result=0
 
     if [[ "$(get_distribution_name)" == "debian" ]]; then
-        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger               || (( result++ ))
+        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger \
+                fonts-noto fonts-noto-mono fonts-noto-cjk \
+                || (( result++ ))
+    elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
+        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger \
+                fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra \
+                || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
         # TODO: ranger not supported in centos
-        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal \
+        # TODO: Are there google-noto-mono-(sans|serif) fonts?
+        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch \
             && logger_info "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
             || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
-        install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger        || (( result++ ))
+        install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger \
+                google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch \
+                || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
-        install_packages_with_pacman gvim git ctags tmux zsh unzip gnome-terminal ranger     || (( result++ ))
+        install_packages_with_pacman gvim git ctags tmux zsh unzip gnome-terminal ranger \
+                noto-fonts noto-fonts-cjk \
+                || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
         install_packages_with_homebrew vim ctags tmux zsh unzip                             || (( result++ ))
     else
@@ -1419,9 +1430,9 @@ function get_distribution_name() {
         DISTRIBUTION="centos"
     elif (grep -i fedora <<< "$release_info" > /dev/null 2>&1); then
         DISTRIBUTION="fedora"
-    elif (grep -i ubuntu <<< "$release_info" > /dev/null 2>&1) || \
-            (grep -i debian <<< "$release_info" > /dev/null 2>&1); then
-        # Like debian
+    elif (grep -i ubuntu <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="ubuntu"
+    elif (grep -i debian <<< "$release_info" > /dev/null 2>&1); then
         DISTRIBUTION="debian"
     elif (grep -i "arch linux" <<< "$release_info" > /dev/null 2>&1); then
         DISTRIBUTION="arch"
