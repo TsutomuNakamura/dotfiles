@@ -101,6 +101,13 @@ For the reasons mentioned above, I recommend to set font to NertFont on your Mac
 These dotfiles is made on the concept as simple and visibility but utilities satisfactory.
 Customizing these files are now under ongoing and will commit new customizations for continuously.
 
+# Local test
+For developers, the install script in this repository could test with on docker container. Run the commands like below then the test cases will be started.
+```
+# docker build -t tsutomu/ubuntu-dotfiles --file ./test/container/ubuntu/Dockerfile .
+# docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti tsutomu/ubuntu-dotfiles su - foo -c "cd /home/foo/dotfiles && make test"
+```
+
 # License
 The code is available under the MIT license.
 
