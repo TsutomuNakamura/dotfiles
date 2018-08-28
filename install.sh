@@ -388,7 +388,6 @@ function install_fonts() {
     mkdir -p $font_dir
     pushd $font_dir
 
-    # _install_font_ipafont
     install_the_font "_install_font_inconsolata_nerd" \
             "Inconsolata for Powerline Nerd Font" \
             "" \
@@ -420,13 +419,6 @@ function install_fonts() {
         local ret_install_font_noto_emoji=$?
         [[ $ret_install_font_noto_emoji -eq 1 ]] && (( flag_fc_cache++ ))
         [[ $ret_install_font_noto_emoji -gt 1 ]] && (( result++ ))
-    fi
-
-    if [[ $ret_install_font_migu1m -gt 1 ]]; then
-        install_the_font "_install_font_ipafont" "IPA Font" "" "" "" ""
-        local ret_install_font_ipafont=$?
-        [[ $ret_install_font_ipafont -eq 1 ]] && (( flag_fc_cache++ ))
-        [[ $ret_install_font_ipafont -gt 1 ]] && (( result++ )) || (( result-- ))
     fi
 
     popd
@@ -509,38 +501,6 @@ function _install_font_migu1m() {
 
     rm -rf migu-1m-20150712 migu-1m-20150712.zip migu-1m-bold.ttf migu-1m-regular.ttf
     return 2
-}
-
-# Install font migu1m (for Japanese)
-# Return codes are...
-#     0: Already installed (TODO: doesn't implemented now)
-#     1: Installed successfully
-#     2: Failed to install
-function _install_font_ipafont() {
-    local result=1
-
-    local ret_of_ipafont=0
-    if do_i_have_admin_privileges; then
-        if [ "$(get_distribution_name)" == "debian" ]; then
-            install_packages_with_apt fonts-ipafont
-            ret_of_ipafont=$?
-        elif [ "$(get_distribution_name)" == "fedora" ]; then
-            install_packages_with_dnf ipa-gothic-fonts ipa-mincho-fonts
-            ret_of_ipafont=$?
-        elif [ "$(get_distribution_name)" == "arch" ]; then
-            install_packages_with_pacman otf-ipafont
-            ret_of_ipafont=$?
-        elif [ "$(get_distribution_name)" == "mac" ]; then
-            true    # TODO:
-        fi
-
-        [[ "$ret_of_ipafont" -ne 0 ]] && result=2
-    else
-        logger_err "Installing IPA font has failed because the user doesn't have a privilege (nearly root) to install the font."
-        result=2
-    fi
-
-    return $result
 }
 
 # Install font noto emoji (for emoji)
