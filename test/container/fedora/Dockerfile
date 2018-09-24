@@ -7,7 +7,7 @@ FROM fedora:latest
 
 # RUN pacman -Syu --noconfirm
 RUN dnf update -y
-RUN dnf install -y passwd sudo fontconfig findutils
+RUN dnf install -y passwd sudo fontconfig findutils make
 RUN sed -i.org -e 's/^\(\%wheel.*\)/# \1/g' /etc/sudoers
 RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel
 RUN useradd -s /bin/bash -d /home/foo -m foo
