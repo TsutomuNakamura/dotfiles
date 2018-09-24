@@ -10,7 +10,7 @@ RUN wget -q https://www.ubuntulinux.jp/ubuntu-ja-archive-keyring.gpg -O- | apt-k
 RUN wget -q https://www.ubuntulinux.jp/ubuntu-jp-ppa-keyring.gpg -O- | apt-key add -
 RUN wget https://www.ubuntulinux.jp/sources.list.d/bionic.list -O /etc/apt/sources.list.d/ubuntu-ja.list
 RUN apt-get update
-RUN apt-get install -y sudo vim curl git
+RUN apt-get install -y sudo vim curl git make
 RUN echo "%adm ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN useradd -d /home/foo -s /bin/bash -m foo
 RUN usermod -aG adm foo
