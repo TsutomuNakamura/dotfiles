@@ -5,6 +5,7 @@ function setup() {
     stub apt-get
     stub sudo
     stub logger_info
+    stub logger_warn
     stub logger_err
     function command() { return 0; }
 }
@@ -21,12 +22,17 @@ function setup() {
             echo "git-man/xenial-updates,xenial-security,now 1:2.7.4-0ubuntu1.1 all [installed,automatic]"
         fi
     }'
+    stub_and_eval sudo '{
+        if [[ "$1" = "apt-cache" ]] && [[ "$2" = pkgnames ]]; then
+            echo "tmuxfoo"; echo "vim"; echo "gitfoo"
+        fi
+    }'
     run install_packages_with_apt vim
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "Installing vim..." ]]
-    [[ "$(stub_called_times sudo)" -eq 2 ]]
+    [[ "$(stub_called_times sudo)" -eq 3 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
     stub_called_with_exactly_times sudo 1 apt-get install -y vim
@@ -43,16 +49,54 @@ function setup() {
             echo "git-man/xenial-updates,xenial-security,now 1:2.7.4-0ubuntu1.1 all [installed,automatic]"
         fi
     }'
+    stub_and_eval sudo '{
+        if [[ "$1" = "apt-cache" ]] && [[ "$2" = pkgnames ]]; then
+            echo "tmuxfoo"; echo "vim"; echo "gitfoo"
+        fi
+    }'
     run install_packages_with_apt vim
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "vim has already installed. Skipped." ]]
     [[ "${outputs[1]}" = "There are no packages to install" ]]
-    [[ "$(stub_called_times sudo)" -eq 1 ]]
+    [[ "$(stub_called_times sudo)" -eq 2 ]]
     [[ "$(stub_called_times apt-get)" -eq 0 ]]
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
+    stub_called_with_exactly_times sudo 1 apt-get update
+}
+
+@test '#install_packages_with_apt should NOT call apt-get if all packages going to be installed are not available' {
+    stub_and_eval apt '{
+        if [[ "$1" = "list" ]] && [[ "$2" = "--installed" ]]; then
+            echo "git/xenial-updates,xenial-security,now 1:2.7.4-0ubuntu1.1 amd64 [installed]"
+        fi
+    }'
+
+    stub_and_eval sudo '{
+        if [[ "$1" = "apt-cache" ]] && [[ "$2" = pkgnames ]]; then
+            echo "tmuxfoo"
+            echo "vimfoo"
+            echo "gitfoo"
+        fi
+    }'
+
+    run install_packages_with_apt vim
+
+    echo "$output"
+
+    declare -a outputs; IFS=$'\n' outputs=($output)
+    [[ "$status" -eq 0 ]]
+    # Removing color codes then compare
+
+    [[ "${outputs[0]}" = "There are no packages to install" ]]
+    [[ "$(stub_called_times sudo)" -eq 2 ]]
+    [[ "$(stub_called_times apt-get)" -eq 0 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
+    [[ "$(stub_called_times logger_warn)" -eq 1 ]]
+    [[ "$(stub_called_times logger_err)" -eq 0 ]]
+    stub_called_with_exactly_times logger_warn 1 "Package vim is not available. Installing vim was spkipped."
     stub_called_with_exactly_times sudo 1 apt-get update
 }
 
@@ -66,11 +110,16 @@ function setup() {
             echo "git-man/xenial-updates,xenial-security,now 1:2.7.4-0ubuntu1.1 all [installed,automatic]"
         fi
     }'
+    stub_and_eval sudo '{
+        if [[ "$1" = "apt-cache" ]] && [[ "$2" = pkgnames ]]; then
+            echo "tmux"; echo "vim"; echo "gitfoo"
+        fi
+    }'
     run install_packages_with_apt vim tmux
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "Installing vim tmux..." ]]
-    [[ "$(stub_called_times sudo)" -eq 2 ]]
+    [[ "$(stub_called_times sudo)" -eq 3 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
 
@@ -88,13 +137,18 @@ function setup() {
             echo "git-man/xenial-updates,xenial-security,now 1:2.7.4-0ubuntu1.1 all [installed,automatic]"
         fi
     }'
+    stub_and_eval sudo '{
+        if [[ "$1" = "apt-cache" ]] && [[ "$2" = pkgnames ]]; then
+            echo "tmux"; echo "vim"; echo "gitfoo"
+        fi
+    }'
     run install_packages_with_apt vim git
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "git has already installed. Skipped." ]]
     [[ "${outputs[1]}" = "Installing vim..." ]]
-    [[ "$(stub_called_times sudo)" -eq 2 ]]
+    [[ "$(stub_called_times sudo)" -eq 3 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
 
@@ -104,10 +158,8 @@ function setup() {
 
 @test '#install_packages_with_apt should return 1 when apt-get update has failed' {
     stub_and_eval sudo '{
-        if [[ "$1" = "apt-get" ]]; then
-            if [[ "$2" = "update" ]]; then
-                return 1
-            fi
+        if [[ "$1" = "apt-get" ]] && [[ "$2" = "update" ]]; then
+            return 1
         fi
     }'
     stub apt
@@ -147,7 +199,11 @@ function setup() {
         fi
     }'
     stub_and_eval sudo '{
-        if [[ "$2" == "update" ]]; then return 0; fi
+        if [[ "$2" == "update" ]]; then
+            return 0
+        elif [[ "$1" = "apt-cache" ]] && [[ "$2" = pkgnames ]]; then
+            echo "tmux"; echo "vim"; echo "gitfoo"
+        fi
         echo "sudo was called..."
         return 1
     }'
@@ -157,7 +213,7 @@ function setup() {
     [[ "$status" -eq 1 ]]
     [[ "${outputs[0]}" = "Installing vim..." ]]
     [[ "${outputs[1]}" = "sudo was called..." ]]
-    [[ "$(stub_called_times sudo)" -eq 2 ]]
+    [[ "$(stub_called_times sudo)" -eq 3 ]]
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_err)" -eq 1 ]]
 
