@@ -140,3 +140,27 @@ function setup() {
     stub_called_with_exactly_times logger_err 1 "Failed to get installed packages with apt list --installed."
 }
 
+@test '#install_packages_with_apt should return 1 when apt-get install packages was failed' {
+    stub_and_eval apt '{
+        if [[ "$1" = "list" ]] && [[ "$2" = "--installed" ]]; then
+            echo "vim-common/xenial-updates,xenial-security,now 2:7.4.1689-3ubuntu1.2 amd64 [installed,automatic]"
+        fi
+    }'
+    stub_and_eval sudo '{
+        if [[ "$2" == "update" ]]; then return 0; fi
+        echo "sudo was called..."
+        return 1
+    }'
+    run install_packages_with_apt vim
+
+    declare -a outputs; IFS=$'\n' outputs=($output)
+    [[ "$status" -eq 1 ]]
+    [[ "${outputs[0]}" = "Installing vim..." ]]
+    [[ "${outputs[1]}" = "sudo was called..." ]]
+    [[ "$(stub_called_times sudo)" -eq 2 ]]
+    [[ "$(stub_called_times logger_info)" -eq 0 ]]
+    [[ "$(stub_called_times logger_err)" -eq 1 ]]
+
+    stub_called_with_exactly_times sudo 1 apt-get install -y vim
+    stub_called_with_exactly_times logger_err 1 "Some error occured when installing vim.\nsudo was called..."
+}
