@@ -559,12 +559,23 @@ function install_packages_with_apt() {
         return 1
     fi
 
+    local available_packages=
+    available_packages="$(${prefix} apt-cache pkgnames)"
+    if [[ -z "$available_packages" ]]; then
+        logger_err "Failed to get available package list with 'apt-cache pkgnames'"
+        return 1
+    fi
+
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         local p="${packages[i]}"
 
         if (grep -P "^${p}$" &> /dev/null <<< "$pkg_cache"); then
             # Remove already installed packages
             echo "${p} has already installed. Skipped."
+            continue
+        fi
+        if ! (grep -P "^${p}$" &> /dev/null <<< "$available_packages"); then
+            logger_warn "Package ${p} is not available. Installing ${p} was spkipped."
             continue
         fi
 
