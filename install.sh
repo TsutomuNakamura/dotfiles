@@ -578,7 +578,8 @@ function install_packages_with_apt() {
 
     echo "Installing ${packages_will_be_installed[@]}..."
 
-    local output="$(${prefix} apt-get install -y ${packages_will_be_installed[@]} 2>&1)" || {
+    local output=
+    output="$(${prefix} apt-get install -y ${packages_will_be_installed[@]} 2>&1)" || {
         echo "${output}" >&2
         logger_err "Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
         return 1
