@@ -1,0 +1,97 @@
+#!/bin/bash
+
+main() {
+
+    [[ "$#" -eq 0 ]] && {
+        echo "Usage: $0 file_from [fole_to]" >&2
+        exit 0
+    }
+
+
+
+    local target="$1"
+    local destination=
+
+    [[ ! -f "$target" ]] && {
+        echo "ERROR: File convert from \"$target\" was not found." >&2
+        return 1
+    }
+
+    local destination_x2_mp4="${target%.*}_x2.mp4"
+    convert_to_x2_mp4 "$target" "$destination_x2_mp4"
+    local destination_x4_mp4="${target%.*}_x4.mp4"
+    convert_to_x4_mp4 "$target" "$destination_x4_mp4"
+    local destination_x2_gif="${destination_x2_mp4%.*}.gif"
+    convert_to_gif "$destination_x2_mp4" "$destination"
+    local destination_x4_gif="${destination_x4_mp4%.*}.gif"
+    convert_to_gif "$destination_x4_mp4" "$destination"
+
+    echo "===================================================================="
+    echo "$destination_x2_mp4"
+    echo "$destination_x4_mp4"
+    echo "$destination_x2_gif"
+    echo "$destination_x4_gif"
+    echo "===================================================================="
+
+    return $ret
+}
+
+convert_to_x2_mp4() {
+    local from="$1"
+    local destination="$2"
+    ffmpeg -y -i "$from" -vf setpts=PTS/2.0 -af atempo=2.0 -y "$destination"
+}
+
+convert_to_x4_mp4() {
+    local from="$1"
+    local destination="$2"
+    ffmpeg -i "$from" -vf setpts=PTS/4.0 -af atempo=2.0,atempo=2.0 -y "$destination"
+}
+
+convert_to_gif() {
+    local from="$1"
+    local destination="$2"
+
+    local to=
+    if [[ "$#" -eq 1 ]] || [[ -z "$destination" ]]; then
+        to="${from%.*}.gif"
+    else
+        to="$destination"
+    fi
+    dir="$(dirname "${to}")"
+
+    [[ -d "${dir}" ]] || {
+        echo "ERROR: directory \"${dir}\" was not found."
+        return 1
+    }
+
+    # https://askubuntu.com/questions/506670/how-to-do-i-convert-an-webm-video-to-a-animated-gif-on-the-command-line
+    local file_name="$(basename ${to})"
+    local palette="/tmp/tmp_palette_${file_name%.*}.png"
+    local tmp_file_path="/tmp/tmp_${file_name}"
+
+    #local filters="fps=15,scale=320:-1:flags=lanczos"
+    local filters="fps=15"
+    local duration=35
+    # local start_time=1
+
+    #ffmpeg -v warning -ss $start_time -t $duration -i $1 -vf "$filters,palettegen" -y "$palette"
+    ffmpeg -v warning -t $duration -i "$from" -vf "$filters,palettegen" -y "$palette" || {
+        echo "ERROR: Failed to create a palette from \"${from}\" to \"${palette}\"" >&2
+        return 1
+    }
+
+    #ffmpeg -i "$from" -pix_fmt rgb8 "${tmp_file_path}" || {
+    ffmpeg -v warning -t $duration -i "$from" -i "$palette" -lavfi "$filters [x]; [x][1:v] paletteuse" -y "$to" || {
+        echo "ERROR: Failed to convert \"${from}\" to \"${to}\"" >&2
+        return 1
+    }
+
+    echo "INFO: Converted \"${from}\" to \"${to}\" with animated gif"
+    return 0
+}
+
+main "$@" || {
+    echo "ERROR: Failed to convert due to prefious error."
+}
+
