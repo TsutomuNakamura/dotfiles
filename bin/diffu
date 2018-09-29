@@ -1,2 +1,3 @@
 #!/bin/bash
-diff --new-line-format='+%L' --old-line-format='-%L' --unchanged-line-format=' %L' $@
+#diff --new-line-format='+%L' --old-line-format='-%L' --unchanged-line-format=' %L' $@
+diff -U -1 --color -u $@
