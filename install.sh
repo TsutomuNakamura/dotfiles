@@ -265,21 +265,26 @@ function install_packages() {
     local result=0
 
     if [[ "$(get_distribution_name)" == "debian" ]]; then
-        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger \
+        install_packages_with_apt \
+                git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg \
                 fonts-noto fonts-noto-mono fonts-noto-cjk \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
-        install_packages_with_apt git vim vim-gtk ctags tmux zsh unzip ranger \
+        install_packages_with_apt \
+                git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg \
                 fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
         # TODO: ranger not supported in centos
         # TODO: Are there google-noto-mono-(sans|serif) fonts?
-        install_packages_with_yum git vim gvim ctags tmux zsh unzip gnome-terminal google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch \
-            && logger_info "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
-            || (( result++ ))
+        install_packages_with_yum \
+                git vim gvim ctags tmux zsh unzip gnome-terminal ffmpeg \
+                google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch \
+                && logger_info "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
+                || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
-        install_packages_with_dnf git vim ctags tmux zsh unzip gnome-terminal ranger \
+        install_packages_with_dnf \
+                git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg \
                 google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
