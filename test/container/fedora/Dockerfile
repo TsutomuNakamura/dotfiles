@@ -1,7 +1,7 @@
 # Build and run this image with command like below
 #
 #   docker build -t="tsutomu/fedora-dot-test" .
-#   docker run --name fedora-dot-test --hostname fedora-dot-test --volume ... -ti tsutomu/fedora-dot-test /bin/bash
+#   docker run --name fedora-dot-test --hostname fedora-dot-test --volume ${PWD}:/home/foo/dotfiles -ti tsutomu/fedora-dot-test /bin/bash
 #
 FROM fedora:latest
 

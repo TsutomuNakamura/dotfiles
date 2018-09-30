@@ -3,7 +3,7 @@
 #   docker build -t="tsutomu/ubuntu-dot-test" .
 #   docker run --name ubuntu-dot-test --hostname ubuntu-dot-test --volume ... -ti tsutomu/ubuntu-dot-test /bin/bash
 #
-FROM ubuntu:xenial
+FROM ubuntu:18.04
 RUN apt-get update
 RUN apt-get install -y wget gnupg2
 RUN wget -q https://www.ubuntulinux.jp/ubuntu-ja-archive-keyring.gpg -O- | apt-key add -
