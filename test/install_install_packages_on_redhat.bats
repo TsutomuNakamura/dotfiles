@@ -232,6 +232,17 @@ function teardown() {
 }
 
 @test '#install_packages_on_redhat should call "sudo yum" with parameter zsh, ctags(because vim-enhanced is already installed)' {
+    stub_and_eval yum '{
+        [[ "$1" == "list" ]] && {
+            echo "Last metadata expiration check: 0:03:54 ago on Sun Sep 30 02:35:45 2018."
+            echo "Available Packages"
+            echo "ctags.x86_64                             5.8-22.fc28                     fedora"
+            echo "tmux.x86_64                              2.7-1.fc28                      updates"
+            echo "vim-enhanced.x86_64                      2:8.1.408-1.fc28                updates"
+            echo "zsh.x86_64                               5.5.1-2.fc28                    updates"
+        }
+    }'
+
     run install_packages_on_redhat "yum" vim-enhanced zsh ctags
 
     declare -a outputs; IFS=$'\n' outputs=($output)
