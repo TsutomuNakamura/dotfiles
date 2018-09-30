@@ -10,7 +10,7 @@ function setup() {
     stub logger_info
     stub logger_err
 }
-# function teardown() {}
+#function teardown() {}
 
 @test '#install_packages return 0 if install packages has succeeded on debian' {
     stub_and_eval get_distribution_name '{ echo "debian"; }'
@@ -25,7 +25,7 @@ function setup() {
     [[ "$(stub_called_times install_packages_with_homebrew)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger fonts-noto fonts-noto-mono fonts-noto-cjk
+    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg fonts-noto fonts-noto-mono fonts-noto-cjk
 }
 
 @test '#install_packages return 1 if install packages has failed on debian' {
@@ -42,7 +42,7 @@ function setup() {
     [[ "$(stub_called_times install_packages_with_homebrew)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger fonts-noto fonts-noto-mono fonts-noto-cjk
+    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg fonts-noto fonts-noto-mono fonts-noto-cjk
 }
 
 @test '#install_packages return 0 if install packages has succeeded on ubuntu' {
@@ -58,7 +58,7 @@ function setup() {
     [[ "$(stub_called_times install_packages_with_homebrew)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra
+    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra
 }
 
 @test '#install_packages return 1 if install packages has failed on ubuntu' {
@@ -75,9 +75,8 @@ function setup() {
     [[ "$(stub_called_times install_packages_with_homebrew)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra
+    stub_called_with_exactly_times install_packages_with_apt 1 git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra
 }
-
 
 @test '#install_packages return 0 if install packages has succeeded on centos' {
     stub_and_eval get_distribution_name '{ echo "centos"; }'
@@ -93,7 +92,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_yum 1 git vim gvim ctags tmux zsh unzip gnome-terminal google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch
+    stub_called_with_exactly_times install_packages_with_yum 1 git vim gvim ctags tmux zsh unzip gnome-terminal ffmpeg google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch
     stub_called_with_exactly_times logger_info 1 "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually."
 }
 
@@ -112,7 +111,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_yum 1 git vim gvim ctags tmux zsh unzip gnome-terminal google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch
+    stub_called_with_exactly_times install_packages_with_yum 1 git vim gvim ctags tmux zsh unzip gnome-terminal ffmpeg google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch
 }
 
 @test '#install_packages return 0 if install packages has succeeded on fedora' {
@@ -129,7 +128,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_dnf 1 git vim ctags tmux zsh unzip gnome-terminal ranger google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
+    stub_called_with_exactly_times install_packages_with_dnf 1 git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
 }
 
 @test '#install_packages return 1 if install packages has failed on fedora' {
@@ -148,7 +147,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_dnf 1 git vim ctags tmux zsh unzip gnome-terminal ranger google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
+    stub_called_with_exactly_times install_packages_with_dnf 1 git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
 }
 
 @test '#install_packages return 1 if install packages has succeeded on arch' {
@@ -166,7 +165,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_pacman 1 gvim git ctags tmux zsh unzip gnome-terminal ranger noto-fonts noto-fonts-cjk
+    stub_called_with_exactly_times install_packages_with_pacman 1 gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg noto-fonts noto-fonts-cjk
 }
 
 @test '#install_packages return 1 if install packages has failed on arch' {
@@ -184,7 +183,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_pacman 1 gvim git ctags tmux zsh unzip gnome-terminal ranger noto-fonts noto-fonts-cjk
+    stub_called_with_exactly_times install_packages_with_pacman 1 gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg noto-fonts noto-fonts-cjk
 }
 
 @test '#install_packages return 1 if install packages has succeeded on mac' {

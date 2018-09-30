@@ -1,7 +1,7 @@
 # Build and run this image with command like below
 #
 #   docker build -t="tsutomu/ubuntu-dot-test" .
-#   docker run --name ubuntu-dot-test --hostname ubuntu-dot-test --volume ... -ti tsutomu/ubuntu-dot-test /bin/bash
+#   docker run --name ubuntu-dot-test --hostname ubuntu-dot-test --volume ${PWD}:/home/foo/dotfiles -ti tsutomu/ubuntu-dot-test /bin/bash
 #
 FROM ubuntu:18.04
 RUN apt-get update

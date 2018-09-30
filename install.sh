@@ -288,7 +288,7 @@ function install_packages() {
                 google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
-        install_packages_with_pacman gvim git ctags tmux zsh unzip gnome-terminal ranger \
+        install_packages_with_pacman gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg \
                 noto-fonts noto-fonts-cjk \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
