@@ -621,7 +621,7 @@ function install_packages_with_dnf() {
 # Installing packages with yum or dnf on Red Hat like environments.
 # Please call this function only after call do_i_have_admin_privileges() which the return-code is 0(true).
 function install_packages_on_redhat() {
-    local command="$1" ; shift
+    local command_name="$1" ; shift
     declare -a packages=($@)
     declare -a packages_will_be_installed
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
@@ -632,20 +632,43 @@ function install_packages_on_redhat() {
     pkg_cache="$(rpm -qa --queryformat="%{NAME}\n")"
     ret=$?
     [[ "$ret" -ne 0 ]] && {
-        echo "ERROR: Failed to get installed packages at install_packages_on_redhat()" >&2
+        logger_err "Failed to get installed packages at install_packages_on_redhat()"
         return 1
     }
 
-    for ((i = 0; i < ${#packages[@]}; i++)) {
-        while read n; do
-            if [[ "${packages[i]}" == "$n" ]]; then
-                echo "$n is already installed"
-                continue 2
-            fi
-        done <<< "$pkg_cache"
-
-        packages_will_be_installed+=("${packages[i]}")
+    local available_packages="$(${command_name} list available 2> /dev/null | tail -n +3 | cut -f1 -d' ' | sed -e 's/\(.*\)\.\(noarch\|x86_64\|i.86\)/\1/')"
+    [[ -z "$available_packages" ]] && {
+        logger_err "Failed to get available packages at install_packages_on_redhat()"
+        return 1
     }
+
+    for p in "${packages[@]}"; do
+        grep -Fx "$p" <<< "$pkg_cache" > /dev/null
+        ret=$?
+        [[ $ret -eq 0 ]] && {
+            logger_info "Package $p has already installed. Skipping install it."
+            continue
+        }
+
+        grep -Fx "$p" <<< "$available_packages" > /dev/null
+        ret=$?
+        [[ $ret -ne 0 ]] && {
+            logger_warn "Package $p is not available. Skipping install it."
+            continue
+        }
+
+        packages_will_be_installed+=("$p")
+    done
+
+    #for ((i = 0; i < ${#packages[@]}; i++)) {
+    #    while read n; do
+    #        if [[ "${packages[i]}" == "$n" ]]; then
+    #            echo "$n is already installed"
+    #            continue 2
+    #        fi
+    #    done <<< "$pkg_cache"
+    #    packages_will_be_installed+=("${packages[i]}")
+    #}
 
     [[ "${#packages_will_be_installed[@]}" -eq 0 ]] && {
         echo "There are no packages to install"
@@ -654,11 +677,16 @@ function install_packages_on_redhat() {
 
     echo "Installing ${packages_will_be_installed[@]}..."
 
-    ${prefix} ${command} install -y ${packages_will_be_installed[@]}
+    local packages_installed="${packages_will_be_installed[@]}"
+    ${prefix} ${command_name} install -y ${packages_will_be_installed[@]}
     ret=$?
-    [[ "$ret" -ne 0 ]] && echo "ERROR: Failed to install packages ${packages_will_be_installed[@]}" >&2
+    [[ "$ret" -ne 0 ]] && {
+        logger_err "Failed to install packages $packages_installed"
+        return 1
+    }
+    logger_info "Packages $packages_installed have been installed."
 
-    return $ret
+    return 0
 }
 
 # Installing packages with pacman.
