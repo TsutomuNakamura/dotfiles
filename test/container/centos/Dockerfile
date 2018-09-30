@@ -1,7 +1,7 @@
 # Build and run this image with command like below
 #
-#   docker build -t="tsutomu/fedora-dot-test" .
-#   docker run --name fedora-dot-test --hostname fedora-dot-test --volume ... -ti tsutomu/fedora-dot-test /bin/bash
+#   docker build -t="tsutomu/centos-dot-test" .
+#   docker run --name centos-dot-test --hostname centos-dot-test --volume ... -ti tsutomu/centos-dot-test /bin/bash
 #
 FROM centos:latest
 
