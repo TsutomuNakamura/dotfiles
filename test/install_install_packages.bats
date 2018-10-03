@@ -93,7 +93,7 @@ function setup() {
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
     stub_called_with_exactly_times install_packages_with_yum 1 git vim gvim ctags tmux zsh unzip gnome-terminal ffmpeg google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch
-    stub_called_with_exactly_times logger_info 1 "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually."
+    stub_called_with_exactly_times logger_info 1 "Package \"ranger\" will not be installed on Cent OS. So please instlal it manually."
 }
 
 @test '#install_packages return 1 if install packages has failed on centos' {
