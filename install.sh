@@ -164,22 +164,22 @@ function print_post_message_list() {
 # Output the message to stdout then push it to info message list.
 function logger_info() {
     local message="$1"
-    echo -e "INFO: $message"
     message="${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: $message"
+    echo -e "$message"
     push_post_message_list "$message"
 }
 
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
     local message="$1"
-    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: $message"
+    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
 
 function logger_err() {
     local message="$1"
-    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $message"
+    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
@@ -291,7 +291,7 @@ function install_packages() {
         install_packages_with_yum \
                 git vim gvim ctags tmux zsh unzip gnome-terminal ffmpeg \
                 google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch \
-                && logger_info "INFO: Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
+                && logger_info "Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
         install_packages_with_dnf \
