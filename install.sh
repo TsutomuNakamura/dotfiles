@@ -241,13 +241,13 @@ function init() {
 
     # Git will be installed but its version is less or equals 1.8,
     # remaining processes are not continuable.
-    local version_of_git="$(git --version | cut -d' ' -f3)"
-    vercomp "1.9.0" "$version_of_git"
-    result=$?
-    if [[ $result -eq 1 ]]; then
-        logger_err "Your version of git is ${version_of_git}. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
-        return 1
-    fi
+    #local version_of_git="$(git --version | cut -d' ' -f3)"
+    #vercomp "1.9.0" "$version_of_git"
+    #result=$?
+    #if [[ $result -eq 1 ]]; then
+    #    logger_err "Your version of git is ${version_of_git}. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
+    #    return 1
+    #fi
 
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
@@ -1127,75 +1127,117 @@ function determin_update_type_of_repository() {
     local branch="$4"
     local need_question="$5"
 
-    local msg
-    local ret
+    local msg=
+    local ret=
 
     if [[ -d "$target" ]]; then
 
+        pushd "$target" || {
+            logger_err "Failed to push directory \"${target}\". Remaining processes will be aborted."
+            return $ANSWER_OF_QUESTION_ABORTED
+        }
+
         # Is the directory empty? If so, return GIT_UPDATE_TYPE_JUST_CLONE
-        [[ -z "$(ls -A "$target")" ]] && return $GIT_UPDATE_TYPE_JUST_CLONE
+        [[ -z "$(ls -A .)" ]] && {
+            popd
+            return $GIT_UPDATE_TYPE_JUST_CLONE
+        }
 
-        if git -C "$target" rev-parse --git-dir > /dev/null 2>&1; then
-
-            local remote_url="$(git -C "$target" remote get-url "$remote" 2> /dev/null)"
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            local remote_url="$(git remote get-url "$remote" 2> /dev/null)"
 
             if [[ "$remote_url" == "$url" ]]; then
-                local current_branch="$(git -C "$target" rev-parse --abbrev-ref HEAD 2> /dev/null)"
+                local current_branch="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"
 
                 if [[ "$current_branch" != "$branch" ]]; then
                     if [[ "$need_question" -eq 0 ]]; then
                         msg="The local branch(${current_branch}) in repository that located in \"${target}\" is differ from the branch(${branch}) that going to be updated."
-                        msg+="\nDo you want to remove the git repository and reclone it newly? [y/N]: "
+                        msg+="\nDo you want to remove the git repository and re-clone it newly? [y/N]: "
                         question "$msg"
                         ret=$?
-                        [[ "$ret" -ne 0 ]] && echo "Recloning \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                        [[ "$ret" -ne 0 ]] && {
+                            echo "Re-cloning \"${target}\" was aborted."
+                            popd
+                            return $GIT_UPDATE_TYPE_ABOARTED
+                        }
                     fi
+                    popd
                     return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT
                 fi
 
                 # is_there_updates: 0 -> Updates are existed, 1: Updates are not existed
-                local is_there_updates="$([[ "$(git -C "$target" status --porcelain 2> /dev/null | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+                local is_there_updates="$([[ "$(git status --porcelain 2> /dev/null | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
                 # is_there_pushes: 0 -> Files should be pushed are existed, 1: Files should be pushed are not existed
-                local is_there_pushes="$([[ "$(git -C "$target" cherry -v 2> /dev/null | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
+                local is_there_pushes="$([[ "$(git cherry -v 2> /dev/null | wc -l)" -ne 0 ]] && echo 0 || echo 1)"
 
                 if [[ "$is_there_pushes" -eq 0 ]]; then
                     # Question then reinstall
                     if [[ "$need_question" -eq 0 ]]; then
-                        question "The git repository located in \"${target}\" has some unpushed commits.\nDo you want to remove the git repository and reclone it newly? [y/N]: "
+                        msg="The git repository located in \"${target}\" has some unpushed commits."
+                        msg+="\nDo you want to remove the git repository and re-clone it newly? [y/N]: "
+                        question "$msg"
                         ret=$?
-                        [[ "$ret" -ne 0 ]] && echo "Recloning \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                        [[ "$ret" -ne 0 ]] && {
+                            echo "Re-cloning \"${target}\" was aborted."
+                            popd
+                            return $GIT_UPDATE_TYPE_ABOARTED
+                        }
                     fi
+                    popd
                     return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET
                 else
                     # Question then "git reset --hard" and remove untrackedfiles then update
                     if [[ "$is_there_updates" -eq 0 ]]; then
                         if [[ "$need_question" -eq 0 ]]; then
-                            question "The git repository located in \"${target}\" has some uncommitted files.\nDo you want to remove them and update the git repository? [y/N]: "
-                            local ret=$?
-                            [[ "$ret" -ne 0 ]] && echo "Updating git repository \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                            msg="The git repository located in \"${target}\" has some uncommitted files."
+                            msg+="\nDo you want to remove them and update the git repository? [y/N]: "
+                            question "$msg"
+                            ret=$?
+                            [[ "$ret" -ne 0 ]] && {
+                                echo "Updating git repository \"${target}\" was aborted."
+                                popd
+                                return $GIT_UPDATE_TYPE_ABOARTED
+                            }
                         fi
+                        popd
                         return $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL
                     else
                         # Update!!
+                        popd
                         return $GIT_UPDATE_TYPE_JUST_PULL
                     fi
                 fi
             else
                 # Question then reinstall if the remote url is not match.
                 if [[ "$need_question" -eq 0 ]]; then
-                    question "The git repository located in \"${target}\" is refering unexpected remote \"${remote_url}\" (expected is \"${url}\").\nDo you want to remove the git repository and reclone it newly? [y/N]: "
-                    local ret=$?
-                    [[ "$ret" -ne 0 ]] && echo "Recloning \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                    msg="The git repository located in \"${target}\" is refering unexpected remote \"${remote_url}\" (expected is \"${url}\")."
+                    msg+="\nDo you want to remove the git repository and re-clone it newly? [y/N]: "
+                    question "$msg"
+
+                    ret=$?
+                    [[ "$ret" -ne 0 ]] && {
+                        echo "Re-cloning \"${target}\" was aborted."
+                        popd
+                        return $GIT_UPDATE_TYPE_ABOARTED
+                    }
                 fi
+                popd
                 return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE
             fi
         else
             # Question then reinstall if it is not a git repository.
             if [[ "$need_question" -eq 0 ]]; then
-                question "The directory (or file) \"${target}\" is not a git repository.\nDo you want to remove it and clone the repository? [y/N]: "
-                local ret=$?
-                [[ "$ret" -ne 0 ]] && echo "Cloning the repository \"${target}\" was aborted." && return $GIT_UPDATE_TYPE_ABOARTED
+                msg="The directory \"${target}\" is not a git repository."
+                msg+="\nDo you want to remove it and clone the repository? [y/N]: "
+                question "$msg"
+                ret=$?
+                [[ "$ret" -ne 0 ]] && {
+                    echo "Cloning the repository \"${target}\" was aborted."
+                    popd
+                    return $GIT_UPDATE_TYPE_ABOARTED
+                }
             fi
+            popd
             return $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY
         fi
     fi
