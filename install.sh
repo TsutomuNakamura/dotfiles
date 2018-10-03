@@ -241,13 +241,13 @@ function init() {
 
     # Git will be installed but its version is less or equals 1.8,
     # remaining processes are not continuable.
-    local version_of_git="$(git --version | cut -d' ' -f3)"
-    vercomp "1.9.0" "$version_of_git"
-    result=$?
-    if [[ $result -eq 1 ]]; then
-        logger_err "Your version of git is ${version_of_git}. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
-        return 1
-    fi
+    #local version_of_git="$(git --version | cut -d' ' -f3)"
+    #vercomp "1.9.0" "$version_of_git"
+    #result=$?
+    #if [[ $result -eq 1 ]]; then
+    #    logger_err "Your version of git is ${version_of_git}. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
+    #    return 1
+    #fi
 
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed

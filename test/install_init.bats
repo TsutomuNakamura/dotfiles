@@ -9,12 +9,12 @@ function setup() {
     stub init_vim_environment
     stub install_bin_utils
     stub_and_eval question '{ return $ANSWER_OF_QUESTION_YES; }'
-    stub_and_eval git '{
-        [[ "$1" == "--version" ]] && {
-            echo "git version 2.19.0"
-        }
-        return 0
-    }'
+    # stub_and_eval git '{
+    #     [[ "$1" == "--version" ]] && {
+    #         echo "git version 2.19.0"
+    #     }
+    #     return 0
+    # }'
 
     stub logger_err
 }
@@ -24,7 +24,7 @@ function setup() {
 
     echo "$output"
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -41,7 +41,7 @@ function setup() {
     run init
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -59,7 +59,7 @@ function setup() {
     run init
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times git)"                           -eq 0 ]]
+    # [[ "$(stub_called_times git)"                           -eq 0 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
@@ -80,7 +80,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 1
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 0 ]]
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -98,7 +98,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]        # should not call
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -119,7 +119,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
     [[ "$status" -eq 255 ]]
-    [[ "$(stub_called_times git)"                           -eq 0 ]]
+    # [[ "$(stub_called_times git)"                           -eq 0 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]        # should not call
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -138,7 +138,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
     [[ "$status" -eq 255 ]]
-    [[ "$(stub_called_times git)"                           -eq 0 ]]
+    # [[ "$(stub_called_times git)"                           -eq 0 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -152,30 +152,30 @@ function setup() {
     stub_called_with_exactly_times question 1 "Do you continue to install the dotfiles without dependency packages? [Y/n]: "
 }
 
-@test '#init should return 1 if the version of git is lower then 1.9.0.' {
-    stub_and_eval git '{
-        [[ "$1" == "--version" ]] && {
-            echo "git version 1.8.99"
-        }
-        return 0
-    }'
-
-    run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
-
-    [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
-    [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
-    [[ "$(stub_called_times install_packages)"              -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
-    [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
-    [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
-    [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
-    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
-    [[ "$(stub_called_times question)"                      -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
-
-    stub_called_with_exactly_times logger_err 1 "Your version of git is 1.8.99. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
-}
+#@test '#init should return 1 if the version of git is lower then 1.9.0.' {
+#    stub_and_eval git '{
+#        [[ "$1" == "--version" ]] && {
+#            echo "git version 1.8.99"
+#        }
+#        return 0
+#    }'
+#
+#    run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
+#
+#    [[ "$status" -eq 1 ]]
+#    [[ "$(stub_called_times git)"                           -eq 1 ]]
+#    [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
+#    [[ "$(stub_called_times install_packages)"              -eq 1 ]]
+#    [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
+#    [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
+#    [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
+#    [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
+#    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
+#    [[ "$(stub_called_times question)"                      -eq 0 ]]
+#    [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
+#
+#    stub_called_with_exactly_times logger_err 1 "Your version of git is 1.8.99. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
+#}
 
 @test '#init should return 1 if the init_repo() returns 1.' {
     stub_and_eval init_repo '{ return 1; }'
@@ -183,7 +183,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
@@ -200,7 +200,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
@@ -219,7 +219,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
@@ -238,7 +238,7 @@ function setup() {
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times git)"                           -eq 1 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
