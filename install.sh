@@ -255,10 +255,15 @@ function init() {
         logger_err "Failed to initializing repository. Remaining install process will be aborted."
         return 1
     }
-    install_fonts || {
-        logger_err "Failed to installing fonts. Remaining install process will be aborted."
-        return 1
-    }
+    if has_desktop_env; then
+        install_fonts || {
+            logger_err "Failed to installing fonts. Remaining install process will be aborted."
+            return 1
+        }
+    else
+        logger_info "Installing fonts were skipped due to this environment doesn't have desktop components."
+    fi
+
     init_vim_environment || {
         logger_err "Failed to initializing vim environment. Remaining install process will be aborted."
         return 1
@@ -271,39 +276,43 @@ function init() {
     return 0
 }
 
-# Install packages
+# Install packages.
+# Fonts will be installed only when the machine have some desktop environments.
 function install_packages() {
     local result=0
+    local packages=
 
     if [[ "$(get_distribution_name)" == "debian" ]]; then
-        install_packages_with_apt \
-                git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg \
-                fonts-noto fonts-noto-mono fonts-noto-cjk \
-                || (( result++ ))
+        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
+        has_desktop_env && packages=" fonts-noto fonts-noto-mono fonts-noto-cjk"
+
+        install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
-        install_packages_with_apt \
-                git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg \
-                fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra \
-                || (( result++ ))
+        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
+        has_desktop_env && packages=" fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
+
+        install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
+        packages="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg"
+        has_desktop_env && packages="google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch"
+
         # TODO: ranger not supported in centos
         # TODO: Are there google-noto-mono-(sans|serif) fonts?
-        install_packages_with_yum \
-                git vim gvim ctags tmux zsh unzip gnome-terminal ffmpeg \
-                google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch \
-                && logger_info "Package \"ranger\" will not be installed on Cent OS. So please instlal it manually." \
+        install_packages_with_yum $packages \
+                && logger_warn "Package \"ranger\" will not be installed on Cent OS. So please install it manually." \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
-        install_packages_with_dnf \
-                git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg \
-                google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch \
-                || (( result++ ))
+        packages="git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
+        has_desktop_env && packages="google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
+
+        install_packages_with_dnf $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
-        install_packages_with_pacman gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg \
-                noto-fonts noto-fonts-cjk \
-                || (( result++ ))
+        packages="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
+        has_desktop_env && packages="noto-fonts noto-fonts-cjk"
+
+        install_packages_with_pacman $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
-        install_packages_with_homebrew vim ctags tmux zsh unzip                             || (( result++ ))
+        install_packages_with_homebrew vim ctags tmux zsh unzip || (( result++ ))
     else
         logger_err "Failed to get OS distribution to install packages."
         (( result++ ))
@@ -1588,6 +1597,11 @@ function vercomp() {
         fi
     done
     return 0
+}
+
+# Is desktop installed?
+function has_desktop_env() {
+    [[ -d "/usr/share/xsessions" ]] && [[ ! -z "$(ls -A /usr/share/xsessions/*.desktop >& /dev/null)" ]]
 }
 
 if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
