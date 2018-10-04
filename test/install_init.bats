@@ -9,6 +9,7 @@ function setup() {
     stub init_vim_environment
     stub install_bin_utils
     stub_and_eval question '{ return $ANSWER_OF_QUESTION_YES; }'
+    stub has_desktop_env
     # stub_and_eval git '{
     #     [[ "$1" == "--version" ]] && {
     #         echo "git version 2.19.0"
@@ -16,19 +17,39 @@ function setup() {
     #     return 0
     # }'
 
+    stub logger_infol
     stub logger_err
 }
 
-@test '#init should return 0 if no errors have occured' {
+@test '#init should return 0 if no errors have occured with no desktop environment' {
+    stub_and_eval has_desktop_env '{ return 1; }'
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
-    echo "$output"
+    [[ "$status" -eq 0 ]]
+    # [[ "$(stub_called_times git)"                           -eq 1 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
+    [[ "$(stub_called_times install_packages)"              -eq 1 ]]
+    [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
+    [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
+    [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
+    [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
+    [[ "$(stub_called_times question)"                      -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
+
+    stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop"
+}
+
+@test '#init should return 0 if no errors have occured with desktop environment' {
+    run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
+
     [[ "$status" -eq 0 ]]
     # [[ "$(stub_called_times git)"                           -eq 1 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
@@ -46,6 +67,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
@@ -64,6 +86,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
@@ -85,6 +108,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
@@ -93,7 +117,7 @@ function setup() {
     stub_called_with_exactly_times init_repo 1 "git@github.com:TsutomuNakamura/dotfiles.git" "develop"
 }
 
-@test '#init should should call following instructions except call install_packages() if the do_i_have_admin_privileges() returns false and the user accept to be not able to install dependency packages.' {
+@test '#init should call following instructions except call install_packages() if the do_i_have_admin_privileges() returns false and the user accept to be not able to install dependency packages.' {
     stub_and_eval do_i_have_admin_privileges '{ return 1; }'
     run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
 
@@ -103,6 +127,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]        # should not call
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
@@ -112,7 +137,7 @@ function setup() {
     stub_called_with_exactly_times question 1 "Do you continue to install the dotfiles without dependency packages? [Y/n]: "
 }
 
-@test '#init should should return 255 if the do_i_have_admin_privileges() returns false and the user inputs to question with invalid answer over 3 times.' {
+@test '#init should return 255 if the do_i_have_admin_privileges() returns false and the user inputs to question with invalid answer over 3 times.' {
     stub_and_eval question '{ return $ANSWER_OF_QUESTION_ABORTED; }'
     stub_and_eval do_i_have_admin_privileges '{ return 1; }'
 
@@ -124,6 +149,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]        # should not call
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
@@ -143,6 +169,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
@@ -168,6 +195,7 @@ function setup() {
 #    [[ "$(stub_called_times install_packages)"              -eq 1 ]]
 #    [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
 #    [[ "$(stub_called_times init_repo)"                     -eq 0 ]]
+#    [[ "$(stub_called_times has_desktop_env)"               -eq 0 ]]
 #    [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
 #    [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
 #    [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
@@ -188,6 +216,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 0 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
@@ -205,6 +234,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 0 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
@@ -224,6 +254,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 0 ]]
@@ -243,6 +274,7 @@ function setup() {
     [[ "$(stub_called_times install_packages)"              -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                     -eq 1 ]]
+    [[ "$(stub_called_times has_desktop_env)"               -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                 -eq 1 ]]
     [[ "$(stub_called_times init_vim_environment)"          -eq 1 ]]
     [[ "$(stub_called_times install_bin_utils)"             -eq 1 ]]
