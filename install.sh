@@ -1601,7 +1601,7 @@ function vercomp() {
 
 # Is desktop installed?
 function has_desktop_env() {
-    [[ -d "/usr/share/xsessions" ]] && [[ ! -z "$(ls -A /usr/share/xsessions/*.desktop >& /dev/null)" ]]
+    [[ -d "/usr/share/xsessions" ]] && [[ ! -z "$(ls -A /usr/share/xsessions/*.desktop 2> /dev/null)" ]]
 }
 
 if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
