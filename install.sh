@@ -284,17 +284,17 @@ function install_packages() {
 
     if [[ "$(get_distribution_name)" == "debian" ]]; then
         packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
-        has_desktop_env && packages=" fonts-noto fonts-noto-mono fonts-noto-cjk"
+        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk"
 
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
         packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
-        has_desktop_env && packages=" fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
+        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
 
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
         packages="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg"
-        has_desktop_env && packages="google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch"
+        has_desktop_env && packages+=" google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch"
 
         # TODO: ranger not supported in centos
         # TODO: Are there google-noto-mono-(sans|serif) fonts?
@@ -303,12 +303,12 @@ function install_packages() {
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
         packages="git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
-        has_desktop_env && packages="google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
+        has_desktop_env && packages+=" google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
 
         install_packages_with_dnf $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
         packages="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
-        has_desktop_env && packages="noto-fonts noto-fonts-cjk"
+        has_desktop_env && packages+=" noto-fonts noto-fonts-cjk"
 
         install_packages_with_pacman $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
