@@ -1,5 +1,7 @@
 test:
 	./test.sh
 
-.PHONY: test
+test-suite:
+	./test.sh --suite
 
+.PHONY: test test-suite

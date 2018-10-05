@@ -5,6 +5,15 @@ URL_OF_STUBSH="https://github.com/TsutomuNakamura/stub4bats.sh"
 
 function main() {
     local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    cd "$script_dir"
+
+    [[ "$1" == "--suite" ]] && {
+        test_all || {
+            echo "ERROR: Failed to test due to some errors"
+            return 1
+        }
+        return 0
+    }
 
     # Is this container environment
     if [[ ! -e "/.dockerenv" ]] && [[ "${TRAVIS}" != "true" ]]; then
@@ -71,6 +80,104 @@ function main() {
         bats $opts_for_bats ./test/*.bats
     fi
     exit
+}
+
+function build_docker_image() {
+    local image_name="$1"
+    local dockerfile="$2"
+
+    local ret=
+    local dir_of_dockerfile="$(dirname "$dockerfile")"
+    local dockerfile_name="$(basename "$dockerfile")"
+
+    pushd "$dir_of_dockerfile" || {
+        echo "ERROR: Failed to change the directory to $dir_of_dockerfile"
+        return 1
+    }
+
+    echo "INFO: Building docker image $image_name"
+    docker build -t="$image_name" -f "$dockerfile_name" .
+    ret=$?
+    popd
+
+    return $ret
+}
+
+function test_all() {
+    local user_name="$(whoami)"
+    local ret
+    declare -A labels=(
+        ["ubuntu1804-dot-test"]="./test/container/ubuntu/Dockerfile1804"
+        ["ubuntu1604-dot-test"]="./test/container/ubuntu/Dockerfile1604"
+        ["centos-dot-test"]="./test/container/centos/Dockerfile"
+        ["fedora-dot-test"]="./test/container/fedora/Dockerfile"
+        ["arch-dot-test"]="./test/container/arch/Dockerfile"
+    )
+
+    local key
+    local current="$(date +%s)"
+    local current_date_string="$(date +%Y%m%d%H%M%S)"
+    local duration_of_expired=$((1 * 60 * 60 * 24 * 14))
+    declare -a images=()
+
+    # Create new docker images
+    for key in "${!labels[@]}"; do
+        # Create docker image
+        local image_name="${user_name}/${key}:latest"
+        images+=("${image_name}")
+        local hash_of_image="$(docker images -q ${user_name}/${key}:latest)"
+        if [[ -z "$hash_of_image" ]]; then
+            build_docker_image "$image_name" "${labels[${key}]}" || {
+                echo "ERROR: Failed to re-building docker image has failed." >&2
+                return 1
+            }
+            continue
+        fi
+
+        created_date=$(docker inspect -f '{{ .Created }}' ${image_name} | grep -P -o '[0-9]{4}\-[0-9]{2}\-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}')
+        if [[ $duration_of_expired -lt $((current - created_date_string)) ]]; then
+            docker rmi
+            build_docker_image "$image_name" "${labels[${key}]}" || {
+                echo "ERROR: Failed to re-building docker image has failed." >&2
+                return 1
+            }
+            continue
+        fi
+    done
+
+    for key in "${!labels[@]}"; do
+        # Run test cases on each environment
+        local image_name="${user_name}/${key}:latest"
+        if [[ "$key" == "arch-dot-test" ]]; then
+            # Only one test case which has installing font will be tested due to much consumption of the time.
+            set -o pipefail
+            docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
+                    /bin/bash -c "mkdir -p /usr/share/xsessions; touch /usr/share/xsessions/gnome.desktop; su - foo bash -c 'bash <(cat ~/dotfiles/install.sh)'" | \
+                    tee "./${key}_${current_date_string}_with_font.log"
+            ret=$?
+            set +o pipefail
+            [[ $ret -ne 0 ]] && {
+                echo -n "ERROR: Testing has failed on $key with desktop environment." >&2
+                echo    "Check log ${key}_${current_date_string}_with_font.log" >&2
+                return 1
+            }
+        fi
+
+        set -o pipefail
+        docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
+                /bin/bash -c "su - foo bash -c 'bash <(cat ~/dotfiles/install.sh)'" | \
+                tee "./${key}_${current_date_string}.log"
+        ret=$?
+        set +o pipefail
+        [[ $ret -ne 0 ]] && {
+            echo -n "ERROR: Testing has failed on ${key}." >&2
+            echo    "Check log ${key}_${current_date_string}.log" >&2
+            return 1
+        }
+    done
+
+    # All test cases have succeeded
+    return 0
 }
 
 main "$@"
