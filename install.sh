@@ -172,14 +172,28 @@ function logger_info() {
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
     local message="$1"
-    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
+
+    local line_no="${BASH_LINENO[0]}"
+
+    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: line ${line_no}: ${FUNCNAME[1]}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
 
 function logger_err() {
     local message="$1"
-    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
+
+    local line_no
+    local func_name="${FUNCNAME[1]}"
+    if [[ "$func_name" == "pushd" ]]; then
+        # If this method called from pushd, print the caller and its line of pushd for traceability.
+        func_name="${FUNCNAME[2]}"
+        line_no="${BASH_LINENO[1]}"
+    else
+        line_no="${BASH_LINENO[0]}"
+    fi
+
+    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: line ${line_no}: ${func_name}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
@@ -411,7 +425,7 @@ function install_fonts() {
     fi
 
     mkdir -p $font_dir
-    pushd $font_dir
+    pushd $font_dir || return 1
 
     install_the_font "_install_font_inconsolata_nerd" \
             "Inconsolata for Powerline Nerd Font" \
@@ -508,7 +522,7 @@ function _install_font_migu1m() {
 
     if [[ "$ret_of_curl" -eq 0 ]] && [[ -e "migu-1m-20150712.zip" ]] && [[ "$(wc -c < migu-1m-20150712.zip)" -ne 0 ]]; then
         unzip migu-1m-20150712.zip
-        pushd migu-1m-20150712
+        pushd migu-1m-20150712 || return 1
         mv ./*.ttf ../
         popd
     else
@@ -830,7 +844,7 @@ function files_that_should_not_be_linked() {
 function get_target_dotfiles() {
     local dir="$1"
     declare -a dotfiles=()
-    pushd ${dir}
+    pushd ${dir} || return 1
 
     while read f; do
         f=${f#./}
@@ -859,7 +873,7 @@ function backup_current_dotfiles() {
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
     mkdir -p ${backup_dir}
-    pushd ${HOME}
+    pushd ${HOME} || return 1
 
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         [[ -e "${dotfiles[i]}" ]] || continue
@@ -868,7 +882,7 @@ function backup_current_dotfiles() {
         if (should_it_make_deep_link_directory "$dir_name"); then
 
             # Backup deeplink
-            pushd "${HOME}/${DOTDIR}/${dotfiles[i]}"
+            pushd "${HOME}/${DOTDIR}/${dotfiles[i]}" || { popd; return 1; }
             while read target; do
                 # Backup only files or symlinks
                 target=${target#./}
@@ -929,7 +943,7 @@ function backup_xdg_base_directory_individually() {
     local middle=
     local file=
 
-    pushd "${HOME}/${DOTDIR}"
+    pushd "${HOME}/${DOTDIR}" || return 1
     while read f; do
         target="${f#./${xdg_param_name}/*}"
         middle=$(dirname "$target")
@@ -965,7 +979,7 @@ function deploy() {
 
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
-    pushd ${HOME}
+    pushd ${HOME} || return 1
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         if should_it_make_deep_link_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
@@ -975,7 +989,7 @@ function deploy() {
                 echo "ERROR: ${dotfiles[i]} is already exists and cannot make directory"
                 return 1
             }
-            pushd ${DOTDIR}/${dotfiles[i]}
+            pushd ${DOTDIR}/${dotfiles[i]} || { popd; return 1; }
             while read f; do
                 link_of_destinations+=( "${f#./}" )
             done < <(find . -type f)
@@ -1027,7 +1041,7 @@ function link_xdg_base_directory() {
     local link_target=
 
 
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
     if [[ -d "$xdg_directory" ]]; then
         while read f; do
             f=${f#./*}
@@ -1050,7 +1064,7 @@ function link_xdg_base_directory() {
             fi
 
             [[ ! -d "$pushd_target" ]] && mkdir -p "$pushd_target"
-            pushd "$pushd_target"
+            pushd "$pushd_target" || { popd; return 1; }
             link_target="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${f}"
             echo "ln -s \"${link_target}\" from \"$(pwd)\""
             ln -s "${link_target}"
@@ -1062,29 +1076,29 @@ function link_xdg_base_directory() {
 
 function deploy_vim_environment() {
     # Deploy bats.vim
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
     mkdir -p .vim/after/syntax
     mkdir -p .vim/ftdetect
-    pushd .vim/after/syntax
+    pushd .vim/after/syntax || { popd; return 1; }
     ln -sf ../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim
     popd
-    pushd .vim/ftdetect
+    pushd .vim/ftdetect || { popd; return 1; }
     ln -sf ../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim
     popd
 
     # Deploy snipmate-snippets
     mkdir -p .vim/snippets
-    pushd .vim/snippets
+    pushd .vim/snippets || { popd; return 1; }
     ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets
     ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets
-    popd
 
-    popd
+    popd; popd
+    return 0
 }
 
 function should_it_make_deep_link_directory() {
     local directory="$1"
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
 
     [[ -d $directory ]] && \
         ( [[ "$directory" = ".config" ]] || [[ "$directory" = "bin" ]] || [[ "$directory" = ".local" ]] )
@@ -1142,7 +1156,7 @@ function determin_update_type_of_repository() {
     if [[ -d "$target" ]]; then
 
         pushd "$target" || {
-            logger_err "Failed to push directory \"${target}\". Remaining processes will be aborted."
+            logger_err "Remaining processes will be aborted."
             return $ANSWER_OF_QUESTION_ABORTED
         }
 
@@ -1292,10 +1306,7 @@ function init_repo() {
     local homedir_of_repo="${HOME%/}"
     local dirname_of_repo="${DOTDIR%/}"
 
-    pushd "$homedir_of_repo" || {
-        logger_err "Failed to change the directory \"$homedir_of_repo\""
-        return 1
-    }
+    pushd "$homedir_of_repo" || return 1
 
     update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch" || {
         logger_err "Updating repository of dotfiles was aborted due to previous error"
@@ -1462,7 +1473,7 @@ function remove_all_untracked_files() {
 # Initialize vim environment
 function init_vim_environment() {
 
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
 
     # Install pathogen.vim
     mkdir -p ./.vim/autoload
@@ -1472,11 +1483,11 @@ function init_vim_environment() {
     # update vim's submodules
     # Link color theme
     mkdir -p .vim/colors/
-    pushd .vim/colors
+    pushd .vim/colors || { popd; return 1; }
     ln -sf ../../resources/etc/config/vim/colors/molokai.vim
 
-    popd
-    popd
+    popd; popd
+    return 0
 }
 
 # Install command utilities in "${DOTDIR}/bin/emojify"
@@ -1572,7 +1583,11 @@ function question() {
 
 # Alias of silent push
 function pushd() {
-    command pushd "$@" > /dev/null
+    command pushd "$@" > /dev/null || {
+        logger_err "Failed to change (pushd) the directory to \"$@\""
+        return 1
+    }
+    return 0
 }
 # Alias of silent popd
 function popd() {
