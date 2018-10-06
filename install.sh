@@ -1608,5 +1608,6 @@ if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
     # Call this script as ". ./script --load-functions" if you want to load functions only
     #set -eu
     main "$@"
+    return $?
 fi
 
