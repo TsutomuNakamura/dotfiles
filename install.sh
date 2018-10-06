@@ -1256,17 +1256,19 @@ function determin_update_type_of_repository() {
 
 # Get git remote alias.
 # For instance, origin.
-
 function get_git_remote_aliases() {
     local directory="$1"
 
     local counter=0
     local e
+    pushd "$directory"
     while read e; do
         [[ "$counter" -ne 0 ]] && echo -n ","
         echo -n "$e"
         (( ++counter ))
-    done < <(git -C "$directory" remote 2> /dev/null)
+    done < <(git remote 2> /dev/null)
+    popd
+    return 0
 }
 
 ### TODO: Bash version older than 4.4 is not compatible like this method.
@@ -1290,29 +1292,40 @@ function init_repo() {
     local homedir_of_repo="${HOME%/}"
     local dirname_of_repo="${DOTDIR%/}"
 
-    pushd "$homedir_of_repo"
+    pushd "$homedir_of_repo" || {
+        logger_err "Failed to change the directory \"$homedir_of_repo\""
+        return 1
+    }
 
     update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch" || {
         logger_err "Updating repository of dotfiles was aborted due to previous error"
+        popd
         return 1
     }
     local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
 
     # Freeze .gitconfig for not to push username and email
+    pushd "$path_to_git_repo" || {
+        logger_err "Failed to change the directory \"$path_to_git_repo\"."
+        return 1
+    }
     [[ -f "${path_to_git_repo}/.gitconfig" ]] \
-            && git -C "$path_to_git_repo" update-index --assume-unchanged .gitconfig
+            && git update-index --assume-unchanged .gitconfig
 
-    git -C "$path_to_git_repo" submodule init || {
+    git submodule init || {
         logger_err "\"git submodule init\" has failed. Submodules may not be installed correctly on your environment"
+        popd; popd
         return 1
     }
 
-    git -C "$path_to_git_repo" submodule update || {
+    git submodule update || {
         logger_err "\"git submodule update\" has failed. Submodules may not be installed correctly on your environment"
+        popd; popd
         return 1
     }
 
-    popd
+    popd; popd
+    return 0
 }
 
 # Update dotfile's git repository
