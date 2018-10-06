@@ -172,14 +172,28 @@ function logger_info() {
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
     local message="$1"
-    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
+
+    local line_no="${BASH_LINENO[0]}"
+
+    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: line ${line_no}: ${FUNCNAME[1]}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
 
 function logger_err() {
     local message="$1"
-    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
+
+    local line_no
+    local func_name="${FUNCNAME[1]}"
+    if [[ "$func_name" == "pushd" ]]; then
+        # If this method called from pushd, print the caller and its line of pushd for traceability.
+        func_name="${FUNCNAME[2]}"
+        line_no="${BASH_LINENO[1]}"
+    else
+        line_no="${BASH_LINENO[0]}"
+    fi
+
+    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: line ${line_no}: ${func_name}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
@@ -411,7 +425,7 @@ function install_fonts() {
     fi
 
     mkdir -p $font_dir
-    pushd $font_dir
+    pushd $font_dir || return 1
 
     install_the_font "_install_font_inconsolata_nerd" \
             "Inconsolata for Powerline Nerd Font" \
@@ -508,7 +522,7 @@ function _install_font_migu1m() {
 
     if [[ "$ret_of_curl" -eq 0 ]] && [[ -e "migu-1m-20150712.zip" ]] && [[ "$(wc -c < migu-1m-20150712.zip)" -ne 0 ]]; then
         unzip migu-1m-20150712.zip
-        pushd migu-1m-20150712
+        pushd migu-1m-20150712 || return 1
         mv ./*.ttf ../
         popd
     else
@@ -830,7 +844,7 @@ function files_that_should_not_be_linked() {
 function get_target_dotfiles() {
     local dir="$1"
     declare -a dotfiles=()
-    pushd ${dir}
+    pushd ${dir} || return 1
 
     while read f; do
         f=${f#./}
@@ -859,7 +873,7 @@ function backup_current_dotfiles() {
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
     mkdir -p ${backup_dir}
-    pushd ${HOME}
+    pushd ${HOME} || return 1
 
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         [[ -e "${dotfiles[i]}" ]] || continue
@@ -868,7 +882,7 @@ function backup_current_dotfiles() {
         if (should_it_make_deep_link_directory "$dir_name"); then
 
             # Backup deeplink
-            pushd "${HOME}/${DOTDIR}/${dotfiles[i]}"
+            pushd "${HOME}/${DOTDIR}/${dotfiles[i]}" || { popd; return 1; }
             while read target; do
                 # Backup only files or symlinks
                 target=${target#./}
@@ -929,7 +943,7 @@ function backup_xdg_base_directory_individually() {
     local middle=
     local file=
 
-    pushd "${HOME}/${DOTDIR}"
+    pushd "${HOME}/${DOTDIR}" || return 1
     while read f; do
         target="${f#./${xdg_param_name}/*}"
         middle=$(dirname "$target")
@@ -965,7 +979,7 @@ function deploy() {
 
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
-    pushd ${HOME}
+    pushd ${HOME} || return 1
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         if should_it_make_deep_link_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
@@ -975,7 +989,7 @@ function deploy() {
                 echo "ERROR: ${dotfiles[i]} is already exists and cannot make directory"
                 return 1
             }
-            pushd ${DOTDIR}/${dotfiles[i]}
+            pushd ${DOTDIR}/${dotfiles[i]} || { popd; return 1; }
             while read f; do
                 link_of_destinations+=( "${f#./}" )
             done < <(find . -type f)
@@ -1027,7 +1041,7 @@ function link_xdg_base_directory() {
     local link_target=
 
 
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
     if [[ -d "$xdg_directory" ]]; then
         while read f; do
             f=${f#./*}
@@ -1050,7 +1064,7 @@ function link_xdg_base_directory() {
             fi
 
             [[ ! -d "$pushd_target" ]] && mkdir -p "$pushd_target"
-            pushd "$pushd_target"
+            pushd "$pushd_target" || { popd; return 1; }
             link_target="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${f}"
             echo "ln -s \"${link_target}\" from \"$(pwd)\""
             ln -s "${link_target}"
@@ -1062,29 +1076,29 @@ function link_xdg_base_directory() {
 
 function deploy_vim_environment() {
     # Deploy bats.vim
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
     mkdir -p .vim/after/syntax
     mkdir -p .vim/ftdetect
-    pushd .vim/after/syntax
+    pushd .vim/after/syntax || { popd; return 1; }
     ln -sf ../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim
     popd
-    pushd .vim/ftdetect
+    pushd .vim/ftdetect || { popd; return 1; }
     ln -sf ../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim
     popd
 
     # Deploy snipmate-snippets
     mkdir -p .vim/snippets
-    pushd .vim/snippets
+    pushd .vim/snippets || { popd; return 1; }
     ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets
     ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets
-    popd
 
-    popd
+    popd; popd
+    return 0
 }
 
 function should_it_make_deep_link_directory() {
     local directory="$1"
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
 
     [[ -d $directory ]] && \
         ( [[ "$directory" = ".config" ]] || [[ "$directory" = "bin" ]] || [[ "$directory" = ".local" ]] )
@@ -1142,7 +1156,7 @@ function determin_update_type_of_repository() {
     if [[ -d "$target" ]]; then
 
         pushd "$target" || {
-            logger_err "Failed to push directory \"${target}\". Remaining processes will be aborted."
+            logger_err "Remaining processes will be aborted."
             return $ANSWER_OF_QUESTION_ABORTED
         }
 
@@ -1256,17 +1270,24 @@ function determin_update_type_of_repository() {
 
 # Get git remote alias.
 # For instance, origin.
-
 function get_git_remote_aliases() {
     local directory="$1"
 
     local counter=0
     local e
+
+    if [[ ! -d "$directory" ]]; then
+        return 0
+    fi
+
+    pushd "$directory"
     while read e; do
         [[ "$counter" -ne 0 ]] && echo -n ","
         echo -n "$e"
         (( ++counter ))
-    done < <(git -C "$directory" remote 2> /dev/null)
+    done < <(git remote 2> /dev/null)
+    popd
+    return 0
 }
 
 ### TODO: Bash version older than 4.4 is not compatible like this method.
@@ -1290,29 +1311,37 @@ function init_repo() {
     local homedir_of_repo="${HOME%/}"
     local dirname_of_repo="${DOTDIR%/}"
 
-    pushd "$homedir_of_repo"
+    pushd "$homedir_of_repo" || return 1
 
     update_git_repo "$homedir_of_repo" "$dirname_of_repo" "$url_of_repo" "$branch" || {
         logger_err "Updating repository of dotfiles was aborted due to previous error"
+        popd
         return 1
     }
     local path_to_git_repo="${homedir_of_repo}/${dirname_of_repo}"
 
     # Freeze .gitconfig for not to push username and email
+    pushd "$path_to_git_repo" || {
+        logger_err "Failed to change the directory \"$path_to_git_repo\"."
+        return 1
+    }
     [[ -f "${path_to_git_repo}/.gitconfig" ]] \
-            && git -C "$path_to_git_repo" update-index --assume-unchanged .gitconfig
+            && git update-index --assume-unchanged .gitconfig
 
-    git -C "$path_to_git_repo" submodule init || {
+    git submodule init || {
         logger_err "\"git submodule init\" has failed. Submodules may not be installed correctly on your environment"
+        popd; popd
         return 1
     }
 
-    git -C "$path_to_git_repo" submodule update || {
+    git submodule update || {
         logger_err "\"git submodule update\" has failed. Submodules may not be installed correctly on your environment"
+        popd; popd
         return 1
     }
 
-    popd
+    popd; popd
+    return 0
 }
 
 # Update dotfile's git repository
@@ -1343,6 +1372,7 @@ function update_git_repo() {
     #eval "$(get_git_remote_aliases "$path_to_git_repo" remotes)"
     ## ----------------------------------------------------------
     local csv_remotes=$(get_git_remote_aliases "$path_to_git_repo")
+
     declare -a remotes=(${csv_remotes//,/ })
     ## ----------------------------------------------------------
 
@@ -1381,20 +1411,27 @@ function _do_update_git_repository () {
 
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
-            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_err "Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+            pushd "$homedir_of_repo" || return 1
+            git clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
+                logger_err "Failed to clone the repository(git clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                popd
                 return 1
             }
+            popd
             ;;
         $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
             rm -rf "$path_to_git_repo"
-            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_err "Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+
+            pushd "$homedir_of_repo" || return 1
+            git clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
+                logger_err "Failed to clone the repository(git clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                popd
                 return 1
             }
+            popd
             ;;
         $GIT_UPDATE_TYPE_ABOARTED )
             logger_info "Updating or cloning repository \"${url_of_repo}\" has been aborted."
@@ -1407,29 +1444,36 @@ function _do_update_git_repository () {
                 return 1
             fi
 
+            pushd "$path_to_git_repo" || { return 1; }
+
             # Get branch name
-            local branch=$(git -C "$path_to_git_repo" rev-parse --abbrev-ref HEAD 2> /dev/null)
+            local branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null)
             if [[ -z "$branch" ]]; then
                 logger_err "Failed to get git branch name from \"${path_to_git_repo}\""
+                popd
                 return 1
             fi
 
             if [[ "$update_type" -eq $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL ]]; then
                 # Reset and remove untracked files in git repository
-                git -C "$path_to_git_repo" reset --hard || {
+                git reset --hard || {
                     logger_err "Failed to reset git repository at \"${path_to_git_repo}\" for some readson."
+                    popd
                     return 1
                 }
                 remove_all_untracked_files "$path_to_git_repo"
             elif [[ "$update_type" -ne $GIT_UPDATE_TYPE_JUST_PULL ]]; then
                 logger_err "Invalid git update type (${update_type}). Some error occured when determining git update type of \"${path_to_git_repo}\"."
+                popd
                 return 1
             fi
             # Type of GIT_UPDATE_TYPE_JUST_PULL will also reach this section.
-            git -C "$path_to_git_repo" pull "$remote" "$branch" || {
+            git pull "$remote" "$branch" || {
                 logger_err "Failed to pull \"$remote\" \"$branch\"."
+                popd
                 return 1
             }
+            popd
             ;;
     esac
 
@@ -1441,15 +1485,17 @@ function remove_all_untracked_files() {
     local directory="$1"
     local f
 
+    pushd "$directory" || return 1
     while read f; do
         rm -rf "${directory}/${f}"
-    done < <(git -C "$directory" status --porcelain 2> /dev/null | grep -P '^\?\? .*' | cut -d ' ' -f 2)
+    done < <(git status --porcelain 2> /dev/null | grep -P '^\?\? .*' | cut -d ' ' -f 2)
+    popd
 }
 
 # Initialize vim environment
 function init_vim_environment() {
 
-    pushd ${HOME}/${DOTDIR}
+    pushd ${HOME}/${DOTDIR} || return 1
 
     # Install pathogen.vim
     mkdir -p ./.vim/autoload
@@ -1459,11 +1505,11 @@ function init_vim_environment() {
     # update vim's submodules
     # Link color theme
     mkdir -p .vim/colors/
-    pushd .vim/colors
+    pushd .vim/colors || { popd; return 1; }
     ln -sf ../../resources/etc/config/vim/colors/molokai.vim
 
-    popd
-    popd
+    popd; popd
+    return 0
 }
 
 # Install command utilities in "${DOTDIR}/bin/emojify"
@@ -1559,7 +1605,11 @@ function question() {
 
 # Alias of silent push
 function pushd() {
-    command pushd "$@" > /dev/null
+    command pushd "$@" > /dev/null || {
+        logger_err "Failed to change (pushd) the directory to \"$@\""
+        return 1
+    }
+    return 0
 }
 # Alias of silent popd
 function popd() {
