@@ -172,14 +172,20 @@ function logger_info() {
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
     local message="$1"
-    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
+
+    local line_no="${BASH_LINENO[0]}"
+
+    message="${FONT_COLOR_YELLOW}WARN${FONT_COLOR_END}: line ${line_no}: ${FUNCNAME[1]}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
 
 function logger_err() {
     local message="$1"
-    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: ${FUNCNAME[1]}(): $message"
+
+    local line_no="${BASH_LINENO[0]}"
+
+    message="${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: line ${line_no}: ${FUNCNAME[1]}(): $message"
     echo -e "$message" >&2
     push_post_message_list "$message"
 }
