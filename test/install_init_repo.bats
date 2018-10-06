@@ -42,11 +42,10 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times update_git_repo)"   -eq 0 ]]
     [[ "$(stub_called_times git)"               -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"        -eq 0 ]]
     [[ "$(stub_called_times pushd)"             -eq 1 ]]
     [[ "$(stub_called_times popd)"              -eq 0 ]]
     stub_called_with_exactly_times pushd 1 "${HOME%/}"
-    stub_called_with_exactly_times logger_err 1 "Failed to change the directory \"${HOME%/}\""
 }
 
 @test '#init_repo should return 1 if update_git_repo() has failed' {
@@ -149,8 +148,4 @@ function teardown() {
     stub_called_with_exactly_times pushd 1 "${HOME%/}"
     stub_called_with_exactly_times pushd 1 "${HOME%/}/${DOTDIR%/}"
 }
-
-
-
-
 

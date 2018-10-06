@@ -1275,6 +1275,11 @@ function get_git_remote_aliases() {
 
     local counter=0
     local e
+
+    if [[ ! -d "$directory" ]]; then
+        return 0
+    fi
+
     pushd "$directory"
     while read e; do
         [[ "$counter" -ne 0 ]] && echo -n ","
@@ -1367,6 +1372,7 @@ function update_git_repo() {
     #eval "$(get_git_remote_aliases "$path_to_git_repo" remotes)"
     ## ----------------------------------------------------------
     local csv_remotes=$(get_git_remote_aliases "$path_to_git_repo")
+
     declare -a remotes=(${csv_remotes//,/ })
     ## ----------------------------------------------------------
 
@@ -1405,20 +1411,27 @@ function _do_update_git_repository () {
 
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
-            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_err "Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+            pushd "$homedir_of_repo" || return 1
+            git clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
+                logger_err "Failed to clone the repository(git clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                popd
                 return 1
             }
+            popd
             ;;
         $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
             rm -rf "$path_to_git_repo"
-            git -C "$homedir_of_repo" clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
-                logger_err "Failed to clone the repository(git -C \"$homedir_of_repo\" clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+
+            pushd "$homedir_of_repo" || return 1
+            git clone -b "$branch" "$url_of_repo" "$dirname_of_repo" || {
+                logger_err "Failed to clone the repository(git clone -b \"$branch\" \"$url_of_repo\" \"$dirname_of_repo\")"
+                popd
                 return 1
             }
+            popd
             ;;
         $GIT_UPDATE_TYPE_ABOARTED )
             logger_info "Updating or cloning repository \"${url_of_repo}\" has been aborted."
@@ -1431,29 +1444,36 @@ function _do_update_git_repository () {
                 return 1
             fi
 
+            pushd "$path_to_git_repo" || { return 1; }
+
             # Get branch name
-            local branch=$(git -C "$path_to_git_repo" rev-parse --abbrev-ref HEAD 2> /dev/null)
+            local branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null)
             if [[ -z "$branch" ]]; then
                 logger_err "Failed to get git branch name from \"${path_to_git_repo}\""
+                popd
                 return 1
             fi
 
             if [[ "$update_type" -eq $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL ]]; then
                 # Reset and remove untracked files in git repository
-                git -C "$path_to_git_repo" reset --hard || {
+                git reset --hard || {
                     logger_err "Failed to reset git repository at \"${path_to_git_repo}\" for some readson."
+                    popd
                     return 1
                 }
                 remove_all_untracked_files "$path_to_git_repo"
             elif [[ "$update_type" -ne $GIT_UPDATE_TYPE_JUST_PULL ]]; then
                 logger_err "Invalid git update type (${update_type}). Some error occured when determining git update type of \"${path_to_git_repo}\"."
+                popd
                 return 1
             fi
             # Type of GIT_UPDATE_TYPE_JUST_PULL will also reach this section.
-            git -C "$path_to_git_repo" pull "$remote" "$branch" || {
+            git pull "$remote" "$branch" || {
                 logger_err "Failed to pull \"$remote\" \"$branch\"."
+                popd
                 return 1
             }
+            popd
             ;;
     esac
 
@@ -1465,9 +1485,11 @@ function remove_all_untracked_files() {
     local directory="$1"
     local f
 
+    pushd "$directory" || return 1
     while read f; do
         rm -rf "${directory}/${f}"
-    done < <(git -C "$directory" status --porcelain 2> /dev/null | grep -P '^\?\? .*' | cut -d ' ' -f 2)
+    done < <(git status --porcelain 2> /dev/null | grep -P '^\?\? .*' | cut -d ' ' -f 2)
+    popd
 }
 
 # Initialize vim environment

@@ -11,6 +11,17 @@ function teardown() {
 
 # TODO: For older than bash version 4.4, get_git_remote_aliases should return remote list as csv
 
+@test '#get_git_remote_aliases should output nothing if the directory does not existed' {
+    stub git
+    run get_git_remote_aliases "${HOME}/aaaaaaaaaaaaaaaaaaaaaaaa"
+
+    [[ "$status" -eq 0 ]]
+    [[ -z "$output" ]]
+    [[ $(stub_called_times git) -eq 0 ]]
+}
+
+
+
 @test '#get_git_remote_aliases should output "origin" the repository refers origin.' {
     # stub_and_eval get_git_remote_aliases '{ echo "declare -a remotes=([0]=\"origin\")"; }'
     stub_and_eval git '{ echo "origin"; }'
