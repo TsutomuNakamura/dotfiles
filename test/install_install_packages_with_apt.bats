@@ -96,7 +96,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_warn)" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
-    stub_called_with_exactly_times logger_warn 1 "Package vim is not available. Installing vim was spkipped."
+    stub_called_with_exactly_times logger_warn 1 "Package vim is not available. Installing vim was skipped."
     stub_called_with_exactly_times sudo 1 apt-get update
 }
 
