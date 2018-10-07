@@ -35,7 +35,7 @@ function setup() {
     [[ "$(stub_called_times sudo)" -eq 3 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
-    stub_called_with_exactly_times sudo 1 apt-get install -y vim
+    stub_called_with_exactly_times sudo 1 DEBIAN_FRONTEND=noninteractive apt-get install -y vim
     stub_called_with_exactly_times logger_info 1 "Packages vim have been installed."
 }
 
@@ -123,7 +123,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
 
-    stub_called_with_exactly_times sudo 1 apt-get install -y vim tmux
+    stub_called_with_exactly_times sudo 1 DEBIAN_FRONTEND=noninteractive apt-get install -y vim tmux
     stub_called_with_exactly_times logger_info 1 "Packages vim tmux have been installed."
 }
 
@@ -152,7 +152,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 0 ]]
 
-    stub_called_with_exactly_times sudo 1 apt-get install -y vim
+    stub_called_with_exactly_times sudo 1 DEBIAN_FRONTEND=noninteractive apt-get install -y vim
     stub_called_with_exactly_times logger_info 1 "Packages vim have been installed."
 }
 
@@ -203,8 +203,8 @@ function setup() {
             return 0
         elif [[ "$1" = "apt-cache" ]] && [[ "$2" = pkgnames ]]; then
             echo "tmux"; echo "vim"; echo "gitfoo"
+            return 0
         fi
-        echo "sudo was called..."
         return 1
     }'
     run install_packages_with_apt vim
@@ -212,11 +212,10 @@ function setup() {
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 1 ]]
     [[ "${outputs[0]}" = "Installing vim..." ]]
-    [[ "${outputs[1]}" = "sudo was called..." ]]
     [[ "$(stub_called_times sudo)" -eq 3 ]]
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_err)" -eq 1 ]]
 
-    stub_called_with_exactly_times sudo 1 apt-get install -y vim
-    stub_called_with_exactly_times logger_err 1 "Some error occured when installing vim.\nsudo was called..."
+    stub_called_with_exactly_times sudo 1 DEBIAN_FRONTEND=noninteractive apt-get install -y vim
+    stub_called_with_exactly_times logger_err 1 "Some error occured when installing vim with apt-get install."
 }

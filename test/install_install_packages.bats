@@ -196,7 +196,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_dnf 1 git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
+    stub_called_with_exactly_times install_packages_with_dnf 1 git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
 }
 
 @test '#install_packages return 0 if install packages has succeeded on fedora' {
@@ -215,7 +215,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_dnf 1 git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg
+    stub_called_with_exactly_times install_packages_with_dnf 1 git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg
 }
 
 @test '#install_packages return 1 if install packages has failed on fedora' {
@@ -235,7 +235,7 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
 
-    stub_called_with_exactly_times install_packages_with_dnf 1 git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
+    stub_called_with_exactly_times install_packages_with_dnf 1 git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch
 }
 
 @test '#install_packages return 1 if install packages has succeeded on arch' {

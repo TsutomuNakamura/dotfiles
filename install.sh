@@ -629,7 +629,7 @@ function install_packages_with_apt() {
     echo "Installing ${packages_will_be_installed[@]}..."
 
     ${prefix} DEBIAN_FRONTEND=noninteractive apt-get install -y ${packages_will_be_installed[@]} || {
-        logger_err "Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
+        logger_err "Some error occured when installing ${packages_will_be_installed[@]} with apt-get install."
         return 1
     }
 
