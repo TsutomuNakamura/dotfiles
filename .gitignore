@@ -15,3 +15,6 @@ test/lib/
 
 /bin/emojify
 
+# test log
+/*.log
+

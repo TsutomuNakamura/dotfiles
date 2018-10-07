@@ -316,7 +316,7 @@ function install_packages() {
                 && logger_warn "Package \"ranger\" will not be installed on Cent OS. So please install it manually." \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
-        packages="git vim ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
+        packages="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
         has_desktop_env && packages+=" google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
 
         install_packages_with_dnf $packages || (( result++ ))
@@ -628,10 +628,8 @@ function install_packages_with_apt() {
 
     echo "Installing ${packages_will_be_installed[@]}..."
 
-    local output=
-    output="$(${prefix} apt-get install -y ${packages_will_be_installed[@]} 2>&1)" || {
-        echo "${output}" >&2
-        logger_err "Some error occured when installing ${packages_will_be_installed[@]}.\n${output}"
+    ${prefix} DEBIAN_FRONTEND=noninteractive apt-get install -y ${packages_will_be_installed[@]} || {
+        logger_err "Some error occured when installing ${packages_will_be_installed[@]} with apt-get install."
         return 1
     }
 
@@ -1658,5 +1656,6 @@ if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
     # Call this script as ". ./script --load-functions" if you want to load functions only
     #set -eu
     main "$@"
+    exit $?
 fi
 
