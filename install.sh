@@ -614,7 +614,7 @@ function install_packages_with_apt() {
             continue
         fi
         if ! (grep -P "^${p}$" &> /dev/null <<< "$available_packages"); then
-            logger_warn "Package ${p} is not available. Installing ${p} was spkipped."
+            logger_warn "Package ${p} is not available. Installing ${p} was skipped."
             continue
         fi
 
@@ -735,13 +735,29 @@ function install_packages_with_pacman() {
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
     local i
     local result=0
-    local installed_packages
-    local failed_to_install_packages
+    local installed_packages=
+
+    local failed_to_install_packages=
+    local unavailable_packages=
+    local already_installed_packages=
+
+    local all_available_packages="$(${prefix} pacman -Ss | grep -P '^[a-zA-z].*' | sed -e 's|^.*/\([^ ]\+\) .*|\1|g')"
+    if [[ -z "$all_available_packages" ]]; then
+        logger_err "Failed to get available packages with \"pacman -Ss\""
+        return 1
+    fi
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
+        if ! grep -Fx "${packages[i]}" <<< "$all_available_packages" > /dev/null ; then
+            #logger_warn "Package ${packages[i]} is not available. Installing ${packages[i]} was skipped."
+            unavailable_packages+="${packages[i]} "
+            continue
+        fi
+
         if ${prefix} pacman -Q "${packages[i]}"; then
-            echo "${packages[i]} is already installed."
+            already_installed_packages+="${packages[i]} "
         else
+            # Packages vim and gvim may conflict each other. Install them individual not to avoid faile to install other packages.
             if [[ "${packages[i]}" = "vim" ]] || [[ "${packages[i]}" = "gvim" ]]; then
                 packages_may_conflict+=("${packages[i]}")
             else
@@ -749,6 +765,11 @@ function install_packages_with_pacman() {
             fi
         fi
     }
+
+    [[ -z "$unavailable_packages" ]] || \
+            logger_warn "Packages ${unavailable_packages% } were unavailable. Skipped installing them."
+    [[ -z "$already_installed_packages" ]] || \
+            logger_info "Packages ${already_installed_packages% } were already installed. Skipped installing them."
 
     if [[ "${#packages_will_be_installed[@]}" -eq 0 ]] && [[ "${#packages_may_conflict[@]}" -eq 0 ]]; then
         echo "There are no packages to install."
@@ -778,7 +799,7 @@ function install_packages_with_pacman() {
     [[ ! -z "$installed_packages" ]] && \
             logger_info "Package(s) \"${installed_packages% }\" have been installed on your OS."
     [[ ! -z "$failed_to_install_packages" ]] && \
-            logger_err "Package(s) \"${failed_to_install_packages% }\" have not been installed on your OS for some error.\n  Please install these packages manually."
+            logger_err "Package(s) \"${failed_to_install_packages% }\" have not been installed on your OS due to some error.\n  Please install these packages manually."
 
     return $result
 }
