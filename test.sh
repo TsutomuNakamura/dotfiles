@@ -2,10 +2,11 @@
 
 URL_OF_BATS="https://github.com/sstephenson/bats.git"
 URL_OF_STUBSH="https://github.com/TsutomuNakamura/stub4bats.sh"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function main() {
     local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    cd "$script_dir"
+    cd "$SCRIPT_DIR"
 
     [[ "$1" == "--suite" ]] && {
         test_all || {
@@ -107,27 +108,30 @@ function test_all() {
     local user_name="$(whoami)"
     local ret
     declare -A labels=(
-        ["ubuntu1804-dot-test"]="./test/container/ubuntu/Dockerfile1804"
-        ["ubuntu1604-dot-test"]="./test/container/ubuntu/Dockerfile1604"
-        ["centos-dot-test"]="./test/container/centos/Dockerfile"
-        ["fedora-dot-test"]="./test/container/fedora/Dockerfile"
-        ["arch-dot-test"]="./test/container/arch/Dockerfile"
+        # ["Image name"]="Location of the Dockerfile, Expiration time"
+        ["ubuntu1804-dot-test"]="./test/container/ubuntu/Dockerfile1804,$((1 * 60 * 60 * 24 * 30))"
+        ["ubuntu1604-dot-test"]="./test/container/ubuntu/Dockerfile1604,$((1 * 60 * 60 * 24 * 30))"
+        ["centos-dot-test"]="./test/container/centos/Dockerfile,$((1 * 60 * 60 * 24 * 30))"
+        ["fedora-dot-test"]="./test/container/fedora/Dockerfile,$((1 * 60 * 60 * 24 * 30))"
+        ["arch-dot-test"]="./test/container/arch/Dockerfile,$((1 * 60 * 60 * 24 * 7))"
     )
 
     local key
     local current="$(date +%s)"
     local current_date_string="$(date +%Y%m%d%H%M%S)"
-    local duration_of_expired=$((1 * 60 * 60 * 24 * 14))
     declare -a images=()
 
     # Create new docker images
     for key in "${!labels[@]}"; do
         # Create docker image
         local image_name="${user_name}/${key}:latest"
+        local docker_file_name="$(cut -d',' -f 1 <<< ${labels[${key}]})"
+        local docker_expiration="$(cut -d',' -f 2 <<< ${labels[${key}]})"
+
         images+=("${image_name}")
         local hash_of_image="$(docker images -q ${user_name}/${key}:latest)"
         if [[ -z "$hash_of_image" ]]; then
-            build_docker_image "$image_name" "${labels[${key}]}" || {
+            build_docker_image "$image_name" "$docker_file_name" || {
                 echo "ERROR: Failed to re-building docker image has failed." >&2
                 return 1
             }
@@ -135,15 +139,24 @@ function test_all() {
         fi
 
         created_date=$(docker inspect -f '{{ .Created }}' ${image_name} | grep -P -o '[0-9]{4}\-[0-9]{2}\-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}')
-        if [[ $duration_of_expired -lt $((current - created_date_string)) ]]; then
-            docker rmi
-            build_docker_image "$image_name" "${labels[${key}]}" || {
+        if [[ $docker_expiration -lt $((current - created_date_string)) ]]; then
+            while read i; do
+                docker rm $i || {
+                    echo "ERROR: Failed to remove container $i" >&2
+                    return 1
+                }
+            done < <(docker ps -a -q --filter=ancestor=${image_name})
+
+            docker rmi "$image_name"
+            build_docker_image "$image_name" "$docker_file_name" || {
                 echo "ERROR: Failed to re-building docker image has failed." >&2
                 return 1
             }
             continue
         fi
     done
+
+    rm -f "${SCRIPT_DIR}/*-dot-test_*{,_with_font}.log"
 
     for key in "${!labels[@]}"; do
         # Run test cases on each environment
