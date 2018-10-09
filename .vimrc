@@ -1,3 +1,4 @@
+" - General specifications -----------------------------------------------------------------------------------
 scriptencoding utf-8
 set encoding=utf-8
 
@@ -41,52 +42,14 @@ set wildmode=longest:full,full
 " enable auto load the file (depending on your platform)
 set autoread
 
-" Change leader for vim plugins
+" Change leader for vim plugins from '\'
 let mapleader = ";"
-
+" - vimdiff specifications -----------------------------------------------------------------------------------
 if &diff                             " only for diff mode/vimdiff
   set diffopt=filler,context:1000000 " filler is default and inserts empty lines for sync
 endif
 
-" TODO: Test settingf from here
-let g:airline_powerline_fonts = 1
-let g:airline_theme = 'simple'
-let g:airline#extensions#tmuxline#enabled = 0
-let g:airline#extensions#tabline#enabled = 1
-" let g:tmuxline_theme = 'powerline'
-
-" Mapping for ctrlp
-let g:ctrlp_map = '<c-l><c-p>'
-let g:ctrlp_cmd = 'CtrlP'
-
-if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
-endif
-
-let g:tmuxline_preset = {
-      \'c'    : '#H',
-      \'win'  : '#I.#W',
-      \'cwin' : '#I.#W',
-      \'z'    : '%a %m/%d/%Y %R'}
-
-" Paste from clipboard/yanked text in command line mode
-cnoremap <C-v><C-v> <C-r>+
-inoremap <C-v><C-v> <C-r>+
-cnoremap <C-v>p <C-r><C-o>"
-
-" set color scheme
-syntax enable
-set t_Co=256
-""""colorscheme molokai
-let g:molokai_original=1
-" TODO
-colorscheme molokai
-
-" vim-pathogen. Auto load plugins
-execute pathogen#infect()
-
-let NERDSpaceDelims = 1
-
+" - Additional keymaps ---------------------------------------------------------------------------------------
 " bind key map
 " save, quit, force quit
 nnoremap <Space>w  :<C-u>w<CR>
@@ -124,9 +87,86 @@ inoremap jk  <Esc>
 vnoremap <C-c>  "+y
 vnoremap <C-v>  "+p
 
-" ----------------------------------------------------------------------------------
-" Visible zenkaku space
-" ----------------------------------------------------------------------------------
+" - Tag page settings ----------------------------------------------------------------------------------------
+" reference
+" http://qiita.com/tekkoc/items/98adcadfa4bdc8b5a6ca
+nnoremap s, <C-w><
+nnoremap s. <C-w>>
+
+nnoremap sj <C-w>j
+nnoremap sk <C-w>k
+nnoremap sl <C-w>l
+nnoremap sh <C-w>h
+nnoremap sJ <C-w>J
+nnoremap sK <C-w>K
+nnoremap sL <C-w>L
+nnoremap sH <C-w>H
+
+
+" - Configuration for vim-plug -------------------------------------------------------------------------------
+" To install plugins run a command linke below from CLI interface.
+" ~$ vim +PlugInstall +"sleep 1000m" +qall
+call plug#begin('~/.vim/plugged')
+" Prefix 'https://github.com/' is abbreviated.
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/nerdcommenter'
+Plug 'vim-scripts/sudo.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'edkolev/tmuxline.vim'
+Plug 'terryma/vim-multiple-cursors'
+
+Plug 'scrooloose/nerdcommenter'
+
+" Color schemes of molokai ----
+""Plug 'tomasr/molokai'
+
+" Tmux line of vim ----
+""Plug 'edkolev/tmuxline.vim'
+
+" Required, plugins available after.
+call plug#end()
+" - Settings of vim-airline ----------------------------------------------------------------------------------
+let g:airline_powerline_fonts = 1
+let g:airline_theme = 'simple'
+let g:airline#extensions#tmuxline#enabled = 0
+let g:airline#extensions#tabline#enabled = 1
+" let g:tmuxline_theme = 'powerline'
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+
+" - Mappings for ctrlp ---------------------------------------------------------------------------------------
+let g:ctrlp_map = '<c-l><c-p>'
+let g:ctrlp_cmd = 'CtrlP'
+
+" - Mappings for ctrlp ---------------------------------------------------------------------------------------
+"" This is a setting of 'edkolev/tmuxline.vim'.
+"let g:tmuxline_preset = {
+"      \'c'    : '#H',
+"      \'win'  : '#I.#W',
+"      \'cwin' : '#I.#W',
+"      \'z'    : '%a %m/%d/%Y %R'}
+
+" - Settings of clip board -----------------------------------------------------------------------------------
+" Paste from clipboard/yanked text in command line mode
+cnoremap <C-v><C-v> <C-r>+
+inoremap <C-v><C-v> <C-r>+
+cnoremap <C-v>p <C-r><C-o>"
+
+" - Settings of color scheme ---------------------------------------------------------------------------------
+" set color scheme
+syntax enable
+set t_Co=256
+try
+    colorscheme molokai
+catch /^Vim\%((\a\+)\)\=:E185/
+    " deal with it
+endtry
+let g:molokai_original=1
+
+" - Visible zenkaku space ------------------------------------------------------------------------------------
 function! ZenkakuSpace()
   highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=darkgray
 endfunction
@@ -140,10 +180,10 @@ if has('syntax')
   call ZenkakuSpace()
 endif
 
-" ----------------------------------------------------------------------------------
+
+" - Pasting settings -----------------------------------------------------------------------------------------
 " Set pasting tric. Thanks for nice tric.
 " https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode
-" ----------------------------------------------------------------------------------
 let &t_SI .= "\<Esc>[?2004h"
 let &t_EI .= "\<Esc>[?2004l"
 
@@ -155,28 +195,11 @@ function! XTermPasteBegin()
   return ""
 endfunction
 
+" - NERDTree settings ----------------------------------------------------------------------------------------
 " open NERDTree
 nnoremap <silent> tr  :<C-u>NERDTree<CR>
 
-" ----------------------------------------------------------------------------------
-" tab page settings
-" 
-" reference
-" http://qiita.com/tekkoc/items/98adcadfa4bdc8b5a6ca
-" ----------------------------------------------------------------------------------
-nnoremap s, <C-w><
-nnoremap s. <C-w>>
-
-nnoremap sj <C-w>j
-nnoremap sk <C-w>k
-nnoremap sl <C-w>l
-nnoremap sh <C-w>h
-nnoremap sJ <C-w>J
-nnoremap sK <C-w>K
-nnoremap sL <C-w>L
-nnoremap sH <C-w>H
-
-" - Key mapping for vim-multiple-cursors from here ----------------------------------
+" - Settings for multi cursor (terryma/vim-multiple-cursors) -------------------------------------------------
 let g:multi_cursor_use_default_mapping=0
 
 " Default mapping
@@ -188,20 +211,20 @@ let g:multi_cursor_next_key            = '<C-n>'
 let g:multi_cursor_prev_key            = '<C-p>'
 let g:multi_cursor_skip_key            = '<C-x>'
 let g:multi_cursor_quit_key            = '<Esc>'
-" - Key mapping for vim-multiple-cursors to here ------------------------------------
 
-" 個別のタブの表示設定をします
+" - Visuals of tabs ------------------------------------------------------------------------------------------
 function! GuiTabLabel()
-  " タブで表示する文字列の初期化をします
+  " Initialize a string of tab.
   let l:label = ''
-
-  " タブに含まれるバッファ(ウィンドウ)についての情報をとっておきます。
+  " Store information of the tab temporary.
   let l:bufnrlist = tabpagebuflist(v:lnum)
 
-  " 表示文字列にバッファ名を追加します
-  " パスを全部表示させると長いのでファイル名だけを使います 詳しくは help fnamemodify()
+  " Add the information(file name).
+  " If it show entire path of the file, it's become too long to show.
+  " So to show the file name only. For more information show `help fnamemodify()`.
   let l:bufname = fnamemodify(bufname(l:bufnrlist[tabpagewinnr(v:lnum) - 1]), ':t')
-  " バッファ名がなければ No title としておきます。ここではマルチバイト文字を使わないほうが無難です
+  " If no file name, set text 'No title'.
+  " It's safe not to use multi byte characters.
   let l:label .= l:bufname == '' ? 'No title' : l:bufname
 
   " タブ内にウィンドウが複数あるときにはその数を追加します(デフォルトで一応あるので)
@@ -226,10 +249,10 @@ endfunction
 " その表示の前に %N というところでタブ番号を表示させています
 set guitablabel=%N:\ %{GuiTabLabel()}
 
-if !filereadable(expand("~/.vimrc_do_not_use_ambiwidth"))
-  source ~/.vim/myconf/ambiwidth.conf
-endif
+""if !filereadable(expand("~/.vimrc_do_not_use_ambiwidth"))
+""  source ~/.vim/myconf/ambiwidth.conf
+""endif
 
 "" nerdcommenter https://github.com/scrooloose/nerdcommenter
-source ~/.vim/myconf/nerdcommenter.conf
+""source ~/.vim/myconf/nerdcommenter.conf
 
