@@ -227,13 +227,13 @@ function! GuiTabLabel()
   " It's safe not to use multi byte characters.
   let l:label .= l:bufname == '' ? 'No title' : l:bufname
 
-  " タブ内にウィンドウが複数あるときにはその数を追加します(デフォルトで一応あるので)
+  " If there are multi windows in tab, add number of them.
   let l:wincount = tabpagewinnr(v:lnum, '$')
   if l:wincount > 1
     let l:label .= '[' . l:wincount . ']'
   endif
 
-  " このタブページに変更のあるバッファがるときには '[+]' を追加します(デフォルトで一応あるので)
+  " Add a string '[+]' if there are changed buffers in its page.
   for bufnr in l:bufnrlist
     if getbufvar(bufnr, "&modified")
       let l:label .= '[+]'
@@ -241,18 +241,19 @@ function! GuiTabLabel()
     endif
   endfor
 
-  " 表示文字列を返します
+  " Return string to display
   return l:label
 endfunction
 
-" guitablabel に上の関数を設定します
-" その表示の前に %N というところでタブ番号を表示させています
+" Set a function GuiTabLabel() in the variable 'guitablabel'.
+" '%N' express a sequence number of its tab.
 set guitablabel=%N:\ %{GuiTabLabel()}
 
-""if !filereadable(expand("~/.vimrc_do_not_use_ambiwidth"))
-""  source ~/.vim/myconf/ambiwidth.conf
-""endif
+if !filereadable(expand("~/.vimrc_do_not_use_ambiwidth")) && filereadable(expand("~/.vim/myconf/ambiwidth.conf"))
+  source ~/.vim/myconf/ambiwidth.conf
+endif
 
-"" nerdcommenter https://github.com/scrooloose/nerdcommenter
-""source ~/.vim/myconf/nerdcommenter.conf
-
+" nerdcommenter https://github.com/scrooloose/nerdcommenter
+if filereadable(expand("~/.vim/myconf/nerdcommenter.conf"))
+  source ~/.vim/myconf/nerdcommenter.conf
+endif
