@@ -392,8 +392,9 @@ function setup() {
     }'
 
     run install_packages_with_pacman "gvim"
+
     declare -a outputs; IFS=$'\n' outputs=($output)
-    [[ "$status" -eq 1 ]]
+    [[ "$status" -eq 0 ]]
     [[ "${outputs[0]}" = "Installing gvim..." ]]
     [[ $(stub_called_times sudo) -eq 3 ]]
     [[ $(stub_called_times logger_info)     -eq 0 ]]
@@ -402,16 +403,16 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Ss
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
     stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
-    stub_called_with_exactly_times logger_warn 1 'Failed to install gvim. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options.'
+    stub_called_with_exactly_times logger_warn 1 'Failed to install gvim. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options. Remaining processes will be continued.'
     stub_called_with_exactly_times logger_err 1 'Package(s) "gvim" have not been installed on your OS due to some error.\n  Please install these packages manually.'
 }
 
 @test '#install_packages_with_pacman should call logger_err when pacman command has failed during installing git curl vim(success) gvim (vim and gvim may conflict)' {
     stub_and_eval sudo '{
-        if [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]] && [[ "$4" = "vim" ]]; then
-            return 0
-        elif [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]] && [[ "$4" = "vim" ]]; then
+        if [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]] && [[ "$4" = "gvim" ]]; then
             return 1
+        elif [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]]; then
+            return 0
         elif [[ "$1" = "pacman" ]] && [[ "$2" = "-Ss" ]]; then
             echo "extra/gvim 8.1.0374-1"
             echo "    Vi Improved, a highly configurable, improved version of the vi text editor (with advanced features, such as a GUI)"
@@ -425,12 +426,10 @@ function setup() {
         fi
         return 1
     }'
-
     run install_packages_with_pacman git curl vim gvim
 
     declare -a outputs; IFS=$'\n' outputs=($output)
-    [[ "$status" -eq 2 ]]
-    echo $(stub_called_times sudo)
+    [[ "$status" -eq 0 ]]
     [[ $(stub_called_times sudo) -eq 8 ]]
     [[ $(stub_called_times logger_info)     -eq 1 ]]
     [[ $(stub_called_times logger_warn)     -eq 1 ]]
@@ -443,8 +442,8 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git curl
     stub_called_with_exactly_times sudo 1 pacman -S --noconfirm vim
     stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
-    stub_called_with_exactly_times logger_info 1 'Package(s) "vim" have been installed on your OS.'
-    stub_called_with_exactly_times logger_warn 1 'Failed to install gvim. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options.'
-    stub_called_with_exactly_times logger_err 1 'Package(s) "git curl gvim" have not been installed on your OS due to some error.\n  Please install these packages manually.'
+    stub_called_with_exactly_times logger_info 1 'Package(s) "git curl vim" have been installed on your OS.'
+    stub_called_with_exactly_times logger_warn 1 'Failed to install gvim. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options. Remaining processes will be continued.'
+    stub_called_with_exactly_times logger_err 1 'Package(s) "gvim" have not been installed on your OS due to some error.\n  Please install these packages manually.'
 }
 
