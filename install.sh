@@ -185,7 +185,7 @@ function logger_err() {
 
     local line_no
     local func_name="${FUNCNAME[1]}"
-    if [[ "$func_name" == "pushd" ]]; then
+    if [[ "$func_name" == "pushd" ]] || [[ "$func_name" == "mmkdir" ]] || [[ "$func_name" == "lln" ]]; then
         # If this method called from pushd, print the caller and its line of pushd for traceability.
         func_name="${FUNCNAME[2]}"
         line_no="${BASH_LINENO[1]}"
@@ -1129,12 +1129,12 @@ function _validate_plug_install() {
 
     local p
     while read p; do
-        p=$(echo "$p" sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | xargs -I {} basename {})
-        if [[ -d ".vim/plugged/${p}" ]] || [[ -d ".vim/plugged/${p}/.git" ]]; then
+        p=$(echo "$p" | sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | xargs -I {} basename {})
+        if [[ ! -d ".vim/plugged/${p}/.git" ]]; then
             logger_err "Failed to install vim plugin \"${p}\". There is not a directory \".vim/plugged/${p}\" or its directory is not a git repository."
             (( error_count++ ))
         fi
-    done < <(grep -P '^Plug .*' .vimrc)
+    done < <(grep -E '^Plug .*' .vimrc)
 
     return $error_count
 }
