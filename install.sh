@@ -3,6 +3,8 @@ trap 'echo "SIG INT was received. This program will be terminated." && exit 1' I
 
 # The directory that dotfiles resources will be installed
 DOTDIR=".dotfiles"
+# Full path of the dotdir
+FULL_DOTDIR_PATH="${HOME}/${DOTDIR}"
 # The directory that dotfiles resources will be backuped
 BACKUPDIR=".backup_of_dotfiles"
 # Git repository location over https
@@ -16,6 +18,15 @@ DISTRIBUTION=
 
 # Post message list
 declare -a POST_MESSAGES=()
+
+# 
+declare -a VIM_CONF_LINK_LIST=(
+    # "<link_dest>,<link_src>"
+    "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim,${FULL_DOTDIR_PATH}/.vim/after/syntax"
+    "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim,${FULL_DOTDIR_PATH}/.vim/ftdetect"
+    "../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
+    "../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
+)
 
 # Answer status for question() yes
 ANSWER_OF_QUESTION_YES=0
@@ -1096,20 +1107,25 @@ function link_xdg_base_directory() {
 }
 
 function deploy_vim_environment() {
-    # Deploy bats.vim
-    pushd "${HOME}/${DOTDIR}" || return 1
-
     # Directory ${HOME}/.vim is a soft link that linked to ${DOTDIR}/.vim.
     # Since creating files under ${DOTDIR}/.vim are same as creating files under ${HOME}/.vim.
 
-    mmkdir ".vim/after/syntax"  || { popd; return 1; }
-    mmkdir ".vim/ftdetect"      || { popd; return 1; }
-    mmkdir ".vim/snippets"      || { popd; return 1; }
+    local record
+    local reg_full_dotdir_path="$(sed -e 's/\./\\./g' <<< "${FULL_DOTDIR_PATH}")"
 
-    lln "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" ".vim/after/syntax"            || { popd; return 1; }
-    lln "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim" ".vim/ftdetect"                     || { popd; return 1; }
-    lln "../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets" ".vim/snippets"   || { popd; return 1; }
-    lln "../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets" ".vim/snippets"   || { popd; return 1; }
+    # FIXME: These commands are dangerous. Instructions in here have to prevent some of dangerous one more strictly.
+    for record in "${VIM_CONF_LINK_LIST[@]}"; do
+        local link_dest="$(cut -d',' -f 1 <<< "$record")"
+        local link_src="$(cut -d',' -f 2 <<< "$record")"
+
+        [[ "$link_src" =~ ^${reg_full_dotdir_path}.*$ ]] || {
+            logger_err "Link of source \"${link_src}\" must in your dotfiles root directory \"${FULL_DOTDIR_PATH}\". Aborted."
+            return 1
+        }
+
+        mmkdir "$link_src"              || { popd; return 1; }
+        lln "$link_dest" "$link_src"    || { popd; return 1; }
+    done
 
     # Install dependent modules.
     # FIXME: Is there a compatible way to detect install error.
