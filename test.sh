@@ -108,7 +108,7 @@ function test_all() {
     local user_name="$(whoami)"
     local ret
     declare -A labels=(
-        # ["Image name"]="Location of the Dockerfile, Expiration time"
+        ["Image name"]="Location of the Dockerfile, Expiration time"
         ["ubuntu1804-dot-test"]="./test/container/ubuntu/Dockerfile1804,$((1 * 60 * 60 * 24 * 30))"
         ["ubuntu1604-dot-test"]="./test/container/ubuntu/Dockerfile1604,$((1 * 60 * 60 * 24 * 30))"
         ["centos-dot-test"]="./test/container/centos/Dockerfile,$((1 * 60 * 60 * 24 * 30))"
@@ -120,6 +120,10 @@ function test_all() {
     local current="$(date +%s)"
     local current_date_string="$(date +%Y%m%d%H%M%S)"
     declare -a images=()
+
+    local created_date
+    local age_of_sec
+    local prefix_of_date="$(date +%Y%m%d%H%M%S)"
 
     # Create new docker images
     for key in "${!labels[@]}"; do
@@ -139,13 +143,17 @@ function test_all() {
         fi
 
         created_date=$(docker inspect -f '{{ .Created }}' ${image_name} | grep -P -o '[0-9]{4}\-[0-9]{2}\-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}')
-        if [[ $docker_expiration -lt $((current - created_date_string)) ]]; then
-            while read i; do
-                docker rm $i || {
-                    echo "ERROR: Failed to remove container $i" >&2
-                    return 1
-                }
-            done < <(docker ps -a -q --filter=ancestor=${image_name})
+        created_date=$(date --date="$created_date" +"%s")
+        age_of_sec="$((current - created_date))"
+
+        while read i; do
+            docker rm $i || {
+                echo "ERROR: Failed to remove container $i" >&2
+                return 1
+            }
+        done < <(docker ps -a -q --filter=ancestor=${image_name})
+
+        if [[ $docker_expiration -lt $age_of_sec ]]; then
 
             docker rmi "$image_name"
             build_docker_image "$image_name" "$docker_file_name" || {
@@ -153,6 +161,8 @@ function test_all() {
                 return 1
             }
             continue
+        else
+            echo "Docker image ${image_name} is not expired. (Age of sec: ${age_of_sec}, Expiration of sec: ${docker_expiration})"
         fi
     done
 
@@ -161,10 +171,11 @@ function test_all() {
     for key in "${!labels[@]}"; do
         # Run test cases on each environment
         local image_name="${user_name}/${key}:latest"
+        local container_name="$(basename ${image_name})_${prefix_of_date}"
         if [[ "$key" == "arch-dot-test" ]]; then
             # Only one test case which has installing font will be tested due to much consumption of the time.
             set -o pipefail
-            docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
+            docker run --name $container_name --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
                     /bin/bash -c "mkdir -p /usr/share/xsessions; touch /usr/share/xsessions/gnome.desktop; su - foo bash -c 'bash <(cat ~/dotfiles/install.sh)'" | \
                     tee "./${key}_${current_date_string}_with_font.log"
             ret=$?
