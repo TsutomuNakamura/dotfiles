@@ -1097,24 +1097,46 @@ function link_xdg_base_directory() {
 
 function deploy_vim_environment() {
     # Deploy bats.vim
-    pushd ${HOME}/${DOTDIR} || return 1
-    mkdir -p .vim/after/syntax
-    mkdir -p .vim/ftdetect
-    pushd .vim/after/syntax || { popd; return 1; }
-    ln -sf ../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim
-    popd
-    pushd .vim/ftdetect || { popd; return 1; }
-    ln -sf ../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim
-    popd
+    pushd "${HOME}/${DOTDIR}" || return 1
 
-    # Deploy snipmate-snippets
-    mkdir -p .vim/snippets
-    pushd .vim/snippets || { popd; return 1; }
-    ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets
-    ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets
+    # Directory ${HOME}/.vim is a soft link that linked to ${DOTDIR}/.vim.
+    # Since creating files under ${DOTDIR}/.vim are same as creating files under ${HOME}/.vim.
 
-    popd; popd
+    mmkdir ".vim/after/syntax"  || { popd; return 1; }
+    mmkdir ".vim/ftdetect"      || { popd; return 1; }
+    mmkdir ".vim/snippets"      || { popd; return 1; }
+
+    lln "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" ".vim/after/syntax"            || { popd; return 1; }
+    lln "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim" ".vim/ftdetect"                     || { popd; return 1; }
+    lln "../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets" ".vim/snippets"   || { popd; return 1; }
+    lln "../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets" ".vim/snippets"   || { popd; return 1; }
+
+    # Install dependent modules.
+    # FIXME: Is there a compatible way to detect install error.
+    vim +PlugInstall +"sleep 1000m" +qall
+    _validate_plug_install || {
+        logger_err "Failed to install some plugins of vim. Run a command manually like \`vim +PlugInstall +\"sleep 1000m\" +qall\` or rerun this installer to fix it."
+        # It is not necessary to stop remaining process because installing plugins of vim is isolated from this dotfiles-installer and the user can fix this error manually after its installer has finished.
+    }
+
+    popd
     return 0
+}
+
+function _validate_plug_install() {
+    declare -a failed_packages=()
+    local error_count=0
+
+    local p
+    while read p; do
+        p=$(echo "$p" sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | xargs -I {} basename {})
+        if [[ -d ".vim/plugged/${p}" ]] || [[ -d ".vim/plugged/${p}/.git" ]]; then
+            logger_err "Failed to install vim plugin \"${p}\". There is not a directory \".vim/plugged/${p}\" or its directory is not a git repository."
+            (( error_count++ ))
+        fi
+    done < <(grep -P '^Plug .*' .vimrc)
+
+    return $error_count
 }
 
 function should_it_make_deep_link_directory() {
@@ -1673,6 +1695,27 @@ function vercomp() {
 # Is desktop installed?
 function has_desktop_env() {
     [[ -d "/usr/share/xsessions" ]] && [[ ! -z "$(ls -A /usr/share/xsessions/*.desktop 2> /dev/null)" ]]
+}
+
+# Expanded mkdir
+function mmkdir() {
+    local dir="$1"
+    mkdir -p "$dir" || {
+        logger_err "Failed to create dir $dir"
+        return 1
+    }
+    return 0
+}
+# Expanded ln for soft link
+function lln() {
+    local src="$1"
+    local dest="$2"
+
+    ln -sf "$src" "$dest" || {
+        logger_err "Failed to create soft link \"${src} -> ${dest}\""
+        return 1
+    }
+    return 0
 }
 
 if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
