@@ -1129,6 +1129,10 @@ function deploy_vim_environment() {
 
     # Install dependent modules.
     # FIXME: Is there a compatible way to detect install error.
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim || {
+        logger_err "Failed to install plug-vim from https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+        return 1
+    }
     vim +PlugInstall +"sleep 1000m" +qall
     _validate_plug_install || {
         logger_err "Failed to install some plugins of vim. After this installer has finished, run a command manually like \`vim +PlugInstall +\"sleep 1000m\" +qall\` or rerun this installer to fix it."
