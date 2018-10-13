@@ -117,8 +117,6 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'edkolev/tmuxline.vim'
 Plug 'terryma/vim-multiple-cursors'
 
-Plug 'scrooloose/nerdcommenter'
-
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
 
