@@ -11,6 +11,7 @@ function setup() {
     stub mmkdir
     stub lln
     stub _validate_plug_install
+    stub curl
     stub vim
     stub logger_err
 }
@@ -25,6 +26,7 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times mmkdir)"                    -eq 2 ]]
     [[ "$(stub_called_times lln)"                       -eq 2 ]]
+    [[ "$(stub_called_times curl)"                      -eq 1 ]]
     [[ "$(stub_called_times vim)"                       -eq 1 ]]
     [[ "$(stub_called_times _validate_plug_install)"    -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                -eq 0 ]]
@@ -32,6 +34,7 @@ function teardown() {
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/ftdetect"
     stub_called_with_exactly_times lln 1 "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times lln 1 "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim" "/var/tmp/.dotfiles/.vim/ftdetect"
+    stub_called_with_exactly_times curl 1 "-fLo" "${HOME}/.vim/autoload/plug.vim" "--create-dirs" "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
     stub_called_with_exactly_times vim 1 "+PlugInstall" "+sleep 1000m" "+qall"
 }
 
@@ -44,6 +47,7 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times mmkdir)"                    -eq 0 ]]
     [[ "$(stub_called_times lln)"                       -eq 0 ]]
+    [[ "$(stub_called_times curl)"                      -eq 0 ]]
     [[ "$(stub_called_times vim)"                       -eq 0 ]]
     [[ "$(stub_called_times _validate_plug_install)"    -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
@@ -57,11 +61,31 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times mmkdir)"                    -eq 1 ]]
     [[ "$(stub_called_times lln)"                       -eq 1 ]]
+    [[ "$(stub_called_times curl)"                      -eq 0 ]]
     [[ "$(stub_called_times vim)"                       -eq 0 ]]
     [[ "$(stub_called_times _validate_plug_install)"    -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                -eq 0 ]]
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times lln 1 "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" "/var/tmp/.dotfiles/.vim/after/syntax"
+}
+
+@test '#deploy_vim_environment should return 1 if curl was failed' {
+    stub_and_eval curl '{ return 1; }'
+    run deploy_vim_environment
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times mmkdir)"                    -eq 2 ]]
+    [[ "$(stub_called_times lln)"                       -eq 2 ]]
+    [[ "$(stub_called_times curl)"                      -eq 1 ]]
+    [[ "$(stub_called_times vim)"                       -eq 0 ]]
+    [[ "$(stub_called_times _validate_plug_install)"    -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                -eq 1 ]]
+    stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/after/syntax"
+    stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/ftdetect"
+    stub_called_with_exactly_times lln 1 "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" "/var/tmp/.dotfiles/.vim/after/syntax"
+    stub_called_with_exactly_times lln 1 "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim" "/var/tmp/.dotfiles/.vim/ftdetect"
+    stub_called_with_exactly_times curl 1 "-fLo" "${HOME}/.vim/autoload/plug.vim" "--create-dirs" "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+    stub_called_with_exactly_times logger_err 1 "Failed to install plug-vim from https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
 }
 
 @test '#deploy_vim_environment should return 0 if _validate_plug_install returns non 0' {
@@ -71,6 +95,7 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times mmkdir)"                    -eq 2 ]]
     [[ "$(stub_called_times lln)"                       -eq 2 ]]
+    [[ "$(stub_called_times curl)"                      -eq 1 ]]
     [[ "$(stub_called_times vim)"                       -eq 1 ]]
     [[ "$(stub_called_times _validate_plug_install)"    -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
@@ -78,6 +103,7 @@ function teardown() {
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/ftdetect"
     stub_called_with_exactly_times lln 1 "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times lln 1 "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim" "/var/tmp/.dotfiles/.vim/ftdetect"
+    stub_called_with_exactly_times curl 1 "-fLo" "${HOME}/.vim/autoload/plug.vim" "--create-dirs" "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
     stub_called_with_exactly_times vim 1 "+PlugInstall" "+sleep 1000m" "+qall"
     stub_called_with_exactly_times logger_err 1 "Failed to install some plugins of vim. After this installer has finished, run a command manually like \`vim +PlugInstall +\"sleep 1000m\" +qall\` or rerun this installer to fix it."
 }
