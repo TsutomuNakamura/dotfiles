@@ -3,6 +3,8 @@ trap 'echo "SIG INT was received. This program will be terminated." && exit 1' I
 
 # The directory that dotfiles resources will be installed
 DOTDIR=".dotfiles"
+# Full path of the dotdir
+FULL_DOTDIR_PATH="${HOME}/${DOTDIR}"
 # The directory that dotfiles resources will be backuped
 BACKUPDIR=".backup_of_dotfiles"
 # Git repository location over https
@@ -16,6 +18,15 @@ DISTRIBUTION=
 
 # Post message list
 declare -a POST_MESSAGES=()
+
+# 
+declare -a VIM_CONF_LINK_LIST=(
+    # "<link_dest>,<link_src>"
+    "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim,${FULL_DOTDIR_PATH}/.vim/after/syntax"
+    "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim,${FULL_DOTDIR_PATH}/.vim/ftdetect"
+    "../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
+    "../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
+)
 
 # Answer status for question() yes
 ANSWER_OF_QUESTION_YES=0
@@ -185,7 +196,7 @@ function logger_err() {
 
     local line_no
     local func_name="${FUNCNAME[1]}"
-    if [[ "$func_name" == "pushd" ]]; then
+    if [[ "$func_name" == "pushd" ]] || [[ "$func_name" == "mmkdir" ]] || [[ "$func_name" == "lln" ]]; then
         # If this method called from pushd, print the caller and its line of pushd for traceability.
         func_name="${FUNCNAME[2]}"
         line_no="${BASH_LINENO[1]}"
@@ -1096,25 +1107,51 @@ function link_xdg_base_directory() {
 }
 
 function deploy_vim_environment() {
-    # Deploy bats.vim
-    pushd ${HOME}/${DOTDIR} || return 1
-    mkdir -p .vim/after/syntax
-    mkdir -p .vim/ftdetect
-    pushd .vim/after/syntax || { popd; return 1; }
-    ln -sf ../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim
-    popd
-    pushd .vim/ftdetect || { popd; return 1; }
-    ln -sf ../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim
-    popd
+    # Directory ${HOME}/.vim is a soft link that linked to ${DOTDIR}/.vim.
+    # Since creating files under ${DOTDIR}/.vim are same as creating files under ${HOME}/.vim.
 
-    # Deploy snipmate-snippets
-    mkdir -p .vim/snippets
-    pushd .vim/snippets || { popd; return 1; }
-    ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets
-    ln -sf ../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets
+    local record
+    local reg_full_dotdir_path="$(sed -e 's/\./\\./g' <<< "${FULL_DOTDIR_PATH}")"
 
-    popd; popd
+    # FIXME: These commands are dangerous. Instructions in here have to prevent some of dangerous one more strictly.
+    for record in "${VIM_CONF_LINK_LIST[@]}"; do
+        local link_dest="$(cut -d',' -f 1 <<< "$record")"
+        local link_src="$(cut -d',' -f 2 <<< "$record")"
+
+        [[ "$link_src" =~ ^${reg_full_dotdir_path}.*$ ]] || {
+            logger_err "Link of source \"${link_src}\" must in your dotfiles root directory \"${FULL_DOTDIR_PATH}\". Aborted."
+            return 1
+        }
+
+        mmkdir "$link_src"              || return 1
+        lln "$link_dest" "$link_src"    || return 1
+    done
+
+    # Install dependent modules.
+    # FIXME: Is there a compatible way to detect install error.
+    vim +PlugInstall +"sleep 1000m" +qall
+    _validate_plug_install || {
+        logger_err "Failed to install some plugins of vim. After this installer has finished, run a command manually like \`vim +PlugInstall +\"sleep 1000m\" +qall\` or rerun this installer to fix it."
+        # It is not necessary to stop remaining process because installing plugins of vim is isolated from this dotfiles-installer and the user can fix this error manually after its installer has finished.
+    }
+
     return 0
+}
+
+function _validate_plug_install() {
+    declare -a failed_packages=()
+    local error_count=0
+
+    local p
+    while read p; do
+        p=$(echo "$p" | sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | xargs -I {} basename {})
+        if [[ ! -d ".vim/plugged/${p}/.git" ]]; then
+            logger_err "Failed to install vim plugin \"${p}\". There is not a directory \".vim/plugged/${p}\" or its directory is not a git repository."
+            (( error_count++ ))
+        fi
+    done < <(grep -E '^Plug .*' .vimrc)
+
+    return $error_count
 }
 
 function should_it_make_deep_link_directory() {
@@ -1673,6 +1710,27 @@ function vercomp() {
 # Is desktop installed?
 function has_desktop_env() {
     [[ -d "/usr/share/xsessions" ]] && [[ ! -z "$(ls -A /usr/share/xsessions/*.desktop 2> /dev/null)" ]]
+}
+
+# Expanded mkdir
+function mmkdir() {
+    local dir="$1"
+    mkdir -p "$dir" || {
+        logger_err "Failed to create dir $dir"
+        return 1
+    }
+    return 0
+}
+# Expanded ln for soft link
+function lln() {
+    local src="$1"
+    local dest="$2"
+
+    ln -sf "$src" "$dest" || {
+        logger_err "Failed to create soft link \"${src} -> ${dest}\""
+        return 1
+    }
+    return 0
 }
 
 if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
