@@ -1123,19 +1123,18 @@ function deploy_vim_environment() {
             return 1
         }
 
-        mmkdir "$link_src"              || { popd; return 1; }
-        lln "$link_dest" "$link_src"    || { popd; return 1; }
+        mmkdir "$link_src"              || return 1
+        lln "$link_dest" "$link_src"    || return 1
     done
 
     # Install dependent modules.
     # FIXME: Is there a compatible way to detect install error.
     vim +PlugInstall +"sleep 1000m" +qall
     _validate_plug_install || {
-        logger_err "Failed to install some plugins of vim. Run a command manually like \`vim +PlugInstall +\"sleep 1000m\" +qall\` or rerun this installer to fix it."
+        logger_err "Failed to install some plugins of vim. After this installer has finished, run a command manually like \`vim +PlugInstall +\"sleep 1000m\" +qall\` or rerun this installer to fix it."
         # It is not necessary to stop remaining process because installing plugins of vim is isolated from this dotfiles-installer and the user can fix this error manually after its installer has finished.
     }
 
-    popd
     return 0
 }
 
