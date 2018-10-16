@@ -1127,13 +1127,27 @@ function deploy_vim_environment() {
         lln "$link_dest" "$link_src"    || return 1
     done
 
+    _install_vim_plug || return 1
+
+    return 0
+}
+
+function _install_vim_plug() {
     # Install dependent modules.
     # FIXME: Is there a compatible way to detect install error.
-    curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim || {
+    curl -fLo ${HOME}/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim || {
         logger_err "Failed to install plug-vim from https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
         return 1
     }
-    vim +PlugInstall +"sleep 1000m" +qall
+
+    # An error will be ocurred at ambiwidth=double in .vimrc if LANG environment variable was not set
+    echo "Installing vim plugins..."
+    if [[ -z "$LANG" ]] || [[ "$LANG" == "C" ]]; then
+        LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+    else
+        vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+    fi
+
     _validate_plug_install || {
         logger_err "Failed to install some plugins of vim. After this installer has finished, run a command manually like \`vim +PlugInstall +\"sleep 1000m\" +qall\` or rerun this installer to fix it."
         # It is not necessary to stop remaining process because installing plugins of vim is isolated from this dotfiles-installer and the user can fix this error manually after its installer has finished.
@@ -1146,6 +1160,8 @@ function _validate_plug_install() {
     declare -a failed_packages=()
     local error_count=0
 
+    pushd "${HOME}"
+
     local p
     while read p; do
         p=$(echo "$p" | sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | xargs -I {} basename {})
@@ -1155,6 +1171,7 @@ function _validate_plug_install() {
         fi
     done < <(grep -E '^Plug .*' .vimrc)
 
+    popd
     return $error_count
 }
 
