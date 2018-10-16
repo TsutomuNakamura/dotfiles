@@ -108,7 +108,7 @@ function test_all() {
     local user_name="$(whoami)"
     local ret
     declare -A labels=(
-        ["Image name"]="Location of the Dockerfile, Expiration time"
+        ## ["Image name"]="Location of the Dockerfile, Expiration time"
         ["ubuntu1804-dot-test"]="./test/container/ubuntu/Dockerfile1804,$((1 * 60 * 60 * 24 * 30))"
         ["ubuntu1604-dot-test"]="./test/container/ubuntu/Dockerfile1604,$((1 * 60 * 60 * 24 * 30))"
         ["centos-dot-test"]="./test/container/centos/Dockerfile,$((1 * 60 * 60 * 24 * 30))"
