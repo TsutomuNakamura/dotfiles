@@ -33,7 +33,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]
@@ -48,7 +49,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "There are no packages to install" ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "There are no packages to install" ]]
     [[ "$(stub_called_times sudo)" -eq 0 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]
@@ -63,7 +65,8 @@ function teardown() {
     echo "$output"
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "There are no packages to install" ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "There are no packages to install" ]]
     [[ "$(stub_called_times sudo)" -eq 0 ]]
     [[ "$(stub_called_times logger_info)" -eq 2 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]
@@ -72,14 +75,15 @@ function teardown() {
     stub_called_with_exactly_times logger_info 1 "Package tmux has already installed. Skipping install it."
 }
 
-# - testing already installed packages ----------------------------------------------------------------------------
+## - testing already installed packages ----------------------------------------------------------------------------
 
 @test '#install_packages_on_redhat should call "sudo dnf" with parameter zsh(because zsh is already installed)' {
     run install_packages_on_redhat "dnf" vim-enhanced zsh
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 2 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]
@@ -97,7 +101,8 @@ function teardown() {
     echo "======================================="
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh ctags..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh ctags..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 2 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]
@@ -112,7 +117,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh ctags..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh ctags..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 3 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]
@@ -123,14 +129,15 @@ function teardown() {
     stub_called_with_exactly_times logger_info 1 "Packages zsh ctags have been installed."
 }
 
-# - testing unavailable packages -----------------------------------------------------------------------------------
+## - testing unavailable packages -----------------------------------------------------------------------------------
 
 @test '#install_packages_on_redhat should NOT call "sudo dnf" with parameter ffmpeg(ffmpeg is unavailable)' {
     run install_packages_on_redhat "dnf" ffmpeg
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "There are no packages to install" ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "There are no packages to install" ]]
     [[ "$(stub_called_times sudo)" -eq 0 ]]
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_warn)" -eq 1 ]]
@@ -143,7 +150,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "There are no packages to install" ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "There are no packages to install" ]]
     [[ "$(stub_called_times sudo)" -eq 0 ]]
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_warn)" -eq 2 ]]
@@ -157,7 +165,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_warn)" -eq 1 ]]
@@ -171,7 +180,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_warn)" -eq 2 ]]
@@ -186,7 +196,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 1 ]]
     [[ "$(stub_called_times logger_warn)" -eq 2 ]]
@@ -196,13 +207,12 @@ function teardown() {
     stub_called_with_exactly_times logger_info 1 "Packages zsh have been installed."
 }
 
-# ------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------------------------------------------------------------------
 
 @test '#install_packages_on_redhat should return 1 if "rpm -qa" has failed' {
     stub_and_eval rpm '{ return 1; }'
     run install_packages_on_redhat "dnf" vim-enhanced zsh tmux ctags
 
-    declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times logger_err)" -eq 1 ]]
     stub_called_with_exactly_times logger_err 1 "Failed to get installed packages at install_packages_on_redhat()"
@@ -214,6 +224,7 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 1 ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
     [[ "$(stub_called_times logger_err)" -eq 1 ]]
     stub_called_with_exactly_times logger_err 1 "Failed to get available packages at install_packages_on_redhat()"
 }
@@ -224,7 +235,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 1 ]]
-    [[ "${outputs[0]}" == "Installing zsh..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh..." ]]
     [[ "$(stub_called_times logger_info)" -eq 0 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]
     [[ "$(stub_called_times logger_err)" -eq 1 ]]
@@ -247,7 +259,8 @@ function teardown() {
 
     declare -a outputs; IFS=$'\n' outputs=($output)
     [[ "$status" -eq 0 ]]
-    [[ "${outputs[0]}" == "Installing zsh ctags..." ]]
+    [[ "${outputs[0]}" == "Getting the list of available packages..." ]]
+    [[ "${outputs[1]}" == "Installing zsh ctags..." ]]
     [[ "$(stub_called_times sudo)" -eq 1 ]]
     [[ "$(stub_called_times logger_info)" -eq 2 ]]
     [[ "$(stub_called_times logger_warn)" -eq 0 ]]

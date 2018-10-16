@@ -684,6 +684,7 @@ function install_packages_on_redhat() {
         return 1
     }
 
+    echo "Getting the list of available packages..."
     local available_packages="$(${command_name} list available 2> /dev/null | tail -n +3 | cut -f1 -d' ' | sed -e 's/\(.*\)\.\(noarch\|x86_64\|i.86\)/\1/')"
     [[ -z "$available_packages" ]] && {
         logger_err "Failed to get available packages at install_packages_on_redhat()"
