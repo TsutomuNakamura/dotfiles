@@ -4,16 +4,20 @@
 /stub4bats.sh/
 /test/stub.sh
 
-.vim/autoload/pathogen.vim
-.vim/colors/molokai.vim
-.vim/after/syntax/sh.vim
-.vim/ftdetect/bats.vim
-.vim/snippets/bats.snippets
-.vim/snippets/chef.snippets
+/.vim/autoload/pathogen.vim
+/.vim/colors/molokai.vim
+/.vim/after/syntax/sh.vim
+/.vim/ftdetect/bats.vim
+/.vim/snippets/bats.snippets
+/.vim/snippets/chef.snippets
 
-test/lib/
+/test/lib/
 
 /bin/emojify
+
+# vim-plug
+/.vim/autoload/plug.vim
+/.vim/plugged/
 
 # test log
 /*.log
