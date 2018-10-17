@@ -123,7 +123,6 @@ function test_all() {
 
     local created_date
     local age_of_sec
-    local prefix_of_date="$(date +%Y%m%d%H%M%S)"
 
     # Create new docker images
     for key in "${!labels[@]}"; do
@@ -166,36 +165,38 @@ function test_all() {
         fi
     done
 
-    rm -f "${SCRIPT_DIR}/*-dot-test_*{,_with_font}.log"
+    rm -f "${SCRIPT_DIR}/*.log"
 
     for key in "${!labels[@]}"; do
         # Run test cases on each environment
         local image_name="${user_name}/${key}:latest"
-        local container_name="$(basename ${image_name})_${prefix_of_date}"
+        local container_name="${key}_${current_date_string}"
         if [[ "$key" == "arch-dot-test" ]]; then
             # Only one test case which has installing font will be tested due to much consumption of the time.
             set -o pipefail
-            docker run --name $container_name --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
+            docker run --name "${container_name}_with_font" --hostname "${container_name}_with_font" \
+                    --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
                     /bin/bash -c "mkdir -p /usr/share/xsessions; touch /usr/share/xsessions/gnome.desktop; su - foo bash -c 'bash <(cat ~/dotfiles/install.sh)'" | \
-                    tee "./${key}_${current_date_string}_with_font.log"
+                    tee "./${container_name}_with_font.log"
             ret=$?
             set +o pipefail
             [[ $ret -ne 0 ]] && {
                 echo -n "ERROR: Testing has failed on $key with desktop environment." >&2
-                echo    "Check log ${key}_${current_date_string}_with_font.log" >&2
+                echo    "Check log ${container_name}_with_font.log" >&2
                 return 1
             }
         fi
 
         set -o pipefail
-        docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
+        docker run --name "${container_name}" --hostname "${container_name}" \
+                --volume ${PWD}:/home/foo/dotfiles -ti "$image_name" \
                 /bin/bash -c "su - foo bash -c 'bash <(cat ~/dotfiles/install.sh)'" | \
-                tee "./${key}_${current_date_string}.log"
+                tee "./${container_name}.log"
         ret=$?
         set +o pipefail
         [[ $ret -ne 0 ]] && {
             echo -n "ERROR: Testing has failed on ${key}." >&2
-            echo    "Check log ${key}_${current_date_string}.log" >&2
+            echo    "Check log ${container_name}.log" >&2
             return 1
         }
     done
