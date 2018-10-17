@@ -788,7 +788,7 @@ function install_packages_with_pacman() {
     else
         if [[ "${#packages_will_be_installed[@]}" -ne 0 ]]; then
             echo "Installing ${packages_will_be_installed[@]}..."
-            ${prefix} pacman -S --noconfirm ${packages_will_be_installed[@]} && {
+            ${prefix} pacman -Sy --noconfirm ${packages_will_be_installed[@]} && {
                 installed_packages+="${packages_will_be_installed[@]} "
             }  || {
                 failed_to_install_packages+="${packages_will_be_installed[@]} "
@@ -797,7 +797,7 @@ function install_packages_with_pacman() {
         fi
         for (( i = 0; i < ${#packages_may_conflict[@]}; i++ )) {
             echo "Installing ${packages_may_conflict[i]}..."
-            ${prefix} pacman -S --noconfirm "${packages_may_conflict[i]}" && {
+            ${prefix} pacman -Sy --noconfirm "${packages_may_conflict[i]}" && {
                 installed_packages+="${packages_may_conflict[i]} "
             } || {
                 failed_to_install_packages+="${packages_may_conflict[i]} "

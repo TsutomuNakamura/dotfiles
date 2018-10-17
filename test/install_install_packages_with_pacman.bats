@@ -8,7 +8,7 @@ function setup() {
             return 0
         elif [[ "$1" = "pacman" ]] && [[ "$2" = "-Q" ]] && [[ "$3" = "ranger" ]]; then
             return 0
-        elif [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]]; then
+        elif [[ "$1" = "pacman" ]] && [[ "$2" = "-Sy" ]] && [[ "$3" = "--noconfirm" ]]; then
             return 0
         elif [[ "$1" = "pacman" ]] && [[ "$2" = "-Ss" ]] ; then
             echo "extra/gvim 8.1.0374-1"
@@ -177,7 +177,7 @@ function setup() {
     [[ $(stub_called_times logger_err)      -eq 0 ]]
     stub_called_with_exactly_times sudo 1 pacman -Ss
     stub_called_with_exactly_times sudo 1 pacman -Q git
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git
 
     stub_called_with_exactly_times logger_info 1 'Package(s) "git" have been installed on your OS.'
 }
@@ -195,7 +195,7 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Ss
     stub_called_with_exactly_times sudo 1 pacman -Q git
     stub_called_with_exactly_times sudo 1 pacman -Q sed
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git
     stub_called_with_exactly_times logger_info 1 'Packages sed were already installed. Skipped installing them.'
     stub_called_with_exactly_times logger_info 1 'Package(s) "git" have been installed on your OS.'
 }
@@ -214,7 +214,7 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Q git
     stub_called_with_exactly_times sudo 1 pacman -Q sed
     stub_called_with_exactly_times sudo 1 pacman -Q curl
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git curl
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git curl
 
     stub_called_with_exactly_times logger_info 1 'Packages sed were already installed. Skipped installing them.'
     stub_called_with_exactly_times logger_info 1 'Package(s) "git curl" have been installed on your OS.'
@@ -235,8 +235,8 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Ss
     stub_called_with_exactly_times sudo 1 pacman -Q git
     stub_called_with_exactly_times sudo 1 pacman -Q vim
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm vim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm vim
     stub_called_with_exactly_times logger_info 1 'Package(s) "git vim" have been installed on your OS.'
 }
 
@@ -255,8 +255,8 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Ss
     stub_called_with_exactly_times sudo 1 pacman -Q git
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm gvim
 
     stub_called_with_exactly_times logger_info 1 'Package(s) "git gvim" have been installed on your OS.'
 }
@@ -277,8 +277,8 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Q git
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
     stub_called_with_exactly_times sudo 1 pacman -Q curl
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git curl
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git curl
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm gvim
     stub_called_with_exactly_times logger_info 1 'Package(s) "git curl gvim" have been installed on your OS.'
 }
 
@@ -296,8 +296,8 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Q git
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
     stub_called_with_exactly_times sudo 1 pacman -Q curl
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git curl
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git curl
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm gvim
     stub_called_with_exactly_times logger_info 1 'Package(s) "git curl gvim" have been installed on your OS.'
 }
 
@@ -317,8 +317,8 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Q git
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
     stub_called_with_exactly_times sudo 1 pacman -Q sed
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm gvim
     stub_called_with_exactly_times logger_info 1 'Packages sed were already installed. Skipped installing them.'
     stub_called_with_exactly_times logger_info 1 'Package(s) "git gvim" have been installed on your OS.'
 }
@@ -341,16 +341,16 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
     stub_called_with_exactly_times sudo 1 pacman -Q vim
     stub_called_with_exactly_times sudo 1 pacman -Q sed
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm vim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm gvim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm vim
     stub_called_with_exactly_times logger_info 1 'Packages sed were already installed. Skipped installing them.'
     stub_called_with_exactly_times logger_info 1 'Package(s) "git gvim vim" have been installed on your OS.'
 }
 
 @test '#install_packages_with_pacman should call logger_err when pacman command has failed during installing git' {
     stub_and_eval sudo '{
-        if [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]]; then
+        if [[ "$1" = "pacman" ]] && [[ "$2" = "-Sy" ]] && [[ "$3" = "--noconfirm" ]]; then
             return 1
         elif [[ "$1" = "pacman" ]] && [[ "$2" = "-Q" ]] && [[ "$3" = "git" ]]; then
             return 1
@@ -374,7 +374,7 @@ function setup() {
     [[ $(stub_called_times logger_err)      -eq 1 ]]
     stub_called_with_exactly_times sudo 1 pacman -Ss
     stub_called_with_exactly_times sudo 1 pacman -Q git
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git
     stub_called_with_exactly_times logger_err 1 'Package(s) "git" have not been installed on your OS due to some error.\n  Please install these packages manually.'
 }
 
@@ -402,16 +402,16 @@ function setup() {
     [[ $(stub_called_times logger_err)      -eq 1 ]]
     stub_called_with_exactly_times sudo 1 pacman -Ss
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm gvim
     stub_called_with_exactly_times logger_warn 1 'Failed to install gvim. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options. Remaining processes will be continued.'
     stub_called_with_exactly_times logger_err 1 'Package(s) "gvim" have not been installed on your OS due to some error.\n  Please install these packages manually.'
 }
 
 @test '#install_packages_with_pacman should call logger_err when pacman command has failed during installing git curl vim(success) gvim (vim and gvim may conflict)' {
     stub_and_eval sudo '{
-        if [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]] && [[ "$4" = "gvim" ]]; then
+        if [[ "$1" = "pacman" ]] && [[ "$2" = "-Sy" ]] && [[ "$3" = "--noconfirm" ]] && [[ "$4" = "gvim" ]]; then
             return 1
-        elif [[ "$1" = "pacman" ]] && [[ "$2" = "-S" ]] && [[ "$3" = "--noconfirm" ]]; then
+        elif [[ "$1" = "pacman" ]] && [[ "$2" = "-Sy" ]] && [[ "$3" = "--noconfirm" ]]; then
             return 0
         elif [[ "$1" = "pacman" ]] && [[ "$2" = "-Ss" ]]; then
             echo "extra/gvim 8.1.0374-1"
@@ -439,9 +439,9 @@ function setup() {
     stub_called_with_exactly_times sudo 1 pacman -Q curl
     stub_called_with_exactly_times sudo 1 pacman -Q vim
     stub_called_with_exactly_times sudo 1 pacman -Q gvim
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm git curl
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm vim
-    stub_called_with_exactly_times sudo 1 pacman -S --noconfirm gvim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm git curl
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm vim
+    stub_called_with_exactly_times sudo 1 pacman -Sy --noconfirm gvim
     stub_called_with_exactly_times logger_info 1 'Package(s) "git curl vim" have been installed on your OS.'
     stub_called_with_exactly_times logger_warn 1 'Failed to install gvim. It might has been conflict with vim. I recommend to use gvim rather than vim, because of some useful options. Remaining processes will be continued.'
     stub_called_with_exactly_times logger_err 1 'Package(s) "gvim" have not been installed on your OS due to some error.\n  Please install these packages manually.'
