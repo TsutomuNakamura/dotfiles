@@ -308,17 +308,17 @@ function install_packages() {
     local packages=
 
     if [[ "$(get_distribution_name)" == "debian" ]]; then
-        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
-        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk"
+        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg build-essential cmake python3-dev libclang-dev"
+        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk "
 
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
-        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
-        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
+        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg build-essential cmake python3-dev libclang-dev"
+        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra "
 
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
-        packages="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg"
+        packages="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg cmake gcc-c++ make python3-devel"
         has_desktop_env && packages+=" google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch"
 
         # TODO: ranger not supported in centos
@@ -327,12 +327,12 @@ function install_packages() {
                 && logger_warn "Package \"ranger\" will not be installed on Cent OS. So please install it manually." \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
-        packages="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
+        packages="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc-c++ make python3-devel"
         has_desktop_env && packages+=" google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
 
         install_packages_with_dnf $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
-        packages="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
+        packages="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang"
         has_desktop_env && packages+=" noto-fonts noto-fonts-cjk"
 
         install_packages_with_pacman $packages || (( result++ ))
@@ -1129,6 +1129,22 @@ function deploy_vim_environment() {
     done
 
     _install_vim_plug || return 1
+    _install_youcompleteme || return 1
+
+    return 0
+}
+
+function _install_youcompleteme() {
+    # Packages written in .vimrc in vim-plug section are assumed already installed.
+    curl -fLo "${HOME}/.vim/autoload/plug.vim" --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" || {
+        logger_err "Failed to get vim-plug at ~/.vim/autoload/plug.vim"
+        return 1
+    }
+
+    python3 install.py --clang-completer --system-libclang || {
+        logger_err "Failed to install with python3 install.py"
+        return 1
+    }
 
     return 0
 }

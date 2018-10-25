@@ -116,6 +116,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'edkolev/tmuxline.vim'
 Plug 'terryma/vim-multiple-cursors'
+Plug 'Valloric/YouCompleteMe'
 
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
@@ -125,6 +126,15 @@ Plug 'terryma/vim-multiple-cursors'
 
 " Required, plugins available after.
 call plug#end()
+
+" - Settings of vim YouCompleteMe -----------------------------------------------------------------------------
+let g:ycm_global_ycm_extra_conf = '${HOME}/.ycm_extra_conf.py'
+let g:ycm_auto_trigger = 1
+let g:ycm_min_num_of_chars_for_completion = 3
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_autoclose_preview_window_after_insertion = 1
+set splitbelow
+
 " - Settings of vim-airline ----------------------------------------------------------------------------------
 let g:airline_powerline_fonts = 1
 let g:airline_theme = 'simple'
