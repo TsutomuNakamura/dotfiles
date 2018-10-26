@@ -1134,7 +1134,7 @@ function deploy_vim_environment() {
     return 0
 }
 
-function _install_youcompleteme() {
+function _install_you_complete_me() {
     # Packages written in .vimrc in vim-plug section are assumed already installed.
     curl -fLo "${HOME}/.vim/autoload/plug.vim" --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" || {
         logger_err "Failed to get vim-plug at ~/.vim/autoload/plug.vim"
