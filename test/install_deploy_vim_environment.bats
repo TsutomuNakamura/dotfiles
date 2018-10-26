@@ -12,6 +12,7 @@ function setup() {
     stub lln
     stub _install_vim_plug
     stub _validate_plug_install
+    stub _install_youcompleteme
     stub logger_err
 }
 
@@ -26,6 +27,7 @@ function teardown() {
     [[ "$(stub_called_times mmkdir)"                    -eq 2 ]]
     [[ "$(stub_called_times lln)"                       -eq 2 ]]
     [[ "$(stub_called_times _install_vim_plug)"         -eq 1 ]]
+    [[ "$(stub_called_times _install_youcompleteme)"    -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                -eq 0 ]]
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/ftdetect"
@@ -43,6 +45,7 @@ function teardown() {
     [[ "$(stub_called_times mmkdir)"                    -eq 0 ]]
     [[ "$(stub_called_times lln)"                       -eq 0 ]]
     [[ "$(stub_called_times _install_vim_plug)"         -eq 0 ]]
+    [[ "$(stub_called_times _install_youcompleteme)"    -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
     stub_called_with_exactly_times logger_err 1 "Link of source \"/tmp/.dotfiles/.vim/after/syntax\" must in your dotfiles root directory \"/var/tmp/.dotfiles\". Aborted."
 }
@@ -55,6 +58,7 @@ function teardown() {
     [[ "$(stub_called_times mmkdir)"                    -eq 1 ]]
     [[ "$(stub_called_times lln)"                       -eq 1 ]]
     [[ "$(stub_called_times _install_vim_plug)"         -eq 0 ]]
+    [[ "$(stub_called_times _install_youcompleteme)"    -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                -eq 0 ]]
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times lln 1 "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" "/var/tmp/.dotfiles/.vim/after/syntax"
@@ -68,10 +72,29 @@ function teardown() {
     [[ "$(stub_called_times mmkdir)"                    -eq 2 ]]
     [[ "$(stub_called_times lln)"                       -eq 2 ]]
     [[ "$(stub_called_times _install_vim_plug)"         -eq 1 ]]
+    [[ "$(stub_called_times _install_youcompleteme)"    -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                -eq 0 ]]
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/ftdetect"
     stub_called_with_exactly_times lln 1 "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times lln 1 "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim" "/var/tmp/.dotfiles/.vim/ftdetect"
     stub_called_with_exactly_times _install_vim_plug 1
+}
+
+@test '#deploy_vim_environment should return 0 if _install_youcompleteme returns non 0' {
+    stub_and_eval _install_youcompleteme '{ return 1; }'
+    run deploy_vim_environment
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times mmkdir)"                    -eq 2 ]]
+    [[ "$(stub_called_times lln)"                       -eq 2 ]]
+    [[ "$(stub_called_times _install_vim_plug)"         -eq 1 ]]
+    [[ "$(stub_called_times _install_youcompleteme)"    -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                -eq 0 ]]
+    stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/after/syntax"
+    stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/ftdetect"
+    stub_called_with_exactly_times lln 1 "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim" "/var/tmp/.dotfiles/.vim/after/syntax"
+    stub_called_with_exactly_times lln 1 "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim" "/var/tmp/.dotfiles/.vim/ftdetect"
+    stub_called_with_exactly_times _install_vim_plug 1
+    stub_called_with_exactly_times _install_youcompleteme 1
 }
