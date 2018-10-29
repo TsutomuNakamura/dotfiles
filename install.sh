@@ -1136,8 +1136,8 @@ function deploy_vim_environment() {
 
 function _install_you_complete_me() {
     # Packages written in .vimrc in vim-plug section are assumed already installed.
-    curl -fLo "${HOME}/.vim/autoload/plug.vim" --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" || {
-        logger_err "Failed to get vim-plug at ~/.vim/autoload/plug.vim"
+    curl -fLo "${HOME}/.ycm_extra_conf.py" "https://raw.githubusercontent.com/Valloric/ycmd/master/.ycm_extra_conf.py" || {
+        logger_err "Failed to get vim-plug at ~/.ycm_extra_conf.py"
         return 1
     }
 
