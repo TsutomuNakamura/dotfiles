@@ -19,7 +19,24 @@ DISTRIBUTION=
 # Post message list
 declare -a POST_MESSAGES=()
 
-# 
+PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
+PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
+
+PACKAGES_TO_INSTALL_ON_UBUNTU="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
+PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
+
+PACKAGES_TO_INSTALL_ON_CENTOS="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg"
+PACKAGES_TO_INSTALL_ON_CENTOS_THAT_HAS_GUI="google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch"
+
+PACKAGES_TO_INSTALL_ON_FEDORA="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
+PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI="google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
+
+PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
+PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
+
+PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip"
+
+# Symbolic link list of configuration of vim.
 declare -a VIM_CONF_LINK_LIST=(
     # "<link_dest>,<link_src>"
     "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim,${FULL_DOTDIR_PATH}/.vim/after/syntax"
@@ -308,18 +325,17 @@ function install_packages() {
     local packages=
 
     if [[ "$(get_distribution_name)" == "debian" ]]; then
-        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
-        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk"
-
+        packages="${PACKAGES_TO_INSTALL_ON_DEBIAN}"
+        has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI}"
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
-        packages="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg"
-        has_desktop_env && packages+=" fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
+        packages="${PACKAGES_TO_INSTALL_ON_UBUNTU}"
+        has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI}"
 
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
-        packages="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg"
-        has_desktop_env && packages+=" google-noto-sans-cjk-fonts.noarch google-noto-serif-fonts.noarch google-noto-sans-fonts.noarch"
+        packages="${PACKAGES_TO_INSTALL_ON_CENTOS}"
+        has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_CENTOS_THAT_HAS_GUI}"
 
         # TODO: ranger not supported in centos
         # TODO: Are there google-noto-mono-(sans|serif) fonts?
@@ -327,17 +343,17 @@ function install_packages() {
                 && logger_warn "Package \"ranger\" will not be installed on Cent OS. So please install it manually." \
                 || (( result++ ))
     elif [[ "$(get_distribution_name)" == "fedora" ]]; then
-        packages="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
-        has_desktop_env && packages+=" google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
+        packages="${PACKAGES_TO_INSTALL_ON_FEDORA}"
+        has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI}"
 
         install_packages_with_dnf $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
-        packages="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg"
-        has_desktop_env && packages+=" noto-fonts noto-fonts-cjk"
+        packages="${PACKAGES_TO_INSTALL_ON_ARCH}"
+        has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI}"
 
         install_packages_with_pacman $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
-        install_packages_with_homebrew vim ctags tmux zsh unzip || (( result++ ))
+        install_packages_with_homebrew "${PACKAGES_TO_INSTALL_ON_MAC}" || (( result++ ))
     else
         logger_err "Failed to get OS distribution to install packages."
         (( result++ ))
