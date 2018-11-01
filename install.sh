@@ -353,7 +353,7 @@ function install_packages() {
 
         install_packages_with_pacman $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
-        install_packages_with_homebrew "${PACKAGES_TO_INSTALL_ON_MAC}" || (( result++ ))
+        install_packages_with_homebrew ${PACKAGES_TO_INSTALL_ON_MAC} || (( result++ ))
     else
         logger_err "Failed to get OS distribution to install packages."
         (( result++ ))
