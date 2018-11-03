@@ -1145,6 +1145,22 @@ function deploy_vim_environment() {
     done
 
     _install_vim_plug || return 1
+    _install_youcompleteme || return 1
+
+    return 0
+}
+
+function _install_you_complete_me() {
+    # Packages written in .vimrc in vim-plug section are assumed already installed.
+    curl -fLo "${HOME}/.ycm_extra_conf.py" "https://raw.githubusercontent.com/Valloric/ycmd/master/.ycm_extra_conf.py" || {
+        logger_err "Failed to get vim-plug at ~/.ycm_extra_conf.py"
+        return 1
+    }
+
+    python3 install.py --clang-completer --system-libclang || {
+        logger_err "Failed to install with python3 install.py"
+        return 1
+    }
 
     return 0
 }
