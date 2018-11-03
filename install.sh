@@ -1157,10 +1157,16 @@ function _install_you_complete_me() {
         return 1
     }
 
+    pushd "${HOME}/.vim/plugged/YouCompleteMe" || {
+        logger_err "Failed to change directry \"${HOME}/.vim/plugged/YouCompleteMe\""
+        return 1
+    }
     python3 install.py --clang-completer --system-libclang || {
+        popd
         logger_err "Failed to install with python3 install.py"
         return 1
     }
+    popd
 
     return 0
 }
