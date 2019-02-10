@@ -8,7 +8,7 @@ FROM base/archlinux
 # For you located in Japan
 RUN sed -i.org '1s|^|Server = http://ftp.jaist.ac.jp/pub/Linux/ArchLinux/$repo/os/$arch\nServer = http://ftp.tsukuba.wide.ad.jp/Linux/archlinux/$repo/os/$arch\n|' /etc/pacman.d/mirrorlist
 
-# RUN pacman -Syu --noconfirm
+RUN pacman -Syu --noconfirm
 #RUN pacman -Sy --noconfirm base base-devel sudo awk git inotify-tools make
 RUN pacman -Sy --noconfirm base sudo awk git inotify-tools make
 RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
