@@ -49,6 +49,8 @@ if &diff                             " only for diff mode/vimdiff
   set diffopt=filler,context:1000000 " filler is default and inserts empty lines for sync
 endif
 
+autocmd Filetype html setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+
 " - Additional keymaps ---------------------------------------------------------------------------------------
 " bind key map
 " save, quit, force quit
@@ -118,6 +120,7 @@ Plug 'edkolev/tmuxline.vim'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'Valloric/YouCompleteMe'
 Plug 'posva/vim-vue'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
