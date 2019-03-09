@@ -117,6 +117,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'edkolev/tmuxline.vim'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'Valloric/YouCompleteMe'
+Plug 'posva/vim-vue'
 
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
