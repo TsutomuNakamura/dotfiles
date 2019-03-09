@@ -1,0 +1,52 @@
+#!/bin/bash
+
+main() {
+    #echo "abcdefg" | tr -d '\n' | xxd -p -u | sed -e 's/^/obase=4;ibase=16;/' | bc | sed -e "s/0/`echo -ne '\u200b'`/g" -e "s/1/`echo -ne '\u200c'`/g" -e "s/2/`echo -ne '\u200d'`/g" -e "s/3/`echo -ne '\u2062'`/g" -e "s/^/'/" -e "s/$/'/" | sed -e "s/`echo -ne '\u200b'`/0/g" -e "s/`echo -ne '\u200c'`/1/g" -e "s/`echo -ne '\u200d'`/2/g" -e "s/`echo -ne '\u2062'`/3/g" | tr -d "'" | sed -e "s/^/obase=16;ibase=4;/" | bc | xxd -p -r | xargs
+
+    local options
+    options=$(getopt -o "edh" --longoptions "encode,decode,help" -- "$@")
+    if [[ $? -ne 0 ]]; then
+        echo "Invalid options were specified" >&2
+        return 1
+    fi
+    eval set -- "$options"
+
+    local flag_encode=1
+    local flag_decode=1
+    local argument=
+    while true; do
+        case "$1" in
+        -e | --encode )
+            flag_encode=0 ; shift ;;
+        -d | --decode )
+            flag_decode=0 ; shift ;;
+        -h | --help )
+            usage ; return 0 ;;
+        -- )
+            shift ; break ;;
+        * )
+            echo "Internal error has occured" >&2
+            return 1 ;;
+        esac
+    done
+    argument="$1"
+    #echo "$argument" | xxd
+
+    if [[ $flag_encode ]]; then
+        encode "$argument"
+    elif [[ $flag_decode ]]; then
+        decode "$argument"
+    fi
+}
+
+encode() {
+    echo "$1" | tr -d '\n' | xxd -p -u | sed -e 's/^/obase=4;ibase=16;/' | bc | sed -e "s/0/`echo -ne '\u200b'`/g" -e "s/1/`echo -ne '\u200c'`/g" -e "s/2/`echo -ne '\u200d'`/g" -e "s/3/`echo -ne '\u2062'`/g" -e "s/^/'/" -e "s/$/'/"
+}
+
+
+decode() {
+    echo "$1" | sed -e "s/`echo -ne '\u200b'`/0/g" -e "s/`echo -ne '\u200c'`/1/g" -e "s/`echo -ne '\u200d'`/2/g" -e "s/`echo -ne '\u2062'`/3/g" | tr -d "'" | sed -e "s/^/obase=16;ibase=4;/" | bc | xxd -p -r | xargs
+}
+
+main "$@"
+
