@@ -1207,7 +1207,7 @@ function _validate_plug_install() {
 
     local p
     while read p; do
-        p=$(echo "$p" | sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | xargs -I {} basename {})
+        p=$(echo "$p" | sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | cut -d',' -f 1 | xargs -I {} basename {})
         if [[ ! -d ".vim/plugged/${p}/.git" ]]; then
             logger_err "Failed to install vim plugin \"${p}\". There is not a directory \".vim/plugged/${p}\" or its directory is not a git repository."
             (( error_count++ ))
