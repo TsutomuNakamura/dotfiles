@@ -261,7 +261,7 @@ endfunction
 " '%N' express a sequence number of its tab.
 set guitablabel=%N:\ %{GuiTabLabel()}
 
-if !filereadable(expand("~/.vimrc_do_not_use_ambiwidth")) && filereadable(expand("~/.vim/myconf/ambiwidth.conf")) && !filereadable("/.dockerenv")
+if !filereadable(expand("~/.vimrc_do_not_use_ambiwidth")) && filereadable(expand("~/.vim/myconf/ambiwidth.conf")) && !filereadable("/.dockerenv") && !has("macunix")
   source ~/.vim/myconf/ambiwidth.conf
 endif
 
