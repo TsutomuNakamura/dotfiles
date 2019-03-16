@@ -839,7 +839,7 @@ function install_packages_with_homebrew() {
     local output=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        output="$(sudo brew install ${packages[i]} 2>&1)" || {
+        output="$(brew install ${packages[i]} 2>&1)" || {
             echo "ERROR: Some error occured when installing ${packages[i]}"
             echo "${output}"
         }
