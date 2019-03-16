@@ -1145,10 +1145,11 @@ function deploy_vim_environment() {
     done
 
     _install_vim_plug || return 1
-    if [[ "$(get_distribution_name)" != "centos" ]]; then
+
+    if [[ "$(get_distribution_name)" != "centos" ]] && [[ "$(get_distribution_name)" != "mac" ]]; then
         _install_you_complete_me || return 1
     else
-        logger_warn "Sorry, this dotfiles installer does not support to install YouCompleteMe on CentSO yet."
+        logger_warn "Sorry, this dotfiles installer does not support to install YouCompleteMe on CentOS or Mac yet."
     fi
 
     return 0
