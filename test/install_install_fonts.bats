@@ -59,10 +59,12 @@ function assert_install_the_ipa_font() {
     declare -a outputs
     IFS=$'\n' outputs=($output)
     # [[ ${outputs[0]} = "Building font information cache files with \"fc-cache -f ${HOME}/.local/share/fonts\"" ]]
+
     stub_called_with_exactly_times mkdir 1 -p "${HOME}/.local/share/fonts"
     stub_called_with_exactly_times pushd 1 "${HOME}/.local/share/fonts"
     [[ "$(stub_called_times popd)"                -eq 1 ]]
     [[ "$(stub_called_times fc-cache)"            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"         -eq 0 ]]
 
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
@@ -78,16 +80,19 @@ function assert_install_the_ipa_font() {
 
     [[ "$status" -eq 0 ]]
     declare -a outputs; IFS=$'\n' outputs=($output)
+
     # [[ ${outputs[0]} = "Building font information cache files with \"fc-cache -f ${HOME}/Library/Fonts\"" ]]
     stub_called_with_exactly_times mkdir 1 -p "${HOME}/Library/Fonts"
     stub_called_with_exactly_times pushd 1 "${HOME}/Library/Fonts"
     [[ "$(stub_called_times popd)"                -eq 1 ]]
     [[ "$(stub_called_times fc-cache)"            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"         -eq 1 ]]
 
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  0
     assert_install_the_ipa_font         0
+    stub_called_with_exactly_times logger_info 1 "This dotfiles recommends you to use font that patched nerd fonts to show some icons on your terminal. If you don't have any fonts, \"Inconsolata for Powerline.otf\" has installed and try it ${EMOJI_START_EYES} ."
 }
 
 @test '#install_fonts should return 0 if _install_font_inconsolata_nerd() returns 1 (installing the font has succeeded).' {
@@ -95,8 +100,8 @@ function assert_install_the_ipa_font() {
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
-    [[ "$(stub_called_times logger_info)" -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"            -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"         -eq 1 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
@@ -111,8 +116,8 @@ function assert_install_the_ipa_font() {
     run install_fonts
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times logger_info)" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"         -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
@@ -127,8 +132,8 @@ function assert_install_the_ipa_font() {
     run install_fonts
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times logger_info)" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"              -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"           -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
@@ -143,8 +148,8 @@ function assert_install_the_ipa_font() {
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
-    [[ "$(stub_called_times logger_info)" -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"              -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"           -eq 1 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
@@ -158,8 +163,8 @@ function assert_install_the_ipa_font() {
     run install_fonts
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times logger_info)" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"              -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"           -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
@@ -173,8 +178,8 @@ function assert_install_the_ipa_font() {
     run install_fonts
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times fc-cache)"               -eq 0 ]]
-    [[ "$(stub_called_times logger_info)" -eq 0 ]]
+    [[ "$(stub_called_times fc-cache)"              -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"           -eq 0 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1
@@ -188,8 +193,8 @@ function assert_install_the_ipa_font() {
     run install_fonts
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times fc-cache)"               -eq 1 ]]
-    [[ "$(stub_called_times logger_info)" -eq 1 ]]
+    [[ "$(stub_called_times fc-cache)"              -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"           -eq 1 ]]
     assert_install_the_nerd_font        1
     assert_install_the_migu1m_font      1
     assert_install_the_noto_emoji_font  1

@@ -78,6 +78,9 @@ FONT_COLOR_RED='\033[0;31m'
 # Color of font end
 FONT_COLOR_END='\033[0m'
 
+# Emojis
+EMOJI_START_EYES="🤩"
+
 function main() {
 
     cd "${HOME}" || {
@@ -485,6 +488,11 @@ function install_fonts() {
         local ret_install_font_noto_emoji=$?
         [[ $ret_install_font_noto_emoji -eq 1 ]] && (( flag_fc_cache++ ))
         [[ $ret_install_font_noto_emoji -gt 1 ]] && (( result++ ))
+    fi
+
+    if [[ "$distribution_name" == "mac" ]]; then
+        # "Inconsolata for Powerline.otf" is installed(linked) in deploy() method
+        logger_info "This dotfiles recommends you to use font that patched nerd fonts to show some icons on your terminal. If you don't have any fonts, \"Inconsolata for Powerline.otf\" has installed and try it ${EMOJI_START_EYES} ."
     fi
 
     popd
