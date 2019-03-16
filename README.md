@@ -66,10 +66,10 @@ Run vim and press "tr", then NERDTree will open.
 ### [vim-airline](https://github.com/vim-airline/vim-airline) and [vim-airline-themes](https://github.com/vim-airline/vim-airline-themes)
 vim-airline and vim-airline-themes provide cool status line for vim!
 
-## [tmux](https://github.com/tmux/tmux)
+### [tmux](https://github.com/tmux/tmux)
 Terminal multiplexer tmux makes you easy to control multi terminal.
 
-## [tmuxline](https://github.com/edkolev/tmuxline.vim)
+### [tmuxline](https://github.com/edkolev/tmuxline.vim)
 ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline00.png)
 
 tmuxline makes your tmux interface cool and icons provides you useful informations.
