@@ -619,7 +619,7 @@ function install_packages_with_apt() {
         return 1
     }
 
-    local pkg_cache=$(apt list --installed 2> /dev/null | grep -v -P 'Listing...' | cut -d '/' -f 1)
+    local pkg_cache=$(apt list --installed 2> /dev/null | grep -v -E 'Listing...' | cut -d '/' -f 1)
     if [[ -z "$pkg_cache" ]]; then
         logger_err "Failed to get installed packages with apt list --installed."
         return 1
@@ -635,12 +635,12 @@ function install_packages_with_apt() {
     for (( i = 0; i < ${#packages[@]}; i++ )) {
         local p="${packages[i]}"
 
-        if (grep -P "^${p}$" &> /dev/null <<< "$pkg_cache"); then
+        if (grep -E "^${p}$" &> /dev/null <<< "$pkg_cache"); then
             # Remove already installed packages
             echo "${p} has already installed. Skipped."
             continue
         fi
-        if ! (grep -P "^${p}$" &> /dev/null <<< "$available_packages"); then
+        if ! (grep -E "^${p}$" &> /dev/null <<< "$available_packages"); then
             logger_warn "Package ${p} is not available. Installing ${p} was skipped."
             continue
         fi
@@ -1611,7 +1611,7 @@ function remove_all_untracked_files() {
     pushd "$directory" || return 1
     while read f; do
         rm -rf "${directory}/${f}"
-    done < <(git status --porcelain 2> /dev/null | grep -P '^\?\? .*' | cut -d ' ' -f 2)
+    done < <(git status --porcelain 2> /dev/null | grep -E '^\?\? .*' | cut -d ' ' -f 2)
     popd
 }
 
