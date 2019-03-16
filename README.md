@@ -30,26 +30,24 @@ branch="develop"
 bash -- <(curl -o- https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/${branch}/install.sh) -b ${branch}
 ```
 This command will clone the develop branch of the repository.
-aaa
 
 + Images
 ![Basic visual](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_policy01.png)
 
-# Tested distribution and OS
-These dotfiles tested on the environment like below, but on arch the most suitable for because I usually use arch linux and use them.
+## Tested distribution and OS
+This dotfiles tested on distribution and OS like below.
 
-| Distribution or OS |
-| ------------------ |
-| arch               |
-| ubuntu             |
-| debian             |
-| fedora             |
-| MacOS              |
+| Distribution or OS | Condition |
+| ------------------ | --------- |
+| Arch               |◎         |
+| Ubuntu             |◎         |
+| Fedora             |◎         |
+| Debian             |◎         |
+| CentOS             |△         |
+| MacOS              |△         |
 
-# Recommended emulators
-These dotfiles uses a few many patched fonts.
-Some patched fonts has lost shape on some terminal emulators.
-Terminal that has been tested are like below.
+## Recommended emulators
+This dotfiles tested on some emulators like below.
 
 | application        | OS    | Condition |
 | ------------------ | ----- | --------- |
@@ -59,25 +57,22 @@ Terminal that has been tested are like below.
 | iTerm (Mac)        | Mac   | ○        |
 
 # Applications and feathres
-I introduce you applications and features that the dotfiles will bring.
+This dotfiles equipments some useful features.
 
 ## vim
-### NERDTree
-https://github.com/scrooloose/nerdtree
-Run vim and push "tr", then NERDTree will open.
+### [NERDTree](https://github.com/scrooloose/nerdtree)
+Run vim and press "tr", then NERDTree will open.
 
-### vim-airline
-vim-airline will provide cool status line for vim!
+### [vim-airline](https://github.com/vim-airline/vim-airline) and [vim-airline-themes](https://github.com/vim-airline/vim-airline-themes)
+vim-airline and vim-airline-themes provide cool status line for vim!
 
-## tmux
-### tmuxline
+## [tmux](https://github.com/tmux/tmux)
+Terminal multiplexer tmux makes you easy to control multi terminal.
 
+## [tmuxline](https://github.com/edkolev/tmuxline.vim)
 ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline00.png)
-<br />
-tmuxline has some useful icons.
-Each icons gives us informations like below.
 
-* basic
+tmuxline makes your tmux interface cool and icons provides you useful informations.
 
 | icon        | description |
 | ------------------ | ----- |
@@ -92,14 +87,19 @@ Each icons gives us informations like below.
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon08.png) | Untracked files |
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon09.png) | Ignored files |
 
-# For Mac users
-I found that there are some differences between Mac and Linux for expressing fonts on terminal.
-In Linux, you can experience the best view by fontconfig but Mac doesn't.
-For the reasons mentioned above, I recommend to set font to NertFont on your Mac.
+# Frequently asked
+## Q. Will my dotfiles I'm using now has broken when installing this dotfiles?
+Yes, this dotfiles will break your dotfiles using now.
+But don't worry about it because your dotfiles will be backupd into the directory `~/.backup_of_dotfiles`.
+Restore your dotfiles as needed, please.
 
-# Concept (and goal)
-These dotfiles is made on the concept as simple and visibility but utilities satisfactory.
-Customizing these files are now under ongoing and will commit new customizations for continuously.
+## Q. Icons on vim and tmux are broken on my environment.
+This dotfiles requires [nerd-font](https://github.com/ryanoasis/nerd-fonts). Your font-config will set your font-config on Linux such as Arch, Ubuntu, Fedora automatically but Mac won't.
+Please set your font as needed by your hand.
+
+# Concept (and goal) of this dotfiles
+This dotfiles is developed on the concept as simple and visibility but utilities satisfactory.
+It is now under ongoing and will commit new customizations and ideas for continuously.
 
 # Local test
 For developers, the install script in this repository could test with on docker container. Run the commands like below then the test cases will be started.
