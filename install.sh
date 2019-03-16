@@ -34,7 +34,7 @@ PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI="google-noto-sans-fonts.noarch google
 PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip"
 PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 
-PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip clang python3 cmake"
+PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
 
 # Symbolic link list of configuration of vim.
 declare -a VIM_CONF_LINK_LIST=(
