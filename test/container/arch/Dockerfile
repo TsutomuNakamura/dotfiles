@@ -3,7 +3,7 @@
 #   docker build -t="tsutomu/arch-dot-test" .
 #   docker run --name arch-dot-test --hostname arch-dot-test --volume /path/to/your/dotfiles:/home/foo/dotfiles -ti tsutomu/arch-dot-test /bin/bash
 #
-FROM base/archlinux
+FROM archlinux/base
 
 # For you located in Japan
 RUN sed -i.org '1s|^|Server = http://ftp.jaist.ac.jp/pub/Linux/ArchLinux/$repo/os/$arch\nServer = http://ftp.tsukuba.wide.ad.jp/Linux/archlinux/$repo/os/$arch\n|' /etc/pacman.d/mirrorlist
