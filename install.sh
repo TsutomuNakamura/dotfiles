@@ -45,6 +45,8 @@ declare -a VIM_CONF_LINK_LIST=(
     "../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
 )
 
+declare -a DEEP_LINK_DIRECTORIES=(".config" "bin" ".local")
+
 # Answer status for question() yes
 ANSWER_OF_QUESTION_YES=0
 # Answer status for question() no
@@ -1058,10 +1060,13 @@ function deploy() {
                 local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${dotfiles[i]}/${link_of_destinations[j]}"
                 mkdir -p "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")"
 
-                if ! files_that_should_not_be_linked ${link_of_destinations[j]##*/}; then
-                    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && ln -s \"${destination}\")"
-                    (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && ln -s "${destination}")
-                fi
+                #if ! files_that_should_not_be_linked ${link_of_destinations[j]##*/}; then
+                #    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && ln -s \"${destination}\")"
+                #    (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && ln -s "${destination}")
+                #fi
+
+                files_that_should_not_be_linked ${link_of_destinations[j]##*/} && continue;
+
             }
         else
             echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
@@ -1231,8 +1236,7 @@ function should_it_make_deep_link_directory() {
     local directory="$1"
     pushd ${HOME}/${DOTDIR} || return 1
 
-    [[ -d $directory ]] && \
-        ( [[ "$directory" = ".config" ]] || [[ "$directory" = "bin" ]] || [[ "$directory" = ".local" ]] )
+    [[ -d $directory ]] && contains_element "$directory" "${DEEP_LINK_DIRECTORIES[@]}"
 
     local result=$?
     popd
@@ -1240,7 +1244,12 @@ function should_it_make_deep_link_directory() {
     return $result
 }
 
-
+function contains_element() {
+    local e match="$1"
+    shift
+    for e; do [[ "$e" == "$match" ]] && return 0; done
+    return 1
+}
 
 # Check whether I have admin privileges or not
 function do_i_have_admin_privileges() {

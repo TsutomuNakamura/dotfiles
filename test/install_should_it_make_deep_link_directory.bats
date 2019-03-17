@@ -5,6 +5,8 @@ function setup() {
     pushd ${HOME}
     mkdir ${DOTDIR}
     popd
+
+    declare -g -a DEEP_LINK_DIRECTORIES=(".config" "bin" ".local")
 }
 
 function teardown() {
