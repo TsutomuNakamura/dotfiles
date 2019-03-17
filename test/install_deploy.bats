@@ -19,11 +19,6 @@ function setup() {
         local target="$1"
         [[ "$target" = "LICENSE.txt" ]]
     }'
-    stub_and_eval files_that_should_be_copied_on_only_mac '{
-        local target="$1"
-        [[ "$(get_distribution_name)" == "mac" ]] && \
-            [[ "$target" == "Inconsolata for Powerline.otf" ]]
-    }'
     stub deploy_xdg_base_directory
     stub deploy_vim_environment
 }
@@ -50,7 +45,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 0 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 0 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
@@ -74,7 +68,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 4 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 0 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 0 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
@@ -95,7 +88,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
@@ -119,7 +111,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 2 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 2 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
@@ -152,7 +143,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 2 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 4 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 4 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
@@ -176,7 +166,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 2 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
@@ -197,7 +186,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
@@ -220,27 +208,6 @@ function teardown() {
     [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 2 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 2 ]]
-    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
-    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
-}
-
-@test '#deploy should copy "Inconsolata for Powerline.otf" (not symlink) on only Mac' {
-    function get_distribution_name() { echo "mac"; }
-    mkdir -p ${DOTDIR}/.local/share/fonts
-    touch "${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf"
-
-    run deploy
-
-    echo "$output"
-    [[ "$status" -eq 0 ]]
-
-    [[ ! -L "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]] && [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
-
-    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
-    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
     [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
