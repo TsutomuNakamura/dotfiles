@@ -45,6 +45,12 @@ declare -a VIM_CONF_LINK_LIST=(
     "../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
 )
 
+# Directories should be deep linked
+declare -a DEEP_LINK_DIRECTORIES=(".config" "bin" ".local")
+
+# Files should be copied on only Mac
+declare -a FILES_SHOULD_BE_COPIED_ON_ONLY_MAC=("Inconsolata for Powerline.otf")
+
 # Answer status for question() yes
 ANSWER_OF_QUESTION_YES=0
 # Answer status for question() no
@@ -892,7 +898,7 @@ function is_customized_xdg_base_directories() {
     return $result
 }
 
-# Check the file whether should not be linked
+# Check the file whether should not be linked.
 function files_that_should_not_be_linked() {
     local target="$1"
     [[ "$target" = "LICENSE.txt" ]]
@@ -1051,14 +1057,19 @@ function deploy() {
                 link_of_destinations+=( "${f#./}" )
             done < <(find . -type f)
             popd
-
             for (( j = 0; j < ${#link_of_destinations[@]}; j++ )) {
+
                 # Count depth of directory and append "../" in front of the target
                 local depth=$(( $(tr -cd / <<< "${dotfiles[i]}/${link_of_destinations[j]}" | wc -c) ))
                 local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${dotfiles[i]}/${link_of_destinations[j]}"
                 mkdir -p "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")"
 
-                if ! files_that_should_not_be_linked ${link_of_destinations[j]##*/}; then
+                files_that_should_not_be_linked "${link_of_destinations[j]##*/}" && continue
+
+                if files_that_should_be_copied_on_only_mac "${link_of_destinations[j]##*/}"; then
+                    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && cp -r \"${destination}\" .)"
+                    (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && cp -r "${destination}" .)
+                else
                     echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && ln -s \"${destination}\")"
                     (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && ln -s "${destination}")
                 fi
@@ -1227,12 +1238,12 @@ function _validate_plug_install() {
     return $error_count
 }
 
+# Check whether the directory should be deep linked or not.
 function should_it_make_deep_link_directory() {
     local directory="$1"
     pushd ${HOME}/${DOTDIR} || return 1
 
-    [[ -d $directory ]] && \
-        ( [[ "$directory" = ".config" ]] || [[ "$directory" = "bin" ]] || [[ "$directory" = ".local" ]] )
+    [[ -d $directory ]] && contains_element "$directory" "${DEEP_LINK_DIRECTORIES[@]}"
 
     local result=$?
     popd
@@ -1240,7 +1251,19 @@ function should_it_make_deep_link_directory() {
     return $result
 }
 
+# Check whether the file should not be copied on only mac.
+function files_that_should_be_copied_on_only_mac() {
+    local target="$1"
+    [[ "$(get_distribution_name)" == "mac" ]] && \
+        contains_element "$target" "${FILES_SHOULD_BE_COPIED_ON_ONLY_MAC[@]}"
+}
 
+function contains_element() {
+    local e match="$1"
+    shift
+    for e; do [[ "$e" == "$match" ]] && return 0; done
+    return 1
+}
 
 # Check whether I have admin privileges or not
 function do_i_have_admin_privileges() {
@@ -1420,19 +1443,6 @@ function get_git_remote_aliases() {
     popd
     return 0
 }
-
-### TODO: Bash version older than 4.4 is not compatible like this method.
-## function get_git_remote_aliases() {
-##     local directory="$1"
-##     local name_of_result_array="$2"
-## 
-##     eval "declare -a \"${name_of_result_array}\""
-##     local e
-##     while read e; do
-##         eval "${name_of_result_array}+=(\"${e}\")"
-##     done < <(git -C "$directory" remote 2> /dev/null)
-##     eval "declare -p \"${name_of_result_array}\""
-## }
 
 # Initialize dotfiles repo
 function init_repo() {

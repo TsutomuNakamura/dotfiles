@@ -6,14 +6,26 @@ function setup() {
     mkdir -p .dotfiles
     rm -f ~/.vimrc_do_not_use_ambiwidth
 
-    function backup_current_dotfiles() { return 0; }
-    function should_it_make_deep_link_directory() {
-        [[ "$1" = ".config" ]] && return 0
+    function get_distribution_name() { echo "ubuntu"; }
+    stub_and_eval backup_current_dotfiles '{ return 0; }'
+    stub_and_eval should_it_make_deep_link_directory '{
+        [[ "$1" = ".config" ]]  && return 0
         [[ "$1" = ".config2" ]] && return 0
-        [[ "$1" = ".local" ]] && return 0
-        [[ "$1" = "bin" ]] && return 0
+        [[ "$1" = ".local" ]]   && return 0
+        [[ "$1" = "bin" ]]      && return 0
         return 1
-    }
+    }'
+    stub_and_eval files_that_should_not_be_linked '{
+        local target="$1"
+        [[ "$target" = "LICENSE.txt" ]]
+    }'
+    stub_and_eval files_that_should_be_copied_on_only_mac '{
+        local target="$1"
+        [[ "$(get_distribution_name)" == "mac" ]] && \
+            [[ "$target" == "Inconsolata for Powerline.otf" ]]
+    }'
+    stub deploy_xdg_base_directory
+    stub deploy_vim_environment
 }
 
 function teardown() {
@@ -34,6 +46,13 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ -L "${HOME}/.vim" ]]
     [[ "$(readlink ${HOME}/.vim)" = "${DOTDIR}/.vim" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 0 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 0 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create links .vim, .tmux.conf, .dir0 and .dir1 into .dotfiles' {
@@ -47,14 +66,17 @@ function teardown() {
 
     echo "$output"
     [[ "$status" -eq 0 ]]
-    [[ -L "${HOME}/.vim" ]]
-    [[ -L "${HOME}/.tmux.conf" ]]
-    [[ -L "${HOME}/.dir0" ]]
-    [[ -L "${HOME}/.dir1" ]]
-    [[ "$(readlink ${HOME}/.vim)" = "${DOTDIR}/.vim" ]]
-    [[ "$(readlink ${HOME}/.tmux.conf)" = "${DOTDIR}/.tmux.conf" ]]
-    [[ "$(readlink ${HOME}/.dir0)" = "${DOTDIR}/.dir0" ]]
-    [[ "$(readlink ${HOME}/.dir1)" = "${DOTDIR}/.dir1" ]]
+    [[ -L "${HOME}/.vim" ]]         && [[ "$(readlink ${HOME}/.vim)"        = "${DOTDIR}/.vim" ]]
+    [[ -L "${HOME}/.tmux.conf" ]]   && [[ "$(readlink ${HOME}/.tmux.conf)"  = "${DOTDIR}/.tmux.conf" ]]
+    [[ -L "${HOME}/.dir0" ]]        && [[ "$(readlink ${HOME}/.dir0)"       = "${DOTDIR}/.dir0" ]]
+    [[ -L "${HOME}/.dir1" ]]        && [[ "$(readlink ${HOME}/.dir1)"       = "${DOTDIR}/.dir1" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 4 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 0 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 0 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create a link .config deeply' {
@@ -68,8 +90,14 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
-    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]
-    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
+    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]] && [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create some links .config deeply' {
@@ -85,10 +113,15 @@ function teardown() {
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
     [[ -d "${HOME}/.config/fontconfig/foo" ]]
-    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]
-    [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]
-    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
-    [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config/fontconfig/foo/foo.conf" ]]
+    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]    && [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)"   = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
+    [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]  && [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config/fontconfig/foo/foo.conf" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 2 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 2 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create some links from some source directory deeply' {
@@ -108,18 +141,20 @@ function teardown() {
     [[ -d "${HOME}/.config" ]]
     [[ -d "${HOME}/.config/fontconfig" ]]
     [[ -d "${HOME}/.config/fontconfig/foo" ]]
-    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]
-    [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]
-    [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../${DOTDIR}/.config/fontconfig/fonts.conf" ]]
-    [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../${DOTDIR}/.config/fontconfig/foo/foo.conf" ]]
+    [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]    && [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)"       = "../../${DOTDIR}/.config/fontconfig/fonts.conf" ]]
+    [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]  && [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)"     = "../../../${DOTDIR}/.config/fontconfig/foo/foo.conf" ]]
     [[ -d "${HOME}/.config2" ]]
     [[ -d "${HOME}/.config2/fontconfig" ]]
     [[ -d "${HOME}/.config2/fontconfig/foo" ]]
-    [[ -L "${HOME}/.config2/fontconfig/fonts.conf" ]]
-    [[ -L "${HOME}/.config2/fontconfig/foo/foo.conf" ]]
-    [[ "$(readlink ${HOME}/.config2/fontconfig/fonts.conf)" = "../../${DOTDIR}/.config2/fontconfig/fonts.conf" ]]
-    [[ "$(readlink ${HOME}/.config2/fontconfig/foo/foo.conf)" = "../../../${DOTDIR}/.config2/fontconfig/foo/foo.conf" ]]
+    [[ -L "${HOME}/.config2/fontconfig/fonts.conf" ]]   && [[ "$(readlink ${HOME}/.config2/fontconfig/fonts.conf)"      = "../../${DOTDIR}/.config2/fontconfig/fonts.conf" ]]
+    [[ -L "${HOME}/.config2/fontconfig/foo/foo.conf" ]] && [[ "$(readlink ${HOME}/.config2/fontconfig/foo/foo.conf)"    = "../../../${DOTDIR}/.config2/fontconfig/foo/foo.conf" ]]
 
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 2 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 4 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 4 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create some links .local deeply' {
@@ -134,9 +169,16 @@ function teardown() {
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/.local" ]]
-    [[ -L "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+    [[ -L "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]] && \
+        [[ "$(readlink ${HOME}/.local/share/fonts/Inconsolata\ for\ Powerline.otf)" = "../../../${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
     [[ ! -e "${HOME}/.local/share/fonts/LICENSE.txt" ]]
-    [[ "$(readlink ${HOME}/.local/share/fonts/Inconsolata\ for\ Powerline.otf)" = "../../../${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 2 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create the symlink to the file under the .dotfiles/bin directory' {
@@ -150,8 +192,14 @@ function teardown() {
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/bin" ]]
-    [[ -L "${HOME}/bin/foo" ]]
-    [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
+    [[ -L "${HOME}/bin/foo" ]] && [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create some symlinks to the files under the .dotfiles/bin directory' {
@@ -166,9 +214,35 @@ function teardown() {
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ -d "${HOME}/bin" ]]
-    [[ -L "${HOME}/bin/foo" ]]
-    [[ -L "${HOME}/bin/bar" ]]
-    [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
+    [[ -L "${HOME}/bin/foo" ]] && [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
+    [[ -L "${HOME}/bin/bar" ]] && [[ "$(readlink ${HOME}/bin/bar)" = "../${DOTDIR}/bin/bar" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 2 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 2 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
+}
+
+@test '#deploy should copy "Inconsolata for Powerline.otf" (not symlink) on only Mac' {
+    function get_distribution_name() { echo "mac"; }
+    mkdir -p ${DOTDIR}/.local/share/fonts
+    touch "${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf"
+
+    run deploy
+
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+
+    [[ ! -L "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]] && [[ -f "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+
+    [[ "$(stub_called_times backup_current_dotfiles)"                   -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"        -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"           -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_be_copied_on_only_mac)"   -eq 1 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"                 -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                    -eq 1 ]]
 }
 
 @test '#deploy should create ~/.vimrc_do_not_use_ambiwidth on Mac' {
