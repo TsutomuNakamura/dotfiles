@@ -1103,7 +1103,6 @@ function link_xdg_base_directory() {
     local pushd_target=
     local link_target=
 
-
     pushd ${HOME}/${DOTDIR} || return 1
     if [[ -d "$xdg_directory" ]]; then
         while read f; do
@@ -1130,6 +1129,7 @@ function link_xdg_base_directory() {
             pushd "$pushd_target" || { popd; return 1; }
             link_target="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${f}"
 
+            echo "-> ${link_target##*/}"
             if files_that_should_be_copied_on_only_mac "${link_target##*/}"; then
                 echo "Copy ${xdg_directory}: cp -r \"${link_target}\" ."
                 cp -r "${link_target}" .
