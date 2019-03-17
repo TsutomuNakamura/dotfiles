@@ -1057,8 +1057,8 @@ function deploy() {
                 link_of_destinations+=( "${f#./}" )
             done < <(find . -type f)
             popd
-
             for (( j = 0; j < ${#link_of_destinations[@]}; j++ )) {
+
                 # Count depth of directory and append "../" in front of the target
                 local depth=$(( $(tr -cd / <<< "${dotfiles[i]}/${link_of_destinations[j]}" | wc -c) ))
                 local destination="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${dotfiles[i]}/${link_of_destinations[j]}"
@@ -1067,7 +1067,7 @@ function deploy() {
                 files_that_should_not_be_linked "${link_of_destinations[j]##*/}" && continue
 
                 if files_that_should_be_copied_on_only_mac "${link_of_destinations[j]##*/}"; then
-                    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && cp -r \"${destination}\")"
+                    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && cp -r \"${destination}\" .)"
                     (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && cp -r "${destination}" .)
                 else
                     echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && ln -s \"${destination}\")"
