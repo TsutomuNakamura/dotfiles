@@ -87,6 +87,13 @@ tmuxline makes your tmux interface cool and icons provides you useful informatio
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon08.png) | Untracked files |
 | ![Lose shape](https://github.com/TsutomuNakamura/dotfiles/wiki/img/dotfiles_tmuxline_icon09.png) | Ignored files |
 
+# Local test
+For developers, the install script in this repository could test with on docker container. Run the commands like below then the test cases will be started.
+```
+# docker build -t tsutomu/ubuntu-dotfiles --file ./test/container/ubuntu/Dockerfile .
+# docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti tsutomu/ubuntu-dotfiles su - foo -c "cd /home/foo/dotfiles && make test"
+```
+
 # Frequently asked
 ## Q. Will my dotfiles I'm using now has broken when installing this dotfiles?
 Yes, this dotfiles will break your dotfiles using now.
@@ -100,13 +107,6 @@ Please set your font as needed by your hand.
 # Concept (and goal) of this dotfiles
 This dotfiles is developed on the concept as simple and visibility but utilities satisfactory.
 It is now under ongoing and will commit new customizations and ideas for continuously.
-
-# Local test
-For developers, the install script in this repository could test with on docker container. Run the commands like below then the test cases will be started.
-```
-# docker build -t tsutomu/ubuntu-dotfiles --file ./test/container/ubuntu/Dockerfile .
-# docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti tsutomu/ubuntu-dotfiles su - foo -c "cd /home/foo/dotfiles && make test"
-```
 
 # License
 The code is available under the MIT license.
