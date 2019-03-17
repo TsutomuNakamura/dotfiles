@@ -1066,13 +1066,8 @@ function deploy() {
 
                 files_that_should_not_be_linked "${link_of_destinations[j]##*/}" && continue
 
-                if files_that_should_be_copied_on_only_mac "${link_of_destinations[j]##*/}"; then
-                    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && cp -r \"${destination}\" .)"
-                    (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && cp -r "${destination}" .)
-                else
-                    echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && ln -s \"${destination}\")"
-                    (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && ln -s "${destination}")
-                fi
+                echo "(cd \"${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")\" && ln -s \"${destination}\")"
+                (cd "${dotfiles[i]}/$(dirname "${link_of_destinations[j]}")" && ln -s "${destination}")
             }
         else
             echo "Creating a symbolic link -> ${DOTDIR}/${dotfiles[i]}"
@@ -1134,8 +1129,15 @@ function link_xdg_base_directory() {
             [[ ! -d "$pushd_target" ]] && mkdir -p "$pushd_target"
             pushd "$pushd_target" || { popd; return 1; }
             link_target="$(printf "../%.0s" $( seq 1 1 ${depth} ))${DOTDIR}/${f}"
-            echo "ln -s \"${link_target}\" from \"$(pwd)\""
-            ln -s "${link_target}"
+
+            if files_that_should_be_copied_on_only_mac "${link_target##*/}"; then
+                echo "Copy ${xdg_directory}: cp -r \"${link_target}\" ."
+                cp -r "${link_target}" .
+            else
+                echo "Link ${xdg_directory}: ln -s \"${link_target}\" from \"$(pwd)\""
+                ln -s "${link_target}"
+            fi
+
             popd
         done < <(find ./${xdg_directory} -type f)
     fi
