@@ -118,11 +118,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'edkolev/tmuxline.vim'
 Plug 'terryma/vim-multiple-cursors'
-" Skip installing YouCompleteMe on Mac due to this issue. Uncomment if solved it.
-" https://github.com/Valloric/ycmd/issues/1141
-if !has("macunix")
-    Plug 'Valloric/YouCompleteMe'
-endif
+Plug 'Valloric/YouCompleteMe'
 Plug 'posva/vim-vue'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 
