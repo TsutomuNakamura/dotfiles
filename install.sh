@@ -1168,6 +1168,8 @@ function deploy_vim_environment() {
     _install_vim_plug || return 1
 
     if [[ "$(get_distribution_name)" == "mac" ]]; then
+        # Change options to compile you_complete_me from Linux distributions due to the issue
+        # https://github.com/TsutomuNakamura/dotfiles/issues/61
         _install_you_complete_me || return 1
     elif [[ "$(get_distribution_name)" != "centos" ]]; then
         _install_you_complete_me --clang-completer --system-libclang || return 1
