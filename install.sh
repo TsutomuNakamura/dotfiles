@@ -1167,16 +1167,20 @@ function deploy_vim_environment() {
 
     _install_vim_plug || return 1
 
-    if [[ "$(get_distribution_name)" != "centos" ]] && [[ "$(get_distribution_name)" != "mac" ]]; then
+    if [[ "$(get_distribution_name)" == "mac" ]]; then
         _install_you_complete_me || return 1
+    elif [[ "$(get_distribution_name)" != "centos" ]]; then
+        _install_you_complete_me --clang-completer --system-libclang || return 1
     else
-        logger_warn "Sorry, this dotfiles installer does not support to install YouCompleteMe on CentOS or Mac yet."
+        logger_warn "Sorry, this dotfiles installer does not support to install YouCompleteMe on CentOS yet."
     fi
 
     return 0
 }
 
 function _install_you_complete_me() {
+    declare -a options=("$@")
+
     # Packages written in .vimrc in vim-plug section are assumed already installed.
     curl -fLo "${HOME}/.ycm_extra_conf.py" "https://raw.githubusercontent.com/Valloric/ycmd/master/.ycm_extra_conf.py" || {
         logger_err "Failed to get vim-plug at ~/.ycm_extra_conf.py"
@@ -1187,7 +1191,7 @@ function _install_you_complete_me() {
         logger_err "Failed to change directry \"${HOME}/.vim/plugged/YouCompleteMe\""
         return 1
     }
-    python3 install.py --clang-completer --system-libclang || {
+    python3 install.py ${options[@]} || {
         popd
         logger_err "Failed to install with python3 install.py"
         return 1
