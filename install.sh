@@ -11,6 +11,15 @@ BACKUPDIR=".backup_of_dotfiles"
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
 # Git repository location over ssh
 GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
+# Temporary git user email from previous .gitconfig
+GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
+# Temporary git user name from previous .gitconfig
+GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
+# Git user name to store .gitconfig
+GIT_USER_NAME=
+# Git user email to store .gitconfig
+GIT_USER_EMAIL=
+
 # Cache of absolute backup dir
 CASH_ABSOLUTE_BACKUPDIR=
 # Distribution of this environment
@@ -1039,6 +1048,7 @@ function remove_an_object() {
 function deploy() {
 
     backup_current_dotfiles
+    fetch_git_personal_properties "${HOME}/${DOTDIR}"
 
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
@@ -1074,6 +1084,10 @@ function deploy() {
             ln -s "${DOTDIR}/${dotfiles[i]}"
         fi
     }
+
+    restore_git_personal_properties
+    clear_git_personal_properties
+
     deploy_xdg_base_directory
     deploy_vim_environment
 
@@ -1085,6 +1099,85 @@ function deploy() {
     fi
 
     popd
+}
+
+# Set and store git personal properties
+function fetch_git_personal_properties() {
+    local dotfiles_dir="$1"
+    local backup_dir="$(get_backup_dir)"
+
+    local email_store="${backup_dir}/${GIT_USER_EMAIL_STORE_FILE}"
+    local name_store="${backup_dir}/${GIT_USER_NAME_STORE_FILE}"
+
+    local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
+
+    if [[ ! -d "$backup_dir" ]]; then
+        mkdir -p "$backup_dir" || {
+            logger_err "Failed to make directory \"${backup_dir}\" to store git personal properties"
+            return 1
+        }
+    fi
+
+    # Load ini file parser
+    if [[ ! -f "$read_ini_sh" ]]; then
+        logger_err ".ini file parser \"${$read_ini_sh}\" is not found."
+        return 1
+    fi
+
+    . "${$read_ini_sh}" || {
+        logger_err "Failed to load .ini file parser \"${$read_ini_sh}\""
+        return 1
+    }
+
+    read_ini "${HOME}/.gitconfig" || {
+        logger_err "Failed to parse \"${HOME}/.gitconfig\""
+        return 1
+    }
+
+    # Set and restore git-email property
+    if [[ -f "$email_store" ]]; then
+        read GIT_USER_EMAIL < "$email_store" || {
+            logger_err "Failed to restore user's email of git from \"${email_store}\""
+            return 1
+        }
+    else
+        GIT_USER_EMAIL="${ini__user__email}"
+        echo "${ini__user__email}" > "$email_store" || {
+            logger_err "Failed to store user's email of git to \"${email_store}\""
+            return 1
+        }
+    fi
+
+    # Set and restore git-name property
+    if [[ -f "$name_store" ]]; then
+        read GIT_USER_NAME < "$name_store" || {
+            logger_err "Failed to restore user's name of git from \"${name_store}\""
+            return 1
+        }
+    else
+        GIT_USER_NAME="${ini__user__name}"
+        echo "${ini__user__name}" > "$name_store" || {
+            logger_err "Failed to store user's name of git to \"${name_store}\""
+            return 1
+        }
+    fi
+
+    return 0
+}
+
+function restore_git_personal_properties() {
+    # TODO
+    true
+}
+
+# Clear git personal properties
+function clear_git_personal_properties() {
+    local backup_dir="$(get_backup_dir)"
+
+    [[ -f "${backup_dir}/${GIT_TMP_USER_EMAIL}" ]] && rm -f "${backup_dir}/${GIT_TMP_USER_EMAIL}"
+    [[ -f "${backup_dir}/${GIT_TMP_USER_NAME}" ]] && rm -f "${backup_dir}/${GIT_TMP_USER_NAME}"
+
+    return 0
 }
 
 # Deploy resources about xdg_base directories
