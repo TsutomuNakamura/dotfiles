@@ -11,10 +11,16 @@ BACKUPDIR=".backup_of_dotfiles"
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
 # Git repository location over ssh
 GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
+
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
+# Temporary git user email full path from previous .gitconfig
+GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${HOME}/${BACKUPDIR}/git_tmp_user_email"
 # Temporary git user name from previous .gitconfig
 GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
+# Temporary git user name full path from previous .gitconfig
+GIT_USER_NAME_STORE_FILE_FULL_PATH="${HOME}/${BACKUPDIR}/git_tmp_user_name"
+
 # Git user name to store .gitconfig
 GIT_USER_NAME=
 # Git user email to store .gitconfig
@@ -1108,11 +1114,10 @@ function backup_git_personal_properties() {
     local dotfiles_dir="$1"
     local backup_dir="$(get_backup_dir)"
 
-    local email_store="${backup_dir}/${GIT_USER_EMAIL_STORE_FILE}"
-    local name_store="${backup_dir}/${GIT_USER_NAME_STORE_FILE}"
+    local email_store="${HOME}/${BACKUPDIR}/${GIT_USER_EMAIL_STORE_FILE}"
+    local name_store="${HOME}/${BACKUPDIR}/${GIT_USER_NAME_STORE_FILE}"
 
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
-
 
     if [[ ! -d "$backup_dir" ]]; then
         mkdir -p "$backup_dir" || {
@@ -1130,7 +1135,7 @@ function backup_git_personal_properties() {
         return 1
     fi
 
-    . "${$read_ini_sh}" || {
+    . "${read_ini_sh}" || {
         logger_err "Failed to load .ini file parser \"${$read_ini_sh}\""
         return 1
     }
@@ -1205,8 +1210,8 @@ function restore_git_personal_properties() {
 function clear_git_personal_properties() {
     local backup_dir="$(get_backup_dir)"
 
-    [[ -f "${backup_dir}/${GIT_TMP_USER_EMAIL}" ]] && rm -f "${backup_dir}/${GIT_TMP_USER_EMAIL}"
-    [[ -f "${backup_dir}/${GIT_TMP_USER_NAME}" ]] && rm -f "${backup_dir}/${GIT_TMP_USER_NAME}"
+    [[ -f "${HOME}/${BACKUPDIR}/${GIT_USER_EMAIL_STORE_FILE}" ]] && rm -f "${HOME}/${BACKUPDIR}/${GIT_USER_EMAIL_STORE_FILE}"
+    [[ -f "${HOME}/${BACKUPDIR}/${GIT_USER_NAME_STORE_FILE}" ]] && rm -f "${HOME}/${BACKUPDIR}/${GIT_USER_NAME_STORE_FILE}"
 
     return 0
 }
