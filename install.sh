@@ -1057,9 +1057,9 @@ function remove_an_object() {
 function deploy() {
 
     backup_current_dotfiles
-    backup_git_personal_properties "${HOME}/${DOTDIR}"
+    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || return 1
 
-    declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
+    declare -a dotfiles=($(get_target_dotfiles "${FULL_DOTDIR_PATH}"))
 
     pushd ${HOME} || return 1
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
@@ -1096,7 +1096,7 @@ function deploy() {
 
     # Continue if restore_git_personal_properties() was failed
     # because it is no large effect on later instructions.
-    restore_git_personal_properties "${HOME}/${DOTDIR}"
+    restore_git_personal_properties "${FULL_DOTDIR_PATH}"
     clear_git_personal_properties
 
     deploy_xdg_base_directory
@@ -1174,14 +1174,14 @@ function restore_git_personal_properties() {
     local dotfiles_dir="$1"
 
     local backup_dir="$(get_backup_dir)"
-    local gitconfig="${dotfiles_dir}/.gitconfig"
+    local gitconfig="${HOME}/.gitconfig"
 
-    if [[ -f "${backup_dir}/${GIT_USER_EMAIL_STORE_FILE}" ]]; then
-        local git_email="$(cat ${backup_dir}/${GIT_USER_EMAIL_STORE_FILE})"
+    if [[ -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]; then
+        local git_email="$(cat ${GIT_USER_EMAIL_STORE_FILE_FULL_PATH})"
 
         if [[ "$(get_distribution_name)" == "mac" ]]; then
             sed -i "" -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
-                logger_err "Failed to restore email of the .gitconfig on mac"
+                logger_err "Failed to restore email of the .gitconfig on your mac"
                 return 1
             }
         else
@@ -1192,12 +1192,12 @@ function restore_git_personal_properties() {
         fi
     fi
 
-    if [[ -f "${backup_dir}/${GIT_USER_NAME_STORE_FILE}" ]]; then
-        local git_name="$(cat ${backup_dir}/${GIT_USER_NAME_STORE_FILE})"
+    if [[ -f "${GIT_USER_NAME_STORE_FILE_FULL_PATH}" ]]; then
+        local git_name="$(cat ${GIT_USER_NAME_STORE_FILE_FULL_PATH})"
 
         if [[ "$(get_distribution_name)" == "mac" ]]; then
             sed -i "" -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
-                logger_err "Failed to restore name of the .gitconfig on mac"
+                logger_err "Failed to restore name of the .gitconfig on your mac"
                 return 1
             }
         else

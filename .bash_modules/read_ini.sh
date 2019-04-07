@@ -202,7 +202,7 @@ function read_ini()
 	do
 #echo line = "$line"
 
-		((LINE_NUM++))
+		((++LINE_NUM))
 
 		# Skip blank lines and comments
 		if [ -z "$line" -o "${line:0:1}" = ";" -o "${line:0:1}" = "#" ]
@@ -218,7 +218,7 @@ function read_ini()
 			SECTION="${line#[}"
 			SECTION="${SECTION%]}"
 			eval "${INI_ALL_SECTION}=\"\${${INI_ALL_SECTION}# } $SECTION\""
-			((SECTIONS_NUM++))
+			((++SECTIONS_NUM))
 
 			continue
 		fi
