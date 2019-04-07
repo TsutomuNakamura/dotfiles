@@ -7,6 +7,9 @@ DOTDIR=".dotfiles"
 FULL_DOTDIR_PATH="${HOME}/${DOTDIR}"
 # The directory that dotfiles resources will be backuped
 BACKUPDIR=".backup_of_dotfiles"
+# The full directory that dotfiles resources will be backuped
+FULL_BACKUPDIR_PATH="${HOME}/${BACKUPDIR}"
+
 # Git repository location over https
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
 # Git repository location over ssh
@@ -15,11 +18,11 @@ GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
 # Temporary git user email full path from previous .gitconfig
-GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${HOME}/${BACKUPDIR}/git_tmp_user_email"
+GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_email"
 # Temporary git user name from previous .gitconfig
 GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
 # Temporary git user name full path from previous .gitconfig
-GIT_USER_NAME_STORE_FILE_FULL_PATH="${HOME}/${BACKUPDIR}/git_tmp_user_name"
+GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_name"
 
 # Git user name to store .gitconfig
 GIT_USER_NAME=
@@ -1114,10 +1117,8 @@ function backup_git_personal_properties() {
     local dotfiles_dir="$1"
     local backup_dir="$(get_backup_dir)"
 
-    local email_store="${HOME}/${BACKUPDIR}/${GIT_USER_EMAIL_STORE_FILE}"
-    local name_store="${HOME}/${BACKUPDIR}/${GIT_USER_NAME_STORE_FILE}"
-
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
+    local has_email_store_created=0
 
     if [[ ! -d "$backup_dir" ]]; then
         mkdir -p "$backup_dir" || {
@@ -1131,12 +1132,12 @@ function backup_git_personal_properties() {
 
     # Load ini file parser
     if [[ ! -f "$read_ini_sh" ]]; then
-        logger_err ".ini file parser \"${$read_ini_sh}\" is not found."
+        logger_err ".ini file parser \"${read_ini_sh}\" is not found."
         return 1
     fi
 
-    . "${read_ini_sh}" || {
-        logger_err "Failed to load .ini file parser \"${$read_ini_sh}\""
+    source "${read_ini_sh}" || {
+        logger_err "Failed to load .ini file parser \"${read_ini_sh}\""
         return 1
     }
 
@@ -1146,17 +1147,21 @@ function backup_git_personal_properties() {
     }
 
     # Set and restore git-email property
-    if [[ ! -f "$email_store" ]]; then
-        echo "${ini__user__email}" > "$email_store" || {
-            logger_err "Failed to store user's email of git to \"${email_store}\""
+    if [[ ! -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]]; then
+        echo "${INI__user__email}" > "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" || {
+            logger_err "Failed to store user's email of git to \"${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}\""
+            rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
             return 1
         }
+        has_email_store_created=1
     fi
 
     # Set and restore git-name property
-    if [[ ! -f "$name_store" ]]; then
-        echo "${ini__user__name}" > "$name_store" || {
-            logger_err "Failed to store user's name of git to \"${name_store}\""
+    if [[ ! -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]]; then
+        echo "${INI__user__name}" > "$GIT_USER_NAME_STORE_FILE_FULL_PATH" || {
+            logger_err "Failed to store user's name of git to \"${GIT_USER_NAME_STORE_FILE_FULL_PATH}\""
+            [[ "$has_email_store_created" -eq 1 ]] && rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
+            rm -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
             return 1
         }
     fi
