@@ -1048,7 +1048,7 @@ function remove_an_object() {
 function deploy() {
 
     backup_current_dotfiles
-    fetch_git_personal_properties "${HOME}/${DOTDIR}"
+    backup_git_personal_properties "${HOME}/${DOTDIR}"
 
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
@@ -1085,7 +1085,9 @@ function deploy() {
         fi
     }
 
-    restore_git_personal_properties
+    # Continue if restore_git_personal_properties() was failed
+    # because it is no large effect on later instructions.
+    restore_git_personal_properties "${HOME}/${DOTDIR}"
     clear_git_personal_properties
 
     deploy_xdg_base_directory
@@ -1102,7 +1104,7 @@ function deploy() {
 }
 
 # Set and store git personal properties
-function fetch_git_personal_properties() {
+function backup_git_personal_properties() {
     local dotfiles_dir="$1"
     local backup_dir="$(get_backup_dir)"
 
@@ -1111,12 +1113,16 @@ function fetch_git_personal_properties() {
 
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
 
+
     if [[ ! -d "$backup_dir" ]]; then
         mkdir -p "$backup_dir" || {
             logger_err "Failed to make directory \"${backup_dir}\" to store git personal properties"
             return 1
         }
     fi
+
+    # May for the first time.
+    [[ ! -f "${HOME}/.gitconfig" ]] && return 0
 
     # Load ini file parser
     if [[ ! -f "$read_ini_sh" ]]; then
@@ -1135,13 +1141,7 @@ function fetch_git_personal_properties() {
     }
 
     # Set and restore git-email property
-    if [[ -f "$email_store" ]]; then
-        read GIT_USER_EMAIL < "$email_store" || {
-            logger_err "Failed to restore user's email of git from \"${email_store}\""
-            return 1
-        }
-    else
-        GIT_USER_EMAIL="${ini__user__email}"
+    if [[ ! -f "$email_store" ]]; then
         echo "${ini__user__email}" > "$email_store" || {
             logger_err "Failed to store user's email of git to \"${email_store}\""
             return 1
@@ -1149,13 +1149,7 @@ function fetch_git_personal_properties() {
     fi
 
     # Set and restore git-name property
-    if [[ -f "$name_store" ]]; then
-        read GIT_USER_NAME < "$name_store" || {
-            logger_err "Failed to restore user's name of git from \"${name_store}\""
-            return 1
-        }
-    else
-        GIT_USER_NAME="${ini__user__name}"
+    if [[ ! -f "$name_store" ]]; then
         echo "${ini__user__name}" > "$name_store" || {
             logger_err "Failed to store user's name of git to \"${name_store}\""
             return 1
@@ -1165,9 +1159,46 @@ function fetch_git_personal_properties() {
     return 0
 }
 
+# Restore git personal properties
 function restore_git_personal_properties() {
-    # TODO
-    true
+    local dotfiles_dir="$1"
+
+    local backup_dir="$(get_backup_dir)"
+    local gitconfig="${dotfiles_dir}/.gitconfig"
+
+    if [[ -f "${backup_dir}/${GIT_USER_EMAIL_STORE_FILE}" ]]; then
+        local git_email="$(cat ${backup_dir}/${GIT_USER_EMAIL_STORE_FILE})"
+
+        if [[ "$(get_distribution_name)" == "mac" ]]; then
+            sed -i "" -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
+                logger_err "Failed to restore email of the .gitconfig on mac"
+                return 1
+            }
+        else
+            sed -i -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
+                logger_err "Failed to restore email of the .gitconfig"
+                return 1
+            }
+        fi
+    fi
+
+    if [[ -f "${backup_dir}/${GIT_USER_NAME_STORE_FILE}" ]]; then
+        local git_name="$(cat ${backup_dir}/${GIT_USER_NAME_STORE_FILE})"
+
+        if [[ "$(get_distribution_name)" == "mac" ]]; then
+            sed -i "" -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
+                logger_err "Failed to restore name of the .gitconfig on mac"
+                return 1
+            }
+        else
+            sed -i -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
+                logger_err "Failed to restore name of the .gitconfig"
+                return 1
+            }
+        fi
+    fi
+
+    return 0
 }
 
 # Clear git personal properties
