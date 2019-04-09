@@ -1197,11 +1197,13 @@ function restore_git_personal_properties() {
 
         if [[ "$(get_distribution_name)" == "mac" ]]; then
             sed -i "" -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
+                # TODO: Should restore .gitconfig fot atomicity?
                 logger_err "Failed to restore name of the .gitconfig on your mac"
                 return 1
             }
         else
             sed -i -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
+                # TODO: Should restore .gitconfig fot atomicity?
                 logger_err "Failed to restore name of the .gitconfig"
                 return 1
             }
