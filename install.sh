@@ -1215,10 +1215,8 @@ function restore_git_personal_properties() {
 
 # Clear git personal properties
 function clear_git_personal_properties() {
-    local backup_dir="$(get_backup_dir)"
-
-    [[ -f "${HOME}/${BACKUPDIR}/${GIT_USER_EMAIL_STORE_FILE}" ]] && rm -f "${HOME}/${BACKUPDIR}/${GIT_USER_EMAIL_STORE_FILE}"
-    [[ -f "${HOME}/${BACKUPDIR}/${GIT_USER_NAME_STORE_FILE}" ]] && rm -f "${HOME}/${BACKUPDIR}/${GIT_USER_NAME_STORE_FILE}"
+    [[ -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}" ]] && rm -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}"
+    [[ -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}" ]] && rm -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}"
 
     return 0
 }
