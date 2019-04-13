@@ -47,8 +47,8 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ -L "${HOME}/.vim" ]] && [[ "$(readlink ${HOME}/.vim)" = "${DOTDIR}/.vim" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -78,8 +78,8 @@ function teardown() {
     [[ -L "${HOME}/.dir0" ]]        && [[ "$(readlink ${HOME}/.dir0)"       = "${DOTDIR}/.dir0" ]]
     [[ -L "${HOME}/.dir1" ]]        && [[ "$(readlink ${HOME}/.dir1)"       = "${DOTDIR}/.dir1" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 4 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -108,8 +108,8 @@ function teardown() {
     [[ -d "${HOME}/.config/fontconfig" ]]
     [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]] && [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)" = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 1 ]]    # Called if taget may be deep link
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -139,8 +139,8 @@ function teardown() {
     [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]    && [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)"   = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
     [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]  && [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config/fontconfig/foo/foo.conf" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 2 ]]    # Called if taget may be deep link
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -170,8 +170,8 @@ function teardown() {
     [[ -L "${HOME}/.config/fontconfig/fonts.conf" ]]    && [[ "$(readlink ${HOME}/.config/fontconfig/fonts.conf)"   = "../../.dotfiles/.config/fontconfig/fonts.conf" ]]
     [[ -L "${HOME}/.config/fontconfig/foo/foo.conf" ]]  && [[ "$(readlink ${HOME}/.config/fontconfig/foo/foo.conf)" = "../../../.dotfiles/.config/fontconfig/foo/foo.conf" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 2 ]]    # Called if taget may be deep link
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -208,8 +208,8 @@ function teardown() {
     [[ -L "${HOME}/.config2/fontconfig/fonts.conf" ]]   && [[ "$(readlink ${HOME}/.config2/fontconfig/fonts.conf)"      = "../../${DOTDIR}/.config2/fontconfig/fonts.conf" ]]
     [[ -L "${HOME}/.config2/fontconfig/foo/foo.conf" ]] && [[ "$(readlink ${HOME}/.config2/fontconfig/foo/foo.conf)"    = "../../../${DOTDIR}/.config2/fontconfig/foo/foo.conf" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 2 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 4 ]]    # Called if taget may be deep link
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -238,8 +238,8 @@ function teardown() {
         [[ "$(readlink ${HOME}/.local/share/fonts/Inconsolata\ for\ Powerline.otf)" = "../../../${DOTDIR}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
     [[ ! -e "${HOME}/.local/share/fonts/LICENSE.txt" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 2 ]]    # Called if taget may be deep link
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -264,8 +264,8 @@ function teardown() {
     [[ -d "${HOME}/bin" ]]
     [[ -L "${HOME}/bin/foo" ]] && [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 1 ]]
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -292,8 +292,8 @@ function teardown() {
     [[ -L "${HOME}/bin/foo" ]] && [[ "$(readlink ${HOME}/bin/foo)" = "../${DOTDIR}/bin/foo" ]]
     [[ -L "${HOME}/bin/bar" ]] && [[ "$(readlink ${HOME}/bin/bar)" = "../${DOTDIR}/bin/bar" ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 2 ]]
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
@@ -326,7 +326,28 @@ function teardown() {
     [[ ! -f ~/.vimrc_do_not_use_ambiwidth ]]
 }
 
-@test '#deploy should return 1 if backup_current_dotfiles has failed' {
+@test '#deploy should return 1 if backup_git_personal_properties() has failed' {
+    stub_and_eval backup_git_personal_properties '{ return 1; }'
+
+    run deploy
+
+    echo "$output"
+    [[ "$status" -eq 1 ]]
+
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
+    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
+    [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
+
+    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
+}
+
+@test '#deploy should return 1 if backup_current_dotfiles() has failed' {
     stub_and_eval backup_current_dotfiles '{ return 1; }'
 
     run deploy
@@ -334,8 +355,8 @@ function teardown() {
     echo "$output"
     [[ "$status" -eq 1 ]]
 
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 0 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
@@ -348,107 +369,86 @@ function teardown() {
     stub_called_with_exactly_times logger_err 1 "Failed to backup .dotfiles data. Stop the instruction deploy()."
 }
 
-@test '#deploy should return 1 if backup_git_personal_properties() has failed' {
-    stub_and_eval backup_git_personal_properties '{ return 1; }'
+ @test '#deploy should return 1 if pushd ${HOME}' {
+     function pushd() { return 1; }
 
-    run deploy
+     run deploy
 
-    echo "$output"
-    [[ "$status" -eq 1 ]]
+     echo "$output"
+     [[ "$status" -eq 1 ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
-    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
-    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
-    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
-    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
-    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
-    [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
-    [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
+     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
+     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
+     [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
+     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
+     [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
+     [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
+     [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
-    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
-}
+     stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
+ }
 
-@test '#deploy should return 1 if pushd ${HOME}' {
-    function pushd() { return 1; }
+ @test '#deploy should return 1 if mkdir that create directory to make deep-link has failed' {
+     function get_target_dotfiles() { echo ".config"; }
+     stub_and_eval mkdir '{
+         if [[ "$1" == ".config" ]]; then
+             return 1
+         fi
+         command mkdir $@
+     }'
 
-    run deploy
+     run deploy
 
-    echo "$output"
-    [[ "$status" -eq 1 ]]
+     echo "$output"
+     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".config"
+     [[ "$status" -eq 1 ]]
+     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
+     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
+     [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
+     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
+     [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
+     [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
+     [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
-    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
-    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
-    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
-    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
-    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
-    [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
-    [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+     stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
+     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".config"
+     stub_called_with_exactly_times logger_err 1 "Failed to make directory .config in deploy()."
+ }
 
-    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
-}
+ @test '#deploy should return 1 if pushd to make deep link directory has failed' {
+     function get_target_dotfiles() { echo ".config .vim"; }
+     function pushd() {
+         if [[ "$1" == "${DOTDIR}/.config" ]]; then
+             return 1
+         fi
+         command pushd $@
+     }
 
-@test '#deploy should return 1 if mkdir that create directory to make deep-link has failed' {
-    function get_target_dotfiles() { echo ".config"; }
-    stub_and_eval mkdir '{
-        if [[ "$1" == ".config" ]]; then
-            return 1
-        fi
-        command mkdir $@
-    }'
+     run deploy
 
-    run deploy
+     echo "$output"
+     [[ "$status" -eq 1 ]]
 
-    echo "$output"
-    stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".config"
-    [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
-    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
-    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
-    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
-    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
-    [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
-    [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
+     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
+     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
+     [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
+     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
+     [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
+     [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
+     [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
-    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
-    stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".config"
-    stub_called_with_exactly_times logger_err 1 "Failed to make directory .config in deploy()."
-}
-
-@test '#deploy should return 1 if pushd to make deep link directory has failed' {
-    function get_target_dotfiles() { echo ".config .vim"; }
-    function pushd() {
-        if [[ "$1" == "${DOTDIR}/.config" ]]; then
-            return 1
-        fi
-        command pushd $@
-    }
-
-    run deploy
-
-    echo "$output"
-    [[ "$status" -eq 1 ]]
-
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
-    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
-    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 0 ]]
-    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 0 ]]
-    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
-    [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
-    [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
-
-    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
-    stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".config"
-}
+     stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
+     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".config"
+ }
 
 #@test '#deploy should skip command ln if files_that_should_not_be_linked() returns 0' {
 #    skip
@@ -460,54 +460,54 @@ function teardown() {
 #    # TODO:
 #}
 
-@test '#deploy should call logger_warn if restore_git_personal_properties has failed' {
-    function get_target_dotfiles() { echo ".vim"; }
-    stub_and_eval restore_git_personal_properties '{ return 1; }'
+ @test '#deploy should call logger_warn if restore_git_personal_properties has failed' {
+     function get_target_dotfiles() { echo ".vim"; }
+     stub_and_eval restore_git_personal_properties '{ return 1; }'
 
-    run deploy
+     run deploy
 
-    echo "$output"
-    [[ "$status" -eq 0 ]]
+     echo "$output"
+     [[ "$status" -eq 0 ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
-    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
-    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
-    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 1 ]]
-    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
-    [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
-    [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
-    [[ "$(stub_called_times logger_warn)"                           -eq 1 ]]
-    [[ "$(stub_called_times logger_error)"                          -eq 0 ]]
+     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
+     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
+     [[ "$(stub_called_times clear_git_personal_properties)"         -eq 1 ]]
+     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
+     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
+     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
+     [[ "$(stub_called_times logger_warn)"                           -eq 1 ]]
+     [[ "$(stub_called_times logger_error)"                          -eq 0 ]]
 
-    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
-    stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
-    stub_called_with_exactly_times logger_warn 1 "Failed to restore your email of git and(or) name of git.\nYou may nesessary to restore manually with \`git config --global user.name \"Your Name\"\`, \`git config --global user.email your-email@example.com\`"
-}
+     stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
+     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
+     stub_called_with_exactly_times logger_warn 1 "Failed to restore your email of git and(or) name of git.\nYou may nesessary to restore manually with \`git config --global user.name \"Your Name\"\`, \`git config --global user.email your-email@example.com\`"
+ }
 
-@test '#deploy should call logger_warn if clear_git_personal_properties has failed' {
-    function get_target_dotfiles() { echo ".vim"; }
-    stub_and_eval clear_git_personal_properties '{ return 1; }'
+ @test '#deploy should call logger_warn if clear_git_personal_properties has failed' {
+     function get_target_dotfiles() { echo ".vim"; }
+     stub_and_eval clear_git_personal_properties '{ return 1; }'
 
-    run deploy
+     run deploy
 
-    echo "$output"
-    [[ "$status" -eq 0 ]]
+     echo "$output"
+     [[ "$status" -eq 0 ]]
 
-    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
-    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
-    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
-    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
-    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 1 ]]
-    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
-    [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
-    [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
-    [[ "$(stub_called_times logger_warn)"                           -eq 1 ]]
+     [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
+     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
+     [[ "$(stub_called_times clear_git_personal_properties)"         -eq 1 ]]
+     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
+     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
+     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
+     [[ "$(stub_called_times logger_warn)"                           -eq 1 ]]
 
-    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
-    stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
-    stub_called_with_exactly_times logger_warn 1 "Failed to clear your temporary git data \"${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\" and \"${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\".\nYou should clear these data with...\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\`\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\`"
-}
+     stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
+     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
+     stub_called_with_exactly_times logger_warn 1 "Failed to clear your temporary git data \"${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\" and \"${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\".\nYou should clear these data with...\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\`\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\`"
+ }
 

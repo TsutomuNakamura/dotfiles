@@ -1055,12 +1055,11 @@ function remove_an_object() {
 
 # Deploy dotfiles on user's home directory
 function deploy() {
-
+    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || return 1
     backup_current_dotfiles || {
         logger_err "Failed to backup .dotfiles data. Stop the instruction deploy()."
         return 1
     }
-    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || return 1
 
     declare -a dotfiles=($(get_target_dotfiles "${FULL_DOTDIR_PATH}"))
     pushd ${HOME} || return 1
@@ -1144,7 +1143,10 @@ function backup_git_personal_properties() {
     fi
 
     # May for the first time.
-    [[ ! -f "${HOME}/.gitconfig" ]] && return 0
+    [[ ! -f "${HOME}/.gitconfig" ]] && {
+        logger_info "There is no ${HOME}/.gitconfig. Skip getting user.name and user.email for new .gitconfig."
+        return 0
+    }
 
     # Load ini file parser
     if [[ ! -f "$read_ini_sh" ]]; then
