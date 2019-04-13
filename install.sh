@@ -1235,7 +1235,7 @@ function clear_git_personal_properties() {
     [[ -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}" ]] && rm -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}"
 
     # Return the result of this function
-    [[ -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}" ]] && [[ -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}" ]]
+    [[ ! -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}" ]] && [[ ! -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}" ]]
 }
 
 # Deploy resources about xdg_base directories
