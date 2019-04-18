@@ -40,5 +40,6 @@ export EDITOR=vim
 export PATH="${PATH}:${HOME}/bin"
 
 # Load user specific environment
+[[ -d "${HOME}/.bash_modules/" ]] && while read f; do . "$f"; done < <(find "${HOME}/.bash_modules/" -type f)
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 

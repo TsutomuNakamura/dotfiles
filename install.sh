@@ -7,10 +7,28 @@ DOTDIR=".dotfiles"
 FULL_DOTDIR_PATH="${HOME}/${DOTDIR}"
 # The directory that dotfiles resources will be backuped
 BACKUPDIR=".backup_of_dotfiles"
+# The full directory that dotfiles resources will be backuped
+FULL_BACKUPDIR_PATH="${HOME}/${BACKUPDIR}"
+
 # Git repository location over https
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
 # Git repository location over ssh
 GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
+
+# Temporary git user email from previous .gitconfig
+GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
+# Temporary git user email full path from previous .gitconfig
+GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_email"
+# Temporary git user name from previous .gitconfig
+GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
+# Temporary git user name full path from previous .gitconfig
+GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_name"
+
+# Git user name to store .gitconfig
+GIT_USER_NAME=
+# Git user email to store .gitconfig
+GIT_USER_EMAIL=
+
 # Cache of absolute backup dir
 CASH_ABSOLUTE_BACKUPDIR=
 # Distribution of this environment
@@ -1037,19 +1055,24 @@ function remove_an_object() {
 
 # Deploy dotfiles on user's home directory
 function deploy() {
+    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || return 1
+    backup_current_dotfiles || {
+        logger_err "Failed to backup .dotfiles data. Stop the instruction deploy()."
+        return 1
+    }
 
-    backup_current_dotfiles
-
-    declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
-
+    declare -a dotfiles=($(get_target_dotfiles "${FULL_DOTDIR_PATH}"))
     pushd ${HOME} || return 1
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         if should_it_make_deep_link_directory "${dotfiles[i]}"; then
             # Link only files in dotdirectory
             declare -a link_of_destinations=()
-            [[ ! -e "${dotfiles[i]}" ]] && mkdir ${dotfiles[i]}
+            if [[ ! -e "${dotfiles[i]}" ]]; then
+                mkdir "${dotfiles[i]}"
+            fi
+
             [[ ! -d "${dotfiles[i]}" ]] && {
-                echo "ERROR: ${dotfiles[i]} is already exists and cannot make directory"
+                logger_err "Failed to make directory ${dotfiles[i]} in deploy()."
                 return 1
             }
             pushd ${DOTDIR}/${dotfiles[i]} || { popd; return 1; }
@@ -1074,6 +1097,23 @@ function deploy() {
             ln -s "${DOTDIR}/${dotfiles[i]}"
         fi
     }
+
+    # Continue if restore_git_personal_properties() was failed
+    # because it is no large effect on later instructions.
+    restore_git_personal_properties "${FULL_DOTDIR_PATH}" || {
+        local msg="Failed to restore your email of git and(or) name of git."
+        msg+="\nYou may nesessary to restore manually with \`git config --global user.name \"Your Name\"\`, \`git config --global user.email your-email@example.com\`"
+        logger_warn "$msg"
+    }
+    clear_git_personal_properties || {
+        local msg="Failed to clear your temporary git data \"${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\" and \"${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\"."
+        msg+="\nYou should clear these data with..."
+        msg+="\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\`"
+        msg+="\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\`"
+        logger_warn "$msg"
+    }
+
+    # TODO: Should add error handling
     deploy_xdg_base_directory
     deploy_vim_environment
 
@@ -1085,6 +1125,119 @@ function deploy() {
     fi
 
     popd
+}
+
+# Set and store git personal properties
+function backup_git_personal_properties() {
+    local dotfiles_dir="$1"
+    local backup_dir="$(get_backup_dir)"
+
+    local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
+    local has_email_store_created=0
+
+    if [[ ! -d "$backup_dir" ]]; then
+        mkdir -p "$backup_dir" || {
+            logger_err "Failed to make directory \"${backup_dir}\" to store git personal properties"
+            return 1
+        }
+    fi
+
+    # May for the first time.
+    [[ ! -f "${HOME}/.gitconfig" ]] && {
+        logger_info "There is no ${HOME}/.gitconfig. Skip getting user.name and user.email for new .gitconfig."
+        return 0
+    }
+
+    # Load ini file parser
+    if [[ ! -f "$read_ini_sh" ]]; then
+        logger_err ".ini file parser \"${read_ini_sh}\" is not found."
+        return 1
+    fi
+
+    source "${read_ini_sh}" || {
+        logger_err "Failed to load .ini file parser \"${read_ini_sh}\""
+        return 1
+    }
+
+    read_ini "${HOME}/.gitconfig" || {
+        logger_err "Failed to parse \"${HOME}/.gitconfig\""
+        return 1
+    }
+
+    # Set and restore git-email property
+    if [[ ! -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]]; then
+        echo "${INI__user__email}" > "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" || {
+            logger_err "Failed to store user's email of git to \"${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}\""
+            rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
+            return 1
+        }
+        has_email_store_created=1
+    fi
+
+    # Set and restore git-name property
+    if [[ ! -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]]; then
+        echo "${INI__user__name}" > "$GIT_USER_NAME_STORE_FILE_FULL_PATH" || {
+            logger_err "Failed to store user's name of git to \"${GIT_USER_NAME_STORE_FILE_FULL_PATH}\""
+            [[ "$has_email_store_created" -eq 1 ]] && rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
+            rm -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
+            return 1
+        }
+    fi
+
+    return 0
+}
+
+# Restore git personal properties
+function restore_git_personal_properties() {
+    local dotfiles_dir="$1"
+
+    local backup_dir="$(get_backup_dir)"
+    local gitconfig="${HOME}/.gitconfig"
+
+    if [[ -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]; then
+        local git_email="$(cat ${GIT_USER_EMAIL_STORE_FILE_FULL_PATH})"
+
+        if [[ "$(get_distribution_name)" == "mac" ]]; then
+            sed -i "" -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
+                logger_err "Failed to restore email of the .gitconfig on your mac"
+                return 1
+            }
+        else
+            sed -i -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
+                logger_err "Failed to restore email of the .gitconfig"
+                return 1
+            }
+        fi
+    fi
+
+    if [[ -f "${GIT_USER_NAME_STORE_FILE_FULL_PATH}" ]]; then
+        local git_name="$(cat ${GIT_USER_NAME_STORE_FILE_FULL_PATH})"
+
+        if [[ "$(get_distribution_name)" == "mac" ]]; then
+            sed -i "" -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
+                # TODO: Should restore .gitconfig fot atomicity?
+                logger_err "Failed to restore name of the .gitconfig on your mac"
+                return 1
+            }
+        else
+            sed -i -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
+                # TODO: Should restore .gitconfig fot atomicity?
+                logger_err "Failed to restore name of the .gitconfig"
+                return 1
+            }
+        fi
+    fi
+
+    return 0
+}
+
+# Clear git personal properties
+function clear_git_personal_properties() {
+    [[ -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}" ]] && rm -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}"
+    [[ -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}" ]] && rm -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}"
+
+    # Return the result of this function
+    [[ ! -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}" ]] && [[ ! -f "${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}" ]]
 }
 
 # Deploy resources about xdg_base directories
