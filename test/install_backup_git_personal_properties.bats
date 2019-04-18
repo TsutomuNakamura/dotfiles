@@ -57,7 +57,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)" -eq 1 ]]
     [[ ! -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]
     [[ ! -f "${GIT_USER_NAME_STORE_FILE_FULL_PATH}" ]]
-    stub_called_with_exactly_times logger_err 1 "Failed to make directory \"/home/foo/.backup_of_dotfiles/19000101000000\" to store git personal properties"
+    stub_called_with_exactly_times logger_err 1 "Failed to make directory \"${HOME}/.backup_of_dotfiles/19000101000000\" to store git personal properties"
 }
 
 @test '#install_backup_git_personal_properties should return 0 if file ${HOME}/.gitconfig was not existed' {
