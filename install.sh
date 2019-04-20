@@ -9,6 +9,8 @@ FULL_DOTDIR_PATH="${HOME}/${DOTDIR}"
 BACKUPDIR=".backup_of_dotfiles"
 # The full directory that dotfiles resources will be backuped
 FULL_BACKUPDIR_PATH="${HOME}/${BACKUPDIR}"
+# Anchor for backup
+BACKUP_ANCHOR_FILE=
 
 # Git repository location over https
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
@@ -200,8 +202,34 @@ function main() {
         fi
     fi
 
-    print_post_message_list
+    do_post_instructions || (( error_count++ ))
+
     return $error_count
+}
+
+# Run post instructions
+function do_post_instructions() {
+    local result=0
+
+    clear_backup_anchor_file || {
+        logger_warn "Failed to delete backup anchor file \"${BACKUP_ANCHOR_FILE}\". You would delete it by your own, please."
+        # TODO: Need not detect as an error.
+        # (( ++result ))
+    }
+
+    print_post_message_list
+
+    return $result
+}
+
+# Clear backup anchor file
+function clear_backup_anchor_file() {
+    [[ -z "${BACKUP_ANCHOR_FILE}" ]] && return 0
+    [[ ! -f "${BACKUP_ANCHOR_FILE}" ]] && return 0
+    rm -f "${BACKUP_ANCHOR_FILE}"
+
+    # Return the status of deleting the file was succeeded or not
+    [[ ! -f "${BACKUP_ANCHOR_FILE}" ]]
 }
 
 function print_post_message_list() {
