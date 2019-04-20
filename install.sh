@@ -308,15 +308,16 @@ function init() {
         fi
     fi
 
-    # Git will be installed but its version is less or equals 1.8,
-    # remaining processes are not continuable.
-    #local version_of_git="$(git --version | cut -d' ' -f3)"
-    #vercomp "1.9.0" "$version_of_git"
-    #result=$?
-    #if [[ $result -eq 1 ]]; then
-    #    logger_err "Your version of git is ${version_of_git}. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
-    #    return 1
-    #fi
+    # Backup git personal properties to restore them later
+    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || {
+        logger_err "Failed to backup git personal properties."
+        return 1
+    }
+
+    backup_current_dotfiles || {
+        logger_err "Failed to backup .dotfiles data. Stop the instruction init()."
+        return 1
+    }
 
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
@@ -1055,7 +1056,6 @@ function remove_an_object() {
 
 # Deploy dotfiles on user's home directory
 function deploy() {
-    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || return 1
     backup_current_dotfiles || {
         logger_err "Failed to backup .dotfiles data. Stop the instruction deploy()."
         return 1
@@ -1130,17 +1130,9 @@ function deploy() {
 # Set and store git personal properties
 function backup_git_personal_properties() {
     local dotfiles_dir="$1"
-    local backup_dir="$(get_backup_dir)"
 
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
     local has_email_store_created=0
-
-    if [[ ! -d "$backup_dir" ]]; then
-        mkdir -p "$backup_dir" || {
-            logger_err "Failed to make directory \"${backup_dir}\" to store git personal properties"
-            return 1
-        }
-    fi
 
     # May for the first time.
     [[ ! -f "${HOME}/.gitconfig" ]] && {
@@ -1191,7 +1183,6 @@ function backup_git_personal_properties() {
 function restore_git_personal_properties() {
     local dotfiles_dir="$1"
 
-    local backup_dir="$(get_backup_dir)"
     local gitconfig="${HOME}/.gitconfig"
 
     if [[ -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]; then
