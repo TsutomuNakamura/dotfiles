@@ -22,8 +22,8 @@ function setup() {
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 0 ]]
@@ -43,8 +43,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 1 ]]
@@ -63,8 +63,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 1 ]]
@@ -84,8 +84,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 0 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 0 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 0 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 0 ]]
@@ -107,8 +107,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 0 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 1 ]]
@@ -128,8 +128,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 0 ]]        # should not call
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 1 ]]
@@ -152,8 +152,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 0 ]]        # should not call
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 0 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 0 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 0 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 0 ]]
@@ -173,8 +173,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 0 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 0 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 0 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 0 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 0 ]]
@@ -186,27 +186,6 @@ function setup() {
     stub_called_with_exactly_times question 1 "Do you continue to install the dotfiles without dependency packages? [Y/n]: "
 }
 
-@test '#init should return 1 if the backup_git_personal_properties() returns 1.' {
-    stub_and_eval backup_git_personal_properties '{ return 1; }'
-
-    run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
-
-    [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
-    [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"                        -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
-    [[ "$(stub_called_times backup_current_dotfiles)"           -eq 0 ]]
-    [[ "$(stub_called_times init_repo)"                         -eq 0 ]]
-    [[ "$(stub_called_times has_desktop_env)"                   -eq 0 ]]
-    [[ "$(stub_called_times install_fonts)"                     -eq 0 ]]
-    [[ "$(stub_called_times init_vim_environment)"              -eq 0 ]]
-    [[ "$(stub_called_times install_bin_utils)"                 -eq 0 ]]
-    [[ "$(stub_called_times question)"                          -eq 0 ]]
-
-    stub_called_with_exactly_times backup_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
-}
-
 @test '#init should return 1 if the backup_current_dotfiles() returns 1.' {
     stub_and_eval backup_current_dotfiles '{ return 1; }'
 
@@ -216,8 +195,29 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 0 ]]
+    [[ "$(stub_called_times init_repo)"                         -eq 0 ]]
+    [[ "$(stub_called_times has_desktop_env)"                   -eq 0 ]]
+    [[ "$(stub_called_times install_fonts)"                     -eq 0 ]]
+    [[ "$(stub_called_times init_vim_environment)"              -eq 0 ]]
+    [[ "$(stub_called_times install_bin_utils)"                 -eq 0 ]]
+    [[ "$(stub_called_times question)"                          -eq 0 ]]
+
+    stub_called_with_exactly_times logger_err 1 "Failed to backup .dotfiles data. Stop the instruction init()."
+}
+
+@test '#init should return 1 if the backup_git_personal_properties() returns 1.' {
+    stub_and_eval backup_git_personal_properties '{ return 1; }'
+
+    run init "develop" "git@github.com:TsutomuNakamura/dotfiles.git" 0
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
+    [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 0 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 0 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 0 ]]
@@ -259,8 +259,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 1 ]]
@@ -281,8 +281,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 1 ]]
@@ -303,8 +303,8 @@ function setup() {
     [[ "$(stub_called_times do_i_have_admin_privileges)"        -eq 1 ]]
     [[ "$(stub_called_times install_packages)"                  -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 1 ]]
-    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times backup_current_dotfiles)"           -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"    -eq 1 ]]
     [[ "$(stub_called_times init_repo)"                         -eq 1 ]]
     [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
     [[ "$(stub_called_times install_fonts)"                     -eq 1 ]]
