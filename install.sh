@@ -11,6 +11,19 @@ BACKUPDIR=".backup_of_dotfiles"
 FULL_BACKUPDIR_PATH="${HOME}/${BACKUPDIR}"
 # Anchor for backup
 BACKUP_ANCHOR_FILE=
+# Status of create backup anchor file. Already created backup anchor file
+STAT_ALREADY_CREATED_BACKUP_ANCHOR_FILE=255
+# Status of create backup anchor file. Succeeded in creating backup anchor file
+STAT_SUCCEEDED_IN_CREATING_BACKUP_ANCHOR_FILE=0
+# Status of create backup anchor file. Failed to create backup anchor file
+STAT_FAILED_TO_CREATE_BACKUP_ANCHOR_FILE=1
+
+# Status of backup. Not started.
+STAT_BACKUP_NOT_STARTED=255
+# Status of backup. Finished.
+STAT_BACKUP_FINISHED=0
+# Status of backup. In progress.
+STAT_BACKUP_IN_PROGRESS=1
 
 # Git repository location over https
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
@@ -222,6 +235,45 @@ function do_post_instructions() {
     return $result
 }
 
+# Create backup anchor file
+# @return 0: Creating anchor file has succeeded
+# @return 1: Anchor file is already existed
+function create_backup_anchor_file() {
+    local backup_dir="$1"
+
+    local uuid="$(uuidgen)"
+    BACKUP_ANCHOR_FILE="${backup_dir}/${uuid}.backup_anchor"
+
+    [[ -f "$BACKUP_ANCHOR_FILE" ]] && return $STAT_ALREADY_CREATED_BACKUP_ANCHOR_FILE
+    echo -n "$STAT_BACKUP_IN_PROGRESS" > "$BACKUP_ANCHOR_FILE"
+    [[ ! -f "$BACKUP_ANCHOR_FILE" ]] && return $STAT_FAILED_TO_CREATE_BACKUP_ANCHOR_FILE
+
+    return $STAT_SUCCEEDED_IN_CREATING_BACKUP_ANCHOR_FILE
+}
+
+# Update status of anchor file
+function update_backup_anchor_file() {
+    local status="$1"
+    echo -n "$status" > "$BACKUP_ANCHOR_FILE"
+
+    # TODO: testing
+}
+
+# Get status of backup
+function get_backup_anchor_file_status() {
+    [[ ! -f "$BACKUP_ANCHOR_FILE" ]] && return $STAT_BACKUP_NOT_STARTED
+
+    local status=$(cat "$BACKUP_ANCHOR_FILE")
+
+    if [[ $status -eq $STAT_BACKUP_FINISHED ]]; then
+        return $STAT_BACKUP_FINISHED
+    elif [[ $status -eq $STAT_BACKUP_IN_PROGRESS ]]; then
+        return $STAT_BACKUP_IN_PROGRESS
+    fi
+
+    return $STAT_BACKUP_NOT_STARTED
+}
+
 # Clear backup anchor file
 function clear_backup_anchor_file() {
     [[ -z "${BACKUP_ANCHOR_FILE}" ]] && return 0
@@ -336,14 +388,14 @@ function init() {
         fi
     fi
 
-    # Backup git personal properties to restore them later
-    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || {
-        logger_err "Failed to backup git personal properties."
+    backup_current_dotfiles || {
+        logger_err "Failed to backup .dotfiles data. Stop the instruction init()."
         return 1
     }
 
-    backup_current_dotfiles || {
-        logger_err "Failed to backup .dotfiles data. Stop the instruction init()."
+    # Backup git personal properties to restore them later
+    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || {
+        logger_err "Failed to backup git personal properties."
         return 1
     }
 
@@ -973,6 +1025,10 @@ function get_target_dotfiles() {
 
 # Backup current dotfiles
 function backup_current_dotfiles() {
+    get_backup_anchor_file_status
+    local status_of_backup=$?
+
+    [[ $status_of_backup -eq $STAT_BACKUP_FINISHED ]] && return 0
 
     [[ ! -d "${HOME}/${DOTDIR}" ]] && {
         echo "There are no dotfiles to backup."
@@ -982,8 +1038,17 @@ function backup_current_dotfiles() {
     local backup_dir="$(get_backup_dir)"
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
-    mkdir -p ${backup_dir}
+    mkdir -p "${backup_dir}"
     pushd ${HOME} || return 1
+
+    create_backup_anchor_file "${backup_dir}"
+    local status_of_create_backup=$?
+
+    [[ $status_of_create_backup -eq $STAT_FAILED_TO_CREATE_BACKUP_ANCHOR_FILE ]] && {
+        logger_err "Failed to create backup anchor file in backup_current_dotfiles."
+        return 1
+    }
+    # Continue if STAT_ALREADY_CREATED_BACKUP_ANCHOR_FILE or STAT_SUCCEEDED_IN_CREATING_BACKUP_ANCHOR_FILE
 
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         [[ -e "${dotfiles[i]}" ]] || continue
@@ -1016,6 +1081,7 @@ function backup_current_dotfiles() {
     }
 
     backup_xdg_base_directory "$backup_dir"
+    update_backup_anchor_file "$STAT_BACKUP_FINISHED"
 
     popd
 }
