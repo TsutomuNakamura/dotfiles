@@ -3,8 +3,17 @@ load helpers "install.sh"
 
 function setup() {
     mkdir -p ${HOME}/${DOTDIR}
-    function should_it_make_deep_link_directory() { return 1; };
-    function date() { echo "19700101000000"; }
+
+    function get_backup_anchor_file_status() { return $STAT_BACKUP_NOT_STARTED; }
+    stub_and_eval should_it_make_deep_link_directory '{ return 1; }'
+    # stub_and_eval date '{ echo "19700101000000"; }'
+    stub_and_eval get_backup_dir '{ echo "${HOME}/${BACKUPDIR}/19700101000000"; }'
+
+    stub create_backup_anchor_file
+    stub backup_xdg_base_directory
+    stub update_backup_anchor_file
+
+    stub logger_err
 }
 
 function teardown() {
@@ -15,6 +24,20 @@ function count() {
     find $1 -maxdepth 1 -mindepth 1 \( -type f -or -type d -or -type l \) | wc -l;
 }
 
+@test '#backup_current_dotfiles should return 0 and do nothing if get_backup_anchor_file_status returns STAT_BACKUP_FINISHED' {
+    function get_backup_anchor_file_status() { return $STAT_BACKUP_FINISHED; }
+    run backup_current_dotfiles
+
+    echo "$output"
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 0 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 0 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 0 ]]
+}
+
+# TODO: get_backup_anchor_file returns other stats
+
 @test '#backup_current_dotfiles should print a message if dotfiles directory was not existed' {
     rm -rf ${HOME}/${DOTDIR}
     run backup_current_dotfiles
@@ -22,6 +45,25 @@ function count() {
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$output" = "There are no dotfiles to backup." ]]
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 0 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 0 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 0 ]]
+}
+
+@test '#backup_current_dotfiles should return 1 if create_backup_anchor_file was failed' {
+    stub_and_eval create_backup_anchor_file '{ return $STAT_FAILED_TO_CREATE_BACKUP_ANCHOR_FILE; }'
+    run backup_current_dotfiles
+
+    echo "$output"
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
+
+    stub_called_with_exactly_times logger_err 1 'Failed to create backup anchor file in backup_current_dotfiles.'
 }
 
 @test '#backup_current_dotfiles should backup if one dotfile was existed' {
@@ -31,10 +73,20 @@ function count() {
 
     run backup_current_dotfiles
 
+    echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
     [[ ! -e ${HOME}/.vimrc ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.vimrc" ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+
+    stub_called_with_exactly_times update_backup_anchor_file 1 "$STAT_BACKUP_FINISHED"
 }
 
 @test '#backup_current_dotfiles should NOT backup if one dotfile was NOT existed' {
@@ -49,6 +101,13 @@ function count() {
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 0 ]]
     [[ -e ${HOME}/.dummy ]]
     [[ ! -f "${HOME}/${BACKUPDIR}/19700101000000/.vimrc" ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
     rm -f ${HOME}/.dummy
 }
@@ -69,6 +128,13 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.vimrc" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.tmux.conf" ]]
 
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 2 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+
     rm -f ${HOME}/.vimrc ${HOME}/.tmux.conf
 }
 
@@ -88,23 +154,37 @@ function count() {
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.vim/foo" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.vim/foo/bar.vim" ]]
 
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+
     rm -rf ${HOME}/.vim
 }
 
 @test '#backup_current_dotfiles should NOT backup if one directory was NOT existed' {
+    # $HOME/.dummy directory was existed but $HOME/.vim directory was not existed
     rm -rf ${HOME}/.dummy
     mkdir ${HOME}/.dummy
 
     function get_target_dotfiles() { echo ".vim"; }
 
     run backup_current_dotfiles
-
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 0 ]]
     [[ -e ${HOME}/.dummy ]]
     [[ ! -d "${HOME}/${BACKUPDIR}/19700101000000/.vim" ]]
     [[ ! -f "${HOME}/${BACKUPDIR}/19700101000000/.vim/foo/bar.vim" ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
     rm -rf ${HOME}/.dummy
 }
@@ -132,6 +212,13 @@ function count() {
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.dir1" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.dir1/file1.txt" ]]
 
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 2 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+
     rm -rf ${HOME}/.vim ${HOME}/.dir1
 }
 
@@ -144,7 +231,7 @@ function count() {
     touch ${HOME}/.config/fontconfig/fonts.conf
 
     function get_target_dotfiles() { echo ".config"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -155,6 +242,13 @@ function count() {
     [[ ! -e "${HOME}/.config/fontconfig/fonts.conf" ]]
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig/fonts.conf" ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 }
 
 @test '#backup_current_dotfiles should backup files deeply if they should be deep copied' {
@@ -178,7 +272,7 @@ function count() {
     touch ${HOME}/.config/foo.conf
 
     function get_target_dotfiles() { echo ".config"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -202,6 +296,13 @@ function count() {
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config/someconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/someconfig/some.conf" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/foo.conf" ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 }
 
 @test '#backup_current_dotfiles should backup files deeply if the file name contains some spaces' {
@@ -213,7 +314,7 @@ function count() {
 
 
     function get_target_dotfiles() { echo ".local"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -224,6 +325,13 @@ function count() {
     [[ ! -e "${HOME}/.local/share/fonts/Inconsolata for Powerline.otf" ]]
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.local/share/fonts" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.local/share/fonts/Inconsolata for Powerline.otf" ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 }
 
 @test '#backup_current_dotfiles should backup ' {
@@ -246,7 +354,7 @@ function count() {
     touch ${HOME}/.config2/foo.conf
 
     function get_target_dotfiles() { echo ".config .config2"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -266,8 +374,14 @@ function count() {
     [[ -d "${HOME}/${BACKUPDIR}/19700101000000/.config2/fontconfig" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config2/fontconfig/fonts.conf" ]]
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config2/foo.conf" ]]
-}
 
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 2 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+}
 
 @test '#backup_current_dotfiles should backup a file under bin deeply' {
     rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
@@ -278,7 +392,7 @@ function count() {
     touch ${HOME}/bin/bar
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -290,6 +404,13 @@ function count() {
     [[ -d ${HOME}/bin ]]
     [[ ! -e ${HOME}/bin/foo ]]
     [[ -f ${HOME}/bin/bar ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
     rm -rf ${HOME}/bin
 }
@@ -305,7 +426,7 @@ function count() {
     touch ${HOME}/bin/baz
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -320,6 +441,13 @@ function count() {
     [[ ! -e ${HOME}/bin/bar ]]
     [[ -f ${HOME}/bin/baz ]]
 
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+
     rm -rf ${HOME}/bin
 }
 
@@ -332,7 +460,7 @@ function count() {
     ln -s ../foo -t ${HOME}/bin
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -345,6 +473,13 @@ function count() {
     [[ "$(cat ${HOME}/${BACKUPDIR}/19700101000000/bin/foo)" = "foo" ]]
     [[ -d ${HOME}/bin ]]
     [[ ! -e ${HOME}/bin/foo ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
     rm -rf ${HOME}/bin ${HOME}/foo
 }
@@ -361,7 +496,7 @@ function count() {
     ln -s ../bar -t ${HOME}/bin
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -377,6 +512,13 @@ function count() {
     [[ -d ${HOME}/bin ]]
     [[ ! -e ${HOME}/bin/foo ]]
     [[ ! -e ${HOME}/bin/bar ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
     rm -rf ${HOME}/bin ${HOME}/{foo,bar}
 }
@@ -392,7 +534,7 @@ function count() {
     echo "bar" > ${HOME}/bin/bar
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -408,6 +550,13 @@ function count() {
     [[ -d ${HOME}/bin ]]
     [[ ! -e ${HOME}/bin/foo ]]
     [[ ! -e ${HOME}/bin/bar ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
     rm -rf ${HOME}/bin ${HOME}/{foo,bar}
 }
@@ -428,7 +577,7 @@ function count() {
     echo "pee" > ${HOME}/bin/pee
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -451,12 +600,15 @@ function count() {
     [[ ! -e ${HOME}/bin/baz ]]
     [[ ! -e ${HOME}/bin/pee ]]
 
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+
     rm -rf ${HOME}/bin ${HOME}/{foo,bar}
 }
-
-
-
-
 
 @test '#backup_current_dotfiles should backup some symlinks and some files as a file' {
     rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
@@ -470,7 +622,7 @@ function count() {
     ln -s ../bar -t ${HOME}/bin
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -489,11 +641,15 @@ function count() {
     [[ ! -e ${HOME}/bin/foo ]]
     [[ ! -e ${HOME}/bin/bar ]]
 
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
+
     rm -rf ${HOME}/bin ${HOME}/{foo,bar}
 }
-
-
-
 
 @test '#backup_current_dotfiles should not remove bin directory after the file backupped' {
     rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
@@ -503,7 +659,7 @@ function count() {
     touch ${HOME}/bin/foo
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -515,6 +671,13 @@ function count() {
     [[ -d ${HOME}/bin ]]
     [[ ! -e ${HOME}/bin/foo ]]
     [[ "$(count ${HOME}/bin)" -eq 0 ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 }
 
 @test '#backup_current_dotfiles should do nothing when the ${HOME}/bin directory has no target files' {
@@ -525,7 +688,7 @@ function count() {
     touch ${HOME}/bin/bar
 
     function get_target_dotfiles() { echo "bin"; }
-    function should_it_make_deep_link_directory() { return 0; };
+    stub_and_eval should_it_make_deep_link_directory '{ return 0; }'
 
     run backup_current_dotfiles
 
@@ -538,5 +701,12 @@ function count() {
     [[ "$(count ${HOME}/bin)" -eq 1 ]]
     [[ -f ${HOME}/bin/bar ]]
     [[ -f ${HOME}/${DOTDIR}/bin/foo ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 }
 
