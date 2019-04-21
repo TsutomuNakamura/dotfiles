@@ -1236,14 +1236,19 @@ function backup_git_personal_properties() {
 
     # Load ini file parser
     if [[ ! -f "$read_ini_sh" ]]; then
-        logger_err ".ini file parser \"${read_ini_sh}\" is not found."
-        return 1
-    fi
+        source <(curl https://raw.githubusercontent.com/TsutomuNakamura/bash_ini_parser/master/read_ini.sh 2> /dev/null)
+        local result=$?
 
-    source "${read_ini_sh}" || {
-        logger_err "Failed to load .ini file parser \"${read_ini_sh}\""
-        return 1
-    }
+        [[ $result -ne 0 ]] && {
+            logger_err ".ini file parser \"${read_ini_sh}\" is not found. And failed to try download .ini file parser from https://raw.githubusercontent.com/TsutomuNakamura/bash_ini_parser/master/read_ini.sh"
+            return 1
+        }
+    else
+        source "${read_ini_sh}" || {
+            logger_err "Failed to load .ini file parser \"${read_ini_sh}\""
+            return 1
+        }
+    fi
 
     read_ini "${HOME}/.gitconfig" || {
         logger_err "Failed to parse \"${HOME}/.gitconfig\""
