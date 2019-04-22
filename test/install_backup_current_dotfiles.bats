@@ -10,6 +10,7 @@ function setup() {
     stub_and_eval get_backup_dir '{ echo "${HOME}/${BACKUPDIR}/19700101000000"; }'
 
     stub create_backup_anchor_file
+    stub backup_git_personal_properties
     stub backup_xdg_base_directory
     stub update_backup_anchor_file
 
@@ -31,6 +32,7 @@ function count() {
     echo "$output"
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 0 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 0 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 0 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 0 ]]
@@ -46,6 +48,7 @@ function count() {
     [[ "$status" -eq 0 ]]
     [[ "$output" = "There are no dotfiles to backup." ]]
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 0 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 0 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 0 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 0 ]]
@@ -58,12 +61,36 @@ function count() {
     echo "$output"
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 0 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
 
     stub_called_with_exactly_times logger_err 1 'Failed to create backup anchor file in backup_current_dotfiles.'
+}
+
+@test '#backup_current_dotfiles should return 1 if backup_git_personal_properties has failed' {
+    touch ${HOME}/.vimrc
+
+    function get_target_dotfiles() { echo ".vimrc"; }
+    stub_and_eval backup_git_personal_properties '{ return 1; }'
+
+    run backup_current_dotfiles
+
+    echo "$output"
+    [[ "$status" -eq 1 ]]
+    # [[ "$(count ${HOME}/${BACKUPDIR}/19700101000000)" -eq 1 ]]
+    # [[ ! -e ${HOME}/.vimrc ]]
+    # [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.vimrc" ]]
+
+    [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
+    [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
+    [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 0 ]]
+    [[ "$(stub_called_times update_backup_anchor_file)"             -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
 }
 
 @test '#backup_current_dotfiles should backup if one dotfile was existed' {
@@ -80,6 +107,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.vimrc" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -103,6 +131,7 @@ function count() {
     [[ ! -f "${HOME}/${BACKUPDIR}/19700101000000/.vimrc" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -129,6 +158,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.tmux.conf" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 2 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -155,6 +185,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.vim/foo/bar.vim" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -180,6 +211,7 @@ function count() {
     [[ ! -f "${HOME}/${BACKUPDIR}/19700101000000/.vim/foo/bar.vim" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 0 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -213,6 +245,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.dir1/file1.txt" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 2 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -244,6 +277,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/fontconfig/fonts.conf" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -298,6 +332,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config/foo.conf" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -327,6 +362,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.local/share/fonts/Inconsolata for Powerline.otf" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -376,6 +412,7 @@ function count() {
     [[ -f "${HOME}/${BACKUPDIR}/19700101000000/.config2/foo.conf" ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 2 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -406,6 +443,7 @@ function count() {
     [[ -f ${HOME}/bin/bar ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -442,6 +480,7 @@ function count() {
     [[ -f ${HOME}/bin/baz ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -475,6 +514,7 @@ function count() {
     [[ ! -e ${HOME}/bin/foo ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -514,6 +554,7 @@ function count() {
     [[ ! -e ${HOME}/bin/bar ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -552,6 +593,7 @@ function count() {
     [[ ! -e ${HOME}/bin/bar ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -601,6 +643,7 @@ function count() {
     [[ ! -e ${HOME}/bin/pee ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -642,6 +685,7 @@ function count() {
     [[ ! -e ${HOME}/bin/bar ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -673,6 +717,7 @@ function count() {
     [[ "$(count ${HOME}/bin)" -eq 0 ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
@@ -703,6 +748,7 @@ function count() {
     [[ -f ${HOME}/${DOTDIR}/bin/foo ]]
 
     [[ "$(stub_called_times create_backup_anchor_file)"             -eq 1 ]]
+    [[ "$(stub_called_times backup_git_personal_properties)"        -eq 1 ]]
     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
     [[ "$(stub_called_times get_backup_dir)"                        -eq 1 ]]
     [[ "$(stub_called_times backup_xdg_base_directory)"             -eq 1 ]]
