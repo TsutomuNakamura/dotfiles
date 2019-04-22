@@ -393,12 +393,6 @@ function init() {
         return 1
     }
 
-    # Backup git personal properties to restore them later
-    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || {
-        logger_err "Failed to backup git personal properties."
-        return 1
-    }
-
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
     init_repo "$url_of_repo" "$branch" || {
@@ -1050,6 +1044,12 @@ function backup_current_dotfiles() {
     }
     # Continue if STAT_ALREADY_CREATED_BACKUP_ANCHOR_FILE or STAT_SUCCEEDED_IN_CREATING_BACKUP_ANCHOR_FILE
 
+    # Backup git personal properties to restore them later
+    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || {
+        logger_err "Failed to backup git personal properties."
+        return 1
+    }
+
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         [[ -e "${dotfiles[i]}" ]] || continue
         local dir_name=${dotfiles[i]#./}
@@ -1227,6 +1227,9 @@ function backup_git_personal_properties() {
 
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
     local has_email_store_created=0
+
+    # Skip if GIT_USER_EMAIL_STORE_FILE_FULL_PATH and GIT_USER_NAME_STORE_FILE_FULL_PATH are already existed
+    [[ -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]] && [[ -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]] && return 0
 
     # May for the first time.
     [[ ! -f "${HOME}/.gitconfig" ]] && {
