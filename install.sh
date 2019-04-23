@@ -1285,7 +1285,7 @@ function backup_git_personal_properties() {
 function restore_git_personal_properties() {
     local dotfiles_dir="$1"
 
-    local gitconfig="${HOME}/.gitconfig"
+    local gitconfig="${FULL_DOTDIR_PATH}/.gitconfig"
 
     if [[ -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]; then
         local git_email="$(cat ${GIT_USER_EMAIL_STORE_FILE_FULL_PATH})"
