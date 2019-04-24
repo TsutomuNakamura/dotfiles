@@ -2,7 +2,7 @@
 load helpers "install.sh"
 
 function setup() {
-    rm -rf "${FULL_BACKUPDIR_PATH}"
+    rm -rf "${FULL_BACKUPDIR_PATH}" "${FULL_DOTDIR_PATH}" "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
 
     # Process will be located in dotfiles repository.
     mkdir -p "${FULL_DOTDIR_PATH}/.bash_modules"
@@ -31,8 +31,7 @@ function setup() {
 }
 
 function teardown() {
-    rm -rf "${FULL_BACKUPDIR_PATH}"
-    rm -rf "${FULL_DOTDIR_PATH}"
+    rm -rf "${FULL_BACKUPDIR_PATH}" "${FULL_DOTDIR_PATH}" "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
 }
 
 @test '#install_backup_git_personal_properties should return 0 if all instructions were succeeded' {
@@ -45,6 +44,20 @@ function teardown() {
     [[ -f "${GIT_USER_NAME_STORE_FILE_FULL_PATH}" ]]
     [[ "$(cat "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}")" == "foo-bar@example.com" ]]
     [[ "$(cat "${GIT_USER_NAME_STORE_FILE_FULL_PATH}")"  == "foo bar" ]]
+}
+
+@test '#install_backup_git_personal_properties should return 0 if GIT_USER_EMAIL_STORE_FILE_FULL_PATH and GIT_USER_NAME_STORE_FILE_FULL_PATH already existed' {
+    touch "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
+    touch "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
+
+    run backup_git_personal_properties "${FULL_DOTDIR_PATH}"
+
+    declare -a outputs; IFS=$'\n' outputs=($output); command echo "$outputs"
+    [[ "$status" -eq 0 ]]
+
+    [[ "$(stub_called_times get_backup_dir)"    -eq 0 ]]
+    [[ "$(stub_called_times mkdir)"             -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"        -eq 0 ]]
 }
 
 @test '#install_backup_git_personal_properties should return 0 if file ${HOME}/.gitconfig was not existed' {
@@ -63,8 +76,6 @@ function teardown() {
     stub curl
     stub source
     stub read_ini
-    touch "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
-    touch "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
 
     run backup_git_personal_properties "${FULL_DOTDIR_PATH}"
 
