@@ -2,20 +2,28 @@
 load helpers "install.sh"
 
 function setup() {
+    source ".bash_modules/read_ini.sh"
+
+    cd "${HOME}"
     rm -rf "${FULL_BACKUPDIR_PATH}"
+    mkdir -p "${FULL_BACKUPDIR_PATH}"
+    if [[ -L "${HOME}/.gitconfig" ]]; then
+        unlink ${HOME}/.gitconfig
+    fi
 
     # Process will be located in dotfiles repository.
     # mkdir -p "${FULL_DOTDIR_PATH}/.bash_modules"
-    mkdir -p "${FULL_BACKUPDIR_PATH}"
+    mkdir -p "${FULL_BACKUPDIR_PATH}" "${FULL_DOTDIR_PATH}"
     # cp "$(pwd)/.bash_modules/read_ini.sh" "${FULL_DOTDIR_PATH}/.bash_modules/"
 
-    echo    '[user]'                        >  "${HOME}/.gitconfig"
-    echo -e '\temail ='                     >> "${HOME}/.gitconfig"
-    echo -e '\tname ='                      >> "${HOME}/.gitconfig"
-    echo    ''                              >> "${HOME}/.gitconfig"
-    echo    '[include]'                     >> "${HOME}/.gitconfig"
-    echo -e '\tpath = .globalgitconfig'     >> "${HOME}/.gitconfig"
-    echo    ''                              >> "${HOME}/.gitconfig"
+    echo    '[user]'                        >  "${FULL_DOTDIR_PATH}/.gitconfig"
+    echo -e '\temail ='                     >> "${FULL_DOTDIR_PATH}/.gitconfig"
+    echo -e '\tname ='                      >> "${FULL_DOTDIR_PATH}/.gitconfig"
+    echo    ''                              >> "${FULL_DOTDIR_PATH}/.gitconfig"
+    echo    '[include]'                     >> "${FULL_DOTDIR_PATH}/.gitconfig"
+    echo -e '\tpath = .globalgitconfig'     >> "${FULL_DOTDIR_PATH}/.gitconfig"
+    echo    ''                              >> "${FULL_DOTDIR_PATH}/.gitconfig"
+    ln -s "${FULL_DOTDIR_PATH}/.gitconfig" .gitconfig
 
     ## Create email and name store
     echo 'foo-bar@example.com' > "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}"
@@ -29,18 +37,19 @@ function setup() {
     # }'
     stub logger_err
     stub_and_eval get_distribution_name '{ echo "ubuntu"; }'
-    source "$(pwd)/.bash_modules/read_ini.sh"
 }
 
 function teardown() {
-    rm -rf "${FULL_BACKUPDIR_PATH}"
-    #rm -rf "${FULL_DOTDIR_PATH}"
+    rm -rf "${FULL_BACKUPDIR_PATH}" "${FULL_DOTDIR_PATH}" "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" "${GIT_USER_NAME_STORE_FILE_FULL_PATH}"
+    if [[ -L "${HOME}/.gitconfig" ]]; then
+        unlink ${HOME}/.gitconfig
+    fi
 }
 
 @test '#install_restore_git_personal_properties should return 0 if all instructions were succeeded' {
-
     run restore_git_personal_properties "${FULL_DOTDIR_PATH}"
 
+    echo "$output"
     read_ini "${HOME}/.gitconfig"
     declare -a outputs; IFS=$'\n' outputs=($output); command echo "$output"
     [[ "$status" -eq 0 ]]
@@ -80,11 +89,11 @@ function teardown() {
 }
 
 @test '#install_restore_git_personal_properties should return 0 and should call sed with options for Linux if it has run on Linux' {
-    # stub_and_eval get_distribution_name '{ echo "ubuntu"; }'
     stub_and_eval sed '{ return 0; }'
 
     run restore_git_personal_properties "${FULL_DOTDIR_PATH}"
 
+    echo "$output"
     read_ini "${HOME}/.gitconfig"
     declare -a outputs; IFS=$'\n' outputs=($output); command echo "$output"
     [[ "$status" -eq 0 ]]
@@ -93,8 +102,8 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"                -eq 0 ]]
     [[ "$(stub_called_times get_distribution_name)"     -eq 2 ]]
     [[ "$(stub_called_times sed)"                       -eq 2 ]]
-    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${HOME}/.gitconfig"
-    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${HOME}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${FULL_DOTDIR_PATH}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${FULL_DOTDIR_PATH}/.gitconfig"
 }
 
 @test '#install_restore_git_personal_properties should return 0 and should call sed with options for Linux if it has run on Mac' {
@@ -111,8 +120,8 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"                -eq 0 ]]
     [[ "$(stub_called_times get_distribution_name)"     -eq 2 ]]
     [[ "$(stub_called_times sed)"                       -eq 2 ]]
-    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${HOME}/.gitconfig"
-    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${HOME}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${FULL_DOTDIR_PATH}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${FULL_DOTDIR_PATH}/.gitconfig"
 }
 
 @test '#install_restore_git_personal_properties should return 1 if sed that changing email has failed on Mac' {
@@ -133,7 +142,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"     -eq 1 ]]
     [[ "$(stub_called_times sed)"                       -eq 1 ]]
-    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${HOME}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${FULL_DOTDIR_PATH}/.gitconfig"
     stub_called_with_exactly_times logger_err 1 'Failed to restore email of the .gitconfig on your mac'
 }
 
@@ -154,7 +163,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"     -eq 1 ]]
     [[ "$(stub_called_times sed)"                       -eq 1 ]]
-    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${HOME}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = foo-bar@example.com|g' "${FULL_DOTDIR_PATH}/.gitconfig"
     stub_called_with_exactly_times logger_err 1 'Failed to restore email of the .gitconfig'
 }
 
@@ -176,7 +185,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"     -eq 2 ]]
     [[ "$(stub_called_times sed)"                       -eq 2 ]]
-    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${HOME}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i "" -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${FULL_DOTDIR_PATH}/.gitconfig"
     stub_called_with_exactly_times logger_err 1 'Failed to restore name of the .gitconfig on your mac'
 }
 
@@ -197,7 +206,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"     -eq 2 ]]
     [[ "$(stub_called_times sed)"                       -eq 2 ]]
-    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${HOME}/.gitconfig"
+    stub_called_with_exactly_times sed 1 -i -e 's|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = foo bar|g' "${FULL_DOTDIR_PATH}/.gitconfig"
     stub_called_with_exactly_times logger_err 1 'Failed to restore name of the .gitconfig'
 }
 

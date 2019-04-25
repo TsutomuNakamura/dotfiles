@@ -9,6 +9,21 @@ FULL_DOTDIR_PATH="${HOME}/${DOTDIR}"
 BACKUPDIR=".backup_of_dotfiles"
 # The full directory that dotfiles resources will be backuped
 FULL_BACKUPDIR_PATH="${HOME}/${BACKUPDIR}"
+# Anchor for backup
+BACKUP_ANCHOR_FILE=
+# Status of create backup anchor file. Already created backup anchor file
+STAT_ALREADY_CREATED_BACKUP_ANCHOR_FILE=255
+# Status of create backup anchor file. Succeeded in creating backup anchor file
+STAT_SUCCEEDED_IN_CREATING_BACKUP_ANCHOR_FILE=0
+# Status of create backup anchor file. Failed to create backup anchor file
+STAT_FAILED_TO_CREATE_BACKUP_ANCHOR_FILE=1
+
+# Status of backup. Not started.
+STAT_BACKUP_NOT_STARTED=255
+# Status of backup. Finished.
+STAT_BACKUP_FINISHED=0
+# Status of backup. In progress.
+STAT_BACKUP_IN_PROGRESS=1
 
 # Git repository location over https
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
@@ -200,8 +215,73 @@ function main() {
         fi
     fi
 
-    print_post_message_list
+    do_post_instructions || (( error_count++ ))
+
     return $error_count
+}
+
+# Run post instructions
+function do_post_instructions() {
+    local result=0
+
+    clear_backup_anchor_file || {
+        logger_warn "Failed to delete backup anchor file \"${BACKUP_ANCHOR_FILE}\". You would delete it by your own, please."
+        # TODO: Need not detect as an error.
+        # (( ++result ))
+    }
+
+    print_post_message_list
+
+    return $result
+}
+
+# Create backup anchor file
+# @return 0: Creating anchor file has succeeded
+# @return 1: Anchor file is already existed
+function create_backup_anchor_file() {
+    local backup_dir="$1"
+
+    local uuid="$(uuidgen)"
+    BACKUP_ANCHOR_FILE="${backup_dir}/${uuid}.backup_anchor"
+
+    [[ -f "$BACKUP_ANCHOR_FILE" ]] && return $STAT_ALREADY_CREATED_BACKUP_ANCHOR_FILE
+    echo -n "$STAT_BACKUP_IN_PROGRESS" > "$BACKUP_ANCHOR_FILE"
+    [[ ! -f "$BACKUP_ANCHOR_FILE" ]] && return $STAT_FAILED_TO_CREATE_BACKUP_ANCHOR_FILE
+
+    return $STAT_SUCCEEDED_IN_CREATING_BACKUP_ANCHOR_FILE
+}
+
+# Update status of anchor file
+function update_backup_anchor_file() {
+    local status="$1"
+    echo -n "$status" > "$BACKUP_ANCHOR_FILE"
+
+    # TODO: testing
+}
+
+# Get status of backup
+function get_backup_anchor_file_status() {
+    [[ ! -f "$BACKUP_ANCHOR_FILE" ]] && return $STAT_BACKUP_NOT_STARTED
+
+    local status=$(cat "$BACKUP_ANCHOR_FILE")
+
+    if [[ $status -eq $STAT_BACKUP_FINISHED ]]; then
+        return $STAT_BACKUP_FINISHED
+    elif [[ $status -eq $STAT_BACKUP_IN_PROGRESS ]]; then
+        return $STAT_BACKUP_IN_PROGRESS
+    fi
+
+    return $STAT_BACKUP_NOT_STARTED
+}
+
+# Clear backup anchor file
+function clear_backup_anchor_file() {
+    [[ -z "${BACKUP_ANCHOR_FILE}" ]] && return 0
+    [[ ! -f "${BACKUP_ANCHOR_FILE}" ]] && return 0
+    rm -f "${BACKUP_ANCHOR_FILE}"
+
+    # Return the status of deleting the file was succeeded or not
+    [[ ! -f "${BACKUP_ANCHOR_FILE}" ]]
 }
 
 function print_post_message_list() {
@@ -308,15 +388,10 @@ function init() {
         fi
     fi
 
-    # Git will be installed but its version is less or equals 1.8,
-    # remaining processes are not continuable.
-    #local version_of_git="$(git --version | cut -d' ' -f3)"
-    #vercomp "1.9.0" "$version_of_git"
-    #result=$?
-    #if [[ $result -eq 1 ]]; then
-    #    logger_err "Your version of git is ${version_of_git}. Remaining processes of this script requires version of git greater than or equals 1.9. Re-run this script after you upgrade it by yourself, please."
-    #    return 1
-    #fi
+    backup_current_dotfiles || {
+        logger_err "Failed to backup .dotfiles data. Stop the instruction init()."
+        return 1
+    }
 
     # Install patched fonts in your home environment
     # Cloe the repository if it's not existed
@@ -944,6 +1019,10 @@ function get_target_dotfiles() {
 
 # Backup current dotfiles
 function backup_current_dotfiles() {
+    get_backup_anchor_file_status
+    local status_of_backup=$?
+
+    [[ $status_of_backup -eq $STAT_BACKUP_FINISHED ]] && return 0
 
     [[ ! -d "${HOME}/${DOTDIR}" ]] && {
         echo "There are no dotfiles to backup."
@@ -953,8 +1032,23 @@ function backup_current_dotfiles() {
     local backup_dir="$(get_backup_dir)"
     declare -a dotfiles=($(get_target_dotfiles "${HOME}/${DOTDIR}"))
 
-    mkdir -p ${backup_dir}
+    mkdir -p "${backup_dir}"
     pushd ${HOME} || return 1
+
+    create_backup_anchor_file "${backup_dir}"
+    local status_of_create_backup=$?
+
+    [[ $status_of_create_backup -eq $STAT_FAILED_TO_CREATE_BACKUP_ANCHOR_FILE ]] && {
+        logger_err "Failed to create backup anchor file in backup_current_dotfiles."
+        return 1
+    }
+    # Continue if STAT_ALREADY_CREATED_BACKUP_ANCHOR_FILE or STAT_SUCCEEDED_IN_CREATING_BACKUP_ANCHOR_FILE
+
+    # Backup git personal properties to restore them later
+    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || {
+        logger_err "Failed to backup git personal properties."
+        return 1
+    }
 
     for (( i = 0; i < ${#dotfiles[@]}; i++ )) {
         [[ -e "${dotfiles[i]}" ]] || continue
@@ -987,6 +1081,7 @@ function backup_current_dotfiles() {
     }
 
     backup_xdg_base_directory "$backup_dir"
+    update_backup_anchor_file "$STAT_BACKUP_FINISHED"
 
     popd
 }
@@ -1055,7 +1150,6 @@ function remove_an_object() {
 
 # Deploy dotfiles on user's home directory
 function deploy() {
-    backup_git_personal_properties "${FULL_DOTDIR_PATH}" || return 1
     backup_current_dotfiles || {
         logger_err "Failed to backup .dotfiles data. Stop the instruction deploy()."
         return 1
@@ -1130,17 +1224,12 @@ function deploy() {
 # Set and store git personal properties
 function backup_git_personal_properties() {
     local dotfiles_dir="$1"
-    local backup_dir="$(get_backup_dir)"
 
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
     local has_email_store_created=0
 
-    if [[ ! -d "$backup_dir" ]]; then
-        mkdir -p "$backup_dir" || {
-            logger_err "Failed to make directory \"${backup_dir}\" to store git personal properties"
-            return 1
-        }
-    fi
+    # Skip if GIT_USER_EMAIL_STORE_FILE_FULL_PATH and GIT_USER_NAME_STORE_FILE_FULL_PATH are already existed
+    [[ -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]] && [[ -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]] && return 0
 
     # May for the first time.
     [[ ! -f "${HOME}/.gitconfig" ]] && {
@@ -1150,14 +1239,19 @@ function backup_git_personal_properties() {
 
     # Load ini file parser
     if [[ ! -f "$read_ini_sh" ]]; then
-        logger_err ".ini file parser \"${read_ini_sh}\" is not found."
-        return 1
-    fi
+        source <(curl https://raw.githubusercontent.com/TsutomuNakamura/bash_ini_parser/master/read_ini.sh 2> /dev/null)
+        local result=$?
 
-    source "${read_ini_sh}" || {
-        logger_err "Failed to load .ini file parser \"${read_ini_sh}\""
-        return 1
-    }
+        [[ $result -ne 0 ]] && {
+            logger_err ".ini file parser \"${read_ini_sh}\" is not found. And failed to try download .ini file parser from https://raw.githubusercontent.com/TsutomuNakamura/bash_ini_parser/master/read_ini.sh"
+            return 1
+        }
+    else
+        source "${read_ini_sh}" || {
+            logger_err "Failed to load .ini file parser \"${read_ini_sh}\""
+            return 1
+        }
+    fi
 
     read_ini "${HOME}/.gitconfig" || {
         logger_err "Failed to parse \"${HOME}/.gitconfig\""
@@ -1191,8 +1285,7 @@ function backup_git_personal_properties() {
 function restore_git_personal_properties() {
     local dotfiles_dir="$1"
 
-    local backup_dir="$(get_backup_dir)"
-    local gitconfig="${HOME}/.gitconfig"
+    local gitconfig="${FULL_DOTDIR_PATH}/.gitconfig"
 
     if [[ -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]; then
         local git_email="$(cat ${GIT_USER_EMAIL_STORE_FILE_FULL_PATH})"
