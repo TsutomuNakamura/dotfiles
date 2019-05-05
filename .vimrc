@@ -168,6 +168,14 @@ cnoremap <C-v><C-v> <C-r>+
 inoremap <C-v><C-v> <C-r>+
 cnoremap <C-v>p <C-r><C-o>"
 
+" - Settings of vim gitgutter -----------------------------------------------------------------------------
+set updatetime=330
+" let g:gitgutter_sign_added = 'xx'
+" let g:gitgutter_sign_modified = 'yy'
+" let g:gitgutter_sign_removed = 'zz'
+" let g:gitgutter_sign_removed_first_line = '^^'
+" let g:gitgutter_sign_modified_removed = 'ww'
+
 " - Settings of color scheme ---------------------------------------------------------------------------------
 " set color scheme
 syntax enable
