@@ -120,6 +120,7 @@ Plug 'edkolev/tmuxline.vim'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'Valloric/YouCompleteMe'
 Plug 'posva/vim-vue'
+Plug 'airblade/vim-gitgutter'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 
 " Color schemes of molokai ----
