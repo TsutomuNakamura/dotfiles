@@ -49,7 +49,7 @@ function teardown() {
 }
 
 @test '#_validate_plug_install should return 0 if fzf were installed then check ${HOME}/.fzf but not ${HOME}/.vim/plugged/fzf' {
-    mkdir -p ${HOME}/.fzf
+    mkdir -p ${HOME}/.fzf/.git
     stub_and_eval grep '{
         [[ "$1" == "-E" ]] && {
             printf "Plug \047junegunn/fzf\047, { \047dir\047: \047~/.fzf\047, \047do\047: \047./install --bin\047 }\n"
