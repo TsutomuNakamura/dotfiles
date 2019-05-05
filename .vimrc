@@ -122,6 +122,8 @@ Plug 'Valloric/YouCompleteMe'
 Plug 'posva/vim-vue'
 Plug 'airblade/vim-gitgutter'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
+Plug 'junegunn/fzf.vim'
 
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
@@ -169,12 +171,12 @@ inoremap <C-v><C-v> <C-r>+
 cnoremap <C-v>p <C-r><C-o>"
 
 " - Settings of vim gitgutter -----------------------------------------------------------------------------
-set updatetime=330
-" let g:gitgutter_sign_added = 'xx'
-" let g:gitgutter_sign_modified = 'yy'
-" let g:gitgutter_sign_removed = 'zz'
-" let g:gitgutter_sign_removed_first_line = '^^'
-" let g:gitgutter_sign_modified_removed = 'ww'
+set updatetime=350
+
+" - Settings for fzf -----------------------------------------------------------------------------
+nnoremap <silent> ff  :<C-u>Files<CR>
+nnoremap <silent> gf  :<C-u>GFiles<CR>
+let g:fzf_buffers_jump = 1
 
 " - Settings of color scheme ---------------------------------------------------------------------------------
 " set color scheme
