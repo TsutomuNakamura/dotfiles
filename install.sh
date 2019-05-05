@@ -1485,13 +1485,13 @@ function _validate_plug_install() {
         p=$(echo "$p" | sed -e "s/^['\"]\(.*\)['\"]\$/\1/" | cut -d',' -f 1 | xargs -I {} basename {})
 
         if [[ "${p}" == "fzf" ]]; then
-            expected_location=".${p}"
+            expected_location=".${p}/.git"
         else
             expected_location=".vim/plugged/${p}/.git"
         fi
 
         if [[ ! -d "$expected_location" ]]; then
-            logger_err "Failed to install vim plugin \"${p}\". There is not a directory \"${expected_location}\" or its directory is not a git repository."
+            logger_err "Failed to install vim plugin \"${p}\". There is not a directory \"$(dirname ${expected_location})\" or its directory is not a git repository."
             (( error_count++ ))
         fi
     done < <(grep -E '^Plug .*' .vimrc)

@@ -86,7 +86,6 @@ function teardown() {
 }
 
 @test '#_validate_plug_install should return 1 if installing a plugin was failed' {
-    rm -rf /var/tmp/.vim/plugged/vim-airline-themes
     stub_and_eval grep '{
         [[ "$1" == "-E" ]] && {
             printf "Plug \047vim-airline/vim-airline-themessssss\047\n"
@@ -107,7 +106,6 @@ function teardown() {
 }
 
 @test '#_validate_plug_install should return 2 if installing 2 plugins were failed' {
-    rm -rf /var/tmp/.vim/plugged/{vim-airline-themes,nerdtree}
     stub_and_eval grep '{
         [[ "$1" == "-E" ]] && {
             printf "Plug \047vim-airline/vim-airline-themess\047\n"
@@ -128,7 +126,6 @@ function teardown() {
 }
 
 @test '#_validate_plug_install should return 1 if installing 1 of 2 plugins was failed' {
-    rm -rf /var/tmp/.vim/plugged/vim-airline-themes
     stub_and_eval grep '{
         [[ "$1" == "-E" ]] && {
             printf "Plug \047vim-airline/vim-airline-themess\047\n"
