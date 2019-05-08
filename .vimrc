@@ -42,6 +42,9 @@ set wildmode=longest:full,full
 " enable auto load the file (depending on your platform)
 set autoread
 
+" - Preferences of yaml file ---------------------------------------------------------------------------------
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+
 " Change leader for vim plugins from '\'
 let mapleader = ";"
 " - vimdiff specifications -----------------------------------------------------------------------------------
