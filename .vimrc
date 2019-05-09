@@ -127,6 +127,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
 Plug 'junegunn/fzf.vim'
+Plug 'Yggdroot/indentLine'
 
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
