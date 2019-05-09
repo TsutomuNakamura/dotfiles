@@ -168,6 +168,10 @@ let g:ctrlp_cmd = 'CtrlP'
 "      \'cwin' : '#I.#W',
 "      \'z'    : '%a %m/%d/%Y %R'}
 
+" - Setting for Yggdroot/indentLine --------------------------------------------------------------------------
+let g:indentLine_color_term = 234
+let g:indentLine_char_list = ['┊']
+
 " - Settings of clip board -----------------------------------------------------------------------------------
 " Paste from clipboard/yanked text in command line mode
 cnoremap <C-v><C-v> <C-r>+
