@@ -64,7 +64,7 @@ PACKAGES_TO_INSTALL_ON_CENTOS_THAT_HAS_GUI="google-noto-sans-cjk-fonts.noarch go
 PACKAGES_TO_INSTALL_ON_FEDORA="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc-c++ make python3-devel clang clang-devel xclip"
 PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI="google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
 
-PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip neovim"
+PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip neovim python-neovim"
 PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 
 PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
@@ -1912,7 +1912,14 @@ function init_vim_environment() {
     ln -sf ../../resources/etc/config/vim/colors/molokai.vim
 
     popd; popd
+
+    prepare_neovim_environment
+
     return 0
+}
+
+function prepare_neovim_environment() {
+    true
 }
 
 # Install command utilities in "${DOTDIR}/bin/emojify"
