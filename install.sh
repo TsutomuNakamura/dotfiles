@@ -478,7 +478,10 @@ function install_packages() {
 function add_additional_repositories_for_ubuntu() {
     local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
 
-    ${prefix} apt-get update
+    ${prefix} apt-get update || {
+        logger_err "Some error has occured when updating packages with apt-get update."
+        return 1
+    }
     command -v add-apt-repository || {
         ${prefix} DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common || {
             logger_err "Failed to install software-properties-common"
@@ -490,6 +493,7 @@ function add_additional_repositories_for_ubuntu() {
         return 1
     }
 
+    logger_info "Added additional apt repositories. (ppa:neovim-ppa/stable)"
     return 0
 }
 
