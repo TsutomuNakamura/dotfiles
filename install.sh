@@ -61,7 +61,7 @@ DISTRIBUTION=
 # Post message list
 declare -a POST_MESSAGES=()
 
-PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev xclip"
+PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev xclip build-essential"
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
 
 PACKAGES_TO_INSTALL_ON_UBUNTU="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev build-essential xclip"
@@ -488,6 +488,7 @@ function add_additional_repositories_for_ubuntu() {
             return 1
         }
     }
+    # Added ppa:neovim-ppa/stable to install neovim
     ${prefix} add-apt-repository ppa:neovim-ppa/stable -y || {
         logger_err "Failed to add repository ppa:neovim-ppa/stable"
         return 1
