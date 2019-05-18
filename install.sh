@@ -30,6 +30,15 @@ GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
 # Git repository location over ssh
 GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
 
+# Default XDG_CONFIG_HOME for Linux
+DEFAULT_XDG_CONFIG_HOME_FOR_LINUX="${HOME}/.config"
+# Default XDG_CONFIG_HOME for Mac
+DEFAULT_XDG_CONFIG_HOME_FOR_MAC="${HOME}/Library/Preferences"
+# Default XDG_DATA_HOME for Linux
+DEFAULT_XDG_DATA_HOME_FOR_LINUX="${HOME}/.local/share"
+# Default XDG_DATA_HOME for Mac
+DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
+
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
 # Temporary git user email full path from previous .gitconfig
@@ -64,7 +73,7 @@ PACKAGES_TO_INSTALL_ON_CENTOS_THAT_HAS_GUI="google-noto-sans-cjk-fonts.noarch go
 PACKAGES_TO_INSTALL_ON_FEDORA="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc-c++ make python3-devel clang clang-devel xclip"
 PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI="google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
 
-PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip"
+PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip neovim python-neovim"
 PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 
 PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
@@ -966,7 +975,7 @@ function should_the_dotfile_be_skipped() {
             [[ "$target" =  "$BACKUPDIR" ]]
 }
 
-# TODO: This dotfiles sunsupported customized XDG directories.
+# TODO: This dotfiles unsupported customized XDG directories.
 #       XDG_CONFIG_HOME must be "~/.config" in Linux OS and "~/Library/Preferences" in Mac OS.
 #       XDG_DATA_HOME must be "~/.local/share" in Linux OS and "~/Library" in Mac OS.
 function is_customized_xdg_base_directories() {
@@ -974,17 +983,17 @@ function is_customized_xdg_base_directories() {
 
     if [[ ! -z "${XDG_CONFIG_HOME}" ]]; then
         if [[ "$(get_distribution_name)" = "mac" ]]; then
-            [[ "${XDG_CONFIG_HOME%/}" = "${HOME}/Library/Preferences" ]]    || (( result++ ))
+            [[ "${XDG_CONFIG_HOME%/}" = "${DEFAULT_XDG_CONFIG_HOME_FOR_MAC}" ]]     || (( result++ ))
         else
-            [[ "${XDG_CONFIG_HOME%/}" = "${HOME}/.config" ]]                || (( result++ ))
+            [[ "${XDG_CONFIG_HOME%/}" = "${DEFAULT_XDG_CONFIG_HOME_FOR_LINUX}" ]]   || (( result++ ))
         fi
     fi
 
     if [[ ! -z "${XDG_DATA_HOME}" ]]; then
         if [[ "$(get_distribution_name)" = "mac" ]]; then
-            [[ "${XDG_DATA_HOME%/}" = "${HOME}/Library" ]]      || (( result++ ))
+            [[ "${XDG_DATA_HOME%/}" = "${DEFAULT_XDG_DATA_HOME_FOR_MAC}" ]]         || (( result++ ))
         else
-            [[ "${XDG_DATA_HOME%/}" = "${HOME}/.local/share" ]] || (( result++ ))
+            [[ "${XDG_DATA_HOME%/}" = "${DEFAULT_XDG_DATA_HOME_FOR_LINUX}" ]]       || (( result++ ))
         fi
     fi
 
@@ -1912,7 +1921,14 @@ function init_vim_environment() {
     ln -sf ../../resources/etc/config/vim/colors/molokai.vim
 
     popd; popd
+
+    prepare_neovim_environment
+
     return 0
+}
+
+function prepare_neovim_environment() {
+    true
 }
 
 # Install command utilities in "${DOTDIR}/bin/emojify"

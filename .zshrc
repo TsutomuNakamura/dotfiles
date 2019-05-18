@@ -36,6 +36,18 @@ else
     alias ls='ls --color=auto'
 fi
 
+if (command -v nvim > /dev/null 2>&1); then
+    export VISUAL=nvim
+    export EDITOR=nvim
+    # Type `\vim` or `command vim` if you want to use original one.
+    alias vim="nvim"
+    alias vi="nvim"
+    alias vimdiff="nvim -d"
+else
+    export VISUAL=vim
+    export EDITOR=vim
+fi
+
 export EDITOR=vim
 
 if (command -v most > /dev/null 2>&1); then

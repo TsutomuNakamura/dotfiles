@@ -36,7 +36,19 @@ function __prompt_command() {
 PS2="\e[38;05;242m>_\e[0m "
 
 # Set environment
-export EDITOR=vim
+if (command -v nvim > /dev/null 2>&1); then
+    export VISUAL=nvim
+    export EDITOR=nvim
+    # Type `\vim` or `command vim` if you want to use original one.
+    alias vim="nvim"
+    alias vi="nvim"
+    alias vimdiff="nvim -d"
+else
+    export VISUAL=vim
+    export EDITOR=vim
+fi
+
+
 export PATH="${PATH}:${HOME}/bin"
 
 # Load user specific environment
