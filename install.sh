@@ -65,7 +65,7 @@ PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpe
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
 
 PACKAGES_TO_INSTALL_ON_UBUNTU="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev build-essential xclip"
-PACKAGES_TO_INSTALL_ON_UBUNTU+=" software-properties-common neovim python-dev python-pip python3-dev python3-pip"   # Packages for neovim
+PACKAGES_TO_INSTALL_ON_UBUNTU+=" neovim python-dev python-pip python3-dev python3-pip"   # Packages for neovim
 PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
 
 PACKAGES_TO_INSTALL_ON_CENTOS="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg cmake gcc-c++ make python3-devel xclip"
@@ -476,8 +476,17 @@ function install_packages() {
 }
 
 function add_additional_repositories_for_ubuntu() {
-    sudo add-apt-repository ppa:neovim-ppa/stable || {
-        logger_err "Failed add repository ppa:neovim-ppa/stable"
+    local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
+
+    ${prefix} apt-get update
+    command -v add-apt-repository || {
+        DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common || {
+            logger_err "Failed to install software-properties-common"
+            return 1
+        }
+    }
+    ${prefix} add-apt-repository ppa:neovim-ppa/stable -y || {
+        logger_err "Failed to add repository ppa:neovim-ppa/stable"
         return 1
     }
 
