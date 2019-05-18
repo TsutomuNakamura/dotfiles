@@ -480,7 +480,7 @@ function add_additional_repositories_for_ubuntu() {
 
     ${prefix} apt-get update
     command -v add-apt-repository || {
-        DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common || {
+        ${prefix} DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common || {
             logger_err "Failed to install software-properties-common"
             return 1
         }
