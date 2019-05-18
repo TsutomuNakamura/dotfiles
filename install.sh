@@ -65,6 +65,7 @@ PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpe
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
 
 PACKAGES_TO_INSTALL_ON_UBUNTU="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev build-essential xclip"
+PACKAGES_TO_INSTALL_ON_UBUNTU+=" neovim python-dev python-pip python3-dev python3-pip"   # Packages for neovim
 PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
 
 PACKAGES_TO_INSTALL_ON_CENTOS="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg cmake gcc-c++ make python3-devel xclip"
@@ -73,7 +74,8 @@ PACKAGES_TO_INSTALL_ON_CENTOS_THAT_HAS_GUI="google-noto-sans-cjk-fonts.noarch go
 PACKAGES_TO_INSTALL_ON_FEDORA="git vim-enhanced ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc-c++ make python3-devel clang clang-devel xclip"
 PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI="google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
 
-PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip neovim python-neovim"
+PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip"
+PACKAGES_TO_INSTALL_ON_ARCH+=" neovim python-neovim"                                                                # Package for neovim
 PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 
 PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
@@ -442,7 +444,7 @@ function install_packages() {
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
         packages="${PACKAGES_TO_INSTALL_ON_UBUNTU}"
         has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI}"
-
+        add_additional_repositories_for_ubuntu
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
         packages="${PACKAGES_TO_INSTALL_ON_CENTOS}"
@@ -471,6 +473,28 @@ function install_packages() {
     fi
 
     return $result
+}
+
+function add_additional_repositories_for_ubuntu() {
+    local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
+
+    ${prefix} apt-get update || {
+        logger_err "Some error has occured when updating packages with apt-get update."
+        return 1
+    }
+    command -v add-apt-repository || {
+        ${prefix} DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common || {
+            logger_err "Failed to install software-properties-common"
+            return 1
+        }
+    }
+    ${prefix} add-apt-repository ppa:neovim-ppa/stable -y || {
+        logger_err "Failed to add repository ppa:neovim-ppa/stable"
+        return 1
+    }
+
+    logger_info "Added additional apt repositories. (ppa:neovim-ppa/stable)"
+    return 0
 }
 
 # Get the value of XDG_CONFIG_HOME for individual environments appropliately.
@@ -1922,12 +1946,18 @@ function init_vim_environment() {
 
     popd; popd
 
-    prepare_neovim_environment
+    # prepare_neovim_environment || return 1
 
     return 0
 }
 
 function prepare_neovim_environment() {
+
+    if [[ "$(get_distribution_name)" == "arch" ]]; then
+        # Do nothing
+        return 0
+    fi
+
     true
 }
 

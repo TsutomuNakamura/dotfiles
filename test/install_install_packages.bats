@@ -7,6 +7,7 @@ function setup() {
     stub install_packages_with_dnf
     stub install_packages_with_pacman
     stub install_packages_with_homebrew
+    stub add_additional_repositories_for_ubuntu
     stub logger_info
     stub logger_warn
     stub logger_err
@@ -89,15 +90,16 @@ function setup() {
     run install_packages
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times get_distribution_name)"             -eq 2 ]]
-    [[ "$(stub_called_times install_packages_with_apt)"         -eq 1 ]]
-    [[ "$(stub_called_times install_packages_with_yum)"         -eq 0 ]]
-    [[ "$(stub_called_times install_packages_with_dnf)"         -eq 0 ]]
-    [[ "$(stub_called_times install_packages_with_pacman)"      -eq 0 ]]
-    [[ "$(stub_called_times install_packages_with_homebrew)"    -eq 0 ]]
-    [[ "$(stub_called_times has_desktop_env)"                   -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
+    [[ "$(stub_called_times get_distribution_name)"                     -eq 2 ]]
+    [[ "$(stub_called_times install_packages_with_apt)"                 -eq 1 ]]
+    [[ "$(stub_called_times add_additional_repositories_for_ubuntu)"    -eq 1 ]]
+    [[ "$(stub_called_times install_packages_with_yum)"                 -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_dnf)"                 -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_pacman)"              -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_homebrew)"            -eq 0 ]]
+    [[ "$(stub_called_times has_desktop_env)"                           -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                               -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                -eq 0 ]]
     stub_called_with_exactly_times install_packages_with_apt 1 ubuntu_cli_a ubuntu_cli_b ubuntu_gui_a ubuntu_gui_b
 }
 
@@ -109,6 +111,7 @@ function setup() {
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times get_distribution_name)"             -eq 2 ]]
     [[ "$(stub_called_times install_packages_with_apt)"         -eq 1 ]]
+    [[ "$(stub_called_times add_additional_repositories_for_ubuntu)"    -eq 1 ]]
     [[ "$(stub_called_times install_packages_with_yum)"         -eq 0 ]]
     [[ "$(stub_called_times install_packages_with_dnf)"         -eq 0 ]]
     [[ "$(stub_called_times install_packages_with_pacman)"      -eq 0 ]]
@@ -117,6 +120,24 @@ function setup() {
     [[ "$(stub_called_times logger_info)"                       -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                        -eq 0 ]]
     stub_called_with_exactly_times install_packages_with_apt 1 ubuntu_cli_a ubuntu_cli_b
+}
+
+@test '#install_packages return 0 even if add_additional_repositories_for_ubuntu has failed on ubuntu' {
+    stub_and_eval get_distribution_name '{ echo "ubuntu"; }'
+    stub_and_eval add_additional_repositories_for_ubuntu '{ return 1; }'
+    run install_packages
+
+    [[ "$status" -eq 0 ]]
+    [[ "$(stub_called_times get_distribution_name)"                     -eq 2 ]]
+    [[ "$(stub_called_times install_packages_with_apt)"                 -eq 1 ]]
+    [[ "$(stub_called_times add_additional_repositories_for_ubuntu)"    -eq 1 ]]
+    [[ "$(stub_called_times install_packages_with_yum)"                 -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_dnf)"                 -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_pacman)"              -eq 0 ]]
+    [[ "$(stub_called_times install_packages_with_homebrew)"            -eq 0 ]]
+    [[ "$(stub_called_times has_desktop_env)"                           -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                               -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                -eq 0 ]]
 }
 
 @test '#install_packages return 1 if install packages has failed on ubuntu' {
