@@ -979,10 +979,9 @@ function install_packages_with_pacman() {
 
 function install_packages_with_homebrew() {
     declare -a packages=($@)
-    local output=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        output="$(brew install ${packages[i]} 2>&1)" || {
+        brew install ${packages[i]} || {
             echo "ERROR: Some error occured when installing ${packages[i]}"
             echo "${output}"
         }
@@ -1496,9 +1495,11 @@ function _install_vim_plug() {
     # An error will be ocurred at ambiwidth=double in .vimrc if LANG environment variable was not set
     echo "Installing vim plugins..."
     if [[ -z "$LANG" ]] || [[ "$LANG" == "C" ]]; then
-        LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        #LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall
     else
-        vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        # vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        vim +PlugInstall +"sleep 1000m" +qall
     fi
 
     _validate_plug_install || {
