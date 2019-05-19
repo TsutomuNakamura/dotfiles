@@ -19,6 +19,7 @@ function list_glyphs() {
 
 list_glyphs "Seti-UI + Custom" 58608 58667
 list_glyphs "Devicons" 59136 59343
+list_glyphs "Material Fonts" 57344 60236
 list_glyphs "Font Awesome" 61438 62185
 list_glyphs "Font Awesome Extension" 57341 57527
 list_glyphs "Octicons" 61434 61685
