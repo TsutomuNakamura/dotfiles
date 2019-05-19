@@ -979,10 +979,9 @@ function install_packages_with_pacman() {
 
 function install_packages_with_homebrew() {
     declare -a packages=($@)
-    local output=
 
     for (( i = 0; i < ${#packages[@]}; i++ )) {
-        output="$(brew install ${packages[i]} 2>&1)" || {
+        brew install ${packages[i]} || {
             echo "ERROR: Some error occured when installing ${packages[i]}"
             echo "${output}"
         }
