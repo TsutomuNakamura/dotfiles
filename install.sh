@@ -1497,7 +1497,8 @@ function _install_vim_plug() {
     if [[ -z "$LANG" ]] || [[ "$LANG" == "C" ]]; then
         LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
     else
-        vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        # vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        vim +PlugInstall +"sleep 1000m" +qall
     fi
 
     _validate_plug_install || {
