@@ -39,19 +39,19 @@ This dotfiles tested on distribution and OS like below.
 
 | Distribution or OS | Condition |
 | ------------------ | --------- |
-| Arch               |◎         |
-| Ubuntu             |◎         |
-| Fedora             |◎         |
-| Debian             |◎         |
-| CentOS             |△         |
-| MacOS              |△         |
+| Arch               |○         |
+| Ubuntu             |○         |
+| Fedora             |○         |
+| MacOS              |○         |
+| Debian             |○         |
+| CentOS             |○         |
 
-## Recommended emulators
+## Recommended terminal emulators
 This dotfiles tested on some emulators like below.
 
 | application        | OS    | Condition |
 | ------------------ | ----- | --------- |
-| Gnome terminal     | Linux | ◎        |
+| Gnome terminal     | Linux | ○        |
 | Konsole            | Linux | ○        |
 | Terminal (Mac)     | Mac   | ○        |
 | iTerm (Mac)        | Mac   | ○        |
