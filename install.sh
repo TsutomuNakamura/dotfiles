@@ -1495,7 +1495,8 @@ function _install_vim_plug() {
     # An error will be ocurred at ambiwidth=double in .vimrc if LANG environment variable was not set
     echo "Installing vim plugins..."
     if [[ -z "$LANG" ]] || [[ "$LANG" == "C" ]]; then
-        LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        #LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
+        LANG=en_US.UTF-8 vim +PlugInstall +"sleep 1000m" +qall
     else
         # vim +PlugInstall +"sleep 1000m" +qall >& /dev/null
         vim +PlugInstall +"sleep 1000m" +qall
