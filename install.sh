@@ -80,6 +80,7 @@ PACKAGES_TO_INSTALL_ON_ARCH+=" neovim python-neovim"
 PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 
 PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
+PACKAGES_TO_INSTALL_ON_MAC+=" neovim"
 
 # Symbolic link list of configuration of vim.
 declare -a VIM_CONF_LINK_LIST=(
