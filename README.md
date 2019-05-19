@@ -39,22 +39,22 @@ This dotfiles tested on distribution and OS like below.
 
 | Distribution or OS | Condition |
 | ------------------ | --------- |
-| Arch               |○         |
-| Ubuntu             |○         |
-| Fedora             |○         |
-| MacOS              |○         |
-| Debian             |○         |
-| CentOS             |○         |
+| Arch               |✔️         |
+| Ubuntu             |✔️         |
+| Fedora             |✔️         |
+| MacOS              |✔️         |
+| Debian             |✔️         |
+| CentOS             |✔️         |
 
 ## Recommended terminal emulators
 This dotfiles tested on some emulators like below.
 
 | application        | OS    | Condition |
 | ------------------ | ----- | --------- |
-| Gnome terminal     | Linux | ○        |
-| Konsole            | Linux | ○        |
-| Terminal (Mac)     | Mac   | ○        |
-| iTerm (Mac)        | Mac   | ○        |
+| Gnome terminal     | Linux | ✔️        |
+| Konsole            | Linux | ✔️        |
+| Terminal (Mac)     | Mac   | ✔️        |
+| iTerm (Mac)        | Mac   | ✔️        |
 
 # Applications and feathres
 This dotfiles equipments some useful features.
