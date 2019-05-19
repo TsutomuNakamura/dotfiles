@@ -59,7 +59,10 @@ This dotfiles tested on some emulators like below.
 # Applications and feathres
 This dotfiles equipments some useful features.
 
-## vim
+### [Neovim](https://github.com/neovim/neovim)
+Hyperextensible Vim-based text editor. This dotfiles will install it and configure it.
+But some of distributions like CentOS, Debian are not prepared yet.
+
 ### [NERDTree](https://github.com/scrooloose/nerdtree)
 Run vim and press "tr", then NERDTree will open.
 
