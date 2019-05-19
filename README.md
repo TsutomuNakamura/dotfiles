@@ -63,6 +63,15 @@ This dotfiles equipments some useful features.
 Hyperextensible Vim-based text editor. This dotfiles will install it and configure it.
 But some of distributions like CentOS, Debian are not prepared yet.
 
+| Distribution or OS | Condition | Remarks            |
+| ------------------ | --------- | ------------------ |
+| Arch               |✔️         |Compatible!         |
+| Ubuntu             |✔️         |Compatible!         |
+| Fedora             |✔️         |Compatible!         |
+| Debian             |✖️         |Not Compatible yet. |
+| CentOS             |✖️         |Not Compatible yet. |
+| MacOS              |❗️         |Comming Soon!       |
+
 ### [NERDTree](https://github.com/scrooloose/nerdtree)
 Run vim and press "tr", then NERDTree will open.
 
