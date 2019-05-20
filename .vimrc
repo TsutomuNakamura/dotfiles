@@ -170,7 +170,7 @@ let g:ctrlp_cmd = 'CtrlP'
 
 " - Setting for Yggdroot/indentLine --------------------------------------------------------------------------
 let g:indentLine_color_term = 234
-let g:indentLine_char_list = ['┊']
+" let g:indentLine_char_list = ['┊']
 
 " - Settings of clip board -----------------------------------------------------------------------------------
 " Paste from clipboard/yanked text in command line mode
