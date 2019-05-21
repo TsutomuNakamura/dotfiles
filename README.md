@@ -70,7 +70,7 @@ But some of distributions like CentOS, Debian are not prepared yet.
 | Fedora             |✔️         |Compatible!         |
 | Debian             |✖️         |Not Compatible yet. |
 | CentOS             |✖️         |Not Compatible yet. |
-| MacOS              |❗️         |Comming Soon!       |
+| MacOS              |✔️         |Compatible!         |
 
 ### [NERDTree](https://github.com/scrooloose/nerdtree)
 Run vim and press "tr", then NERDTree will open.
