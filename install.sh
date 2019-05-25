@@ -1469,17 +1469,18 @@ function deploy_tmux_environment() {
     #       https://github.com/Code-Hex/battery/pull/12
     #       So test cases of this instructions are not created.
     mkdir -p ${HOME}/bin
+    local url=
+
     if [[ "$(get_distribution_name)" == "mac" ]]; then
-        curl -fLo "${HOME}/bin/battery_darwin" "https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/darwin_amd64/battery" || {
-            logger_err "Failed to install battery plugin for tmux on Mac"
-            return 1
-        }
+        url="https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/darwin_amd64/battery"
     else
-        curl -fLo "${HOME}/bin/battery_linux" "https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/linux_amd64/battery" || {
-            logger_err "Failed to install battery plugin for tmux on Linux"
-            return 1
-        }
+        url="https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/linux_amd64/battery"
     fi
+
+    curl -fLo "${HOME}/bin/battery" "$url" || {
+        logger_err "Failed to install battery plugin for tmux on $(get_distribution_name)"
+        return 1
+    }
 
     return 0
 }
