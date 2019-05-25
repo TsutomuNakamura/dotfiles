@@ -48,8 +48,12 @@ else
     export EDITOR=vim
 fi
 
-
 export PATH="${PATH}:${HOME}/bin"
+
+# Prepare golang environment
+if [[ -d "${HOME}/go/bin" ]]; then
+    export PATH="${PATH}:${HOME}/go/bin"
+fi
 
 # Load user specific environment
 [[ -d "${HOME}/.bash_modules/" ]] && while read f; do . "$f"; done < <(find "${HOME}/.bash_modules/" -type f)
