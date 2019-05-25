@@ -27,6 +27,8 @@ function setup() {
 
     stub logger_err
     stub logger_warn
+
+    function deploy_tmux_environment() { true; }    # TODO: Skip this instruction because this instruction may removed in the future
 }
 
 function teardown() {
@@ -91,7 +93,7 @@ function teardown() {
     stub_called_with_exactly_times restore_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
 }
 
-@test '#deploy should create a link .config deeply' {
+@test '#deploy should create a link a .config deeply' {
     mkdir -p ${DOTDIR}/.config/fontconfig
     touch ${DOTDIR}/.config/fontconfig/fonts.conf
     function get_target_dotfiles() { echo ".config"; }
@@ -116,7 +118,7 @@ function teardown() {
     stub_called_with_exactly_times restore_git_personal_properties 1 "${FULL_DOTDIR_PATH}"
 }
 
-@test '#deploy should create some links .config deeply' {
+@test '#deploy should create some links .configs deeply' {
     mkdir -p ${DOTDIR}/.config/fontconfig/foo
     touch ${DOTDIR}/.config/fontconfig/fonts.conf
     touch ${DOTDIR}/.config/fontconfig/foo/foo.conf
