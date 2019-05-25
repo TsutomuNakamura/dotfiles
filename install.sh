@@ -1245,6 +1245,7 @@ function deploy() {
     # TODO: Should add error handling
     deploy_xdg_base_directory
     deploy_vim_environment
+    deploy_tmux_environment
 
     # FIXME: On Mac, do not ready for fontconfig yet.
     #        For appropriate view, release ambi_width_double settings for vim and 
@@ -1456,6 +1457,28 @@ function deploy_vim_environment() {
         _install_you_complete_me --clang-completer --system-libclang || return 1
     else
         logger_warn "Sorry, this dotfiles installer does not support to install YouCompleteMe on CentOS yet."
+    fi
+
+    return 0
+}
+
+# TODO: 
+function deploy_tmux_environment() {
+
+    # TODO: Installing battery plugin for tmux will be removed after the pull request has merged.
+    #       https://github.com/Code-Hex/battery/pull/12
+    #       So test cases of this instructions are not created.
+    mkdir -p ${HOME}/bin
+    if [[ "$(get_distribution_name)" == "mac" ]]; then
+        curl -fLo "${HOME}/bin/battery_darwin" "https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/darwin_amd64/battery" || {
+            logger_err "Failed to install battery plugin for tmux on Mac"
+            return 1
+        }
+    else
+        curl -fLo "${HOME}/bin/battery_linux" "https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/linux_amd64/battery" || {
+            logger_err "Failed to install battery plugin for tmux on Linux"
+            return 1
+        }
     fi
 
     return 0
