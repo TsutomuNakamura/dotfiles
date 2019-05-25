@@ -1481,6 +1481,7 @@ function deploy_tmux_environment() {
         logger_err "Failed to install battery plugin for tmux on $(get_distribution_name)"
         return 1
     }
+    chmod u+x "${HOME}/bin/battery"
 
     return 0
 }
