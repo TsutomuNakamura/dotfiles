@@ -31,8 +31,8 @@ output+=" $(uname -n) "
 output+=" $(whoami) "
 
 # load average
-load="$(uptime)"
-output+="${load##*:} "
+#load="$(uptime)"
+#output+="${load##*:} "
 
 icon="⭠ "
 branch_name=
