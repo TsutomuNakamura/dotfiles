@@ -1465,23 +1465,21 @@ function deploy_vim_environment() {
 # TODO: 
 function deploy_tmux_environment() {
 
-    # TODO: Installing battery plugin for tmux will be removed after the pull request has merged.
-    #       https://github.com/Code-Hex/battery/pull/12
-    #       So test cases of this instructions are not created.
-    mkdir -p ${HOME}/bin
-    local url=
+    # Install tmux plugin manager
+    # https://github.com/tmux-plugins/tpm
+    determin_update_type_of_repository "${HOME}/.tmux/plugins/tpm" "origin" "https://github.com/tmux-plugins/tpm" "master" 1
+    local update_type=$?
 
-    if [[ "$(get_distribution_name)" == "mac" ]]; then
-        url="https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/darwin_amd64/battery"
-    else
-        url="https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/linux_amd64/battery"
-    fi
+#    GIT_UPDATE_TYPE_JUST_CLONE
+#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY
+#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE
+#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET
+#    GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL
+#    GIT_UPDATE_TYPE_JUST_PULL
+#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT
+#    GIT_UPDATE_TYPE_ABOARTED
 
-    curl -fLo "${HOME}/bin/battery" "$url" || {
-        logger_err "Failed to install battery plugin for tmux on $(get_distribution_name)"
-        return 1
-    }
-    chmod u+x "${HOME}/bin/battery"
+    # git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
     return 0
 }
