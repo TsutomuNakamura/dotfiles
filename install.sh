@@ -82,6 +82,9 @@ PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
 PACKAGES_TO_INSTALL_ON_MAC+=" neovim"
 
+# URL of tmux-plugin
+URL_OF_TMUX_PLUGIN="https://github.com/tmux-plugins/tpm.git"
+
 # Symbolic link list of configuration of vim.
 declare -a VIM_CONF_LINK_LIST=(
     # "<link_dest>,<link_src>"
@@ -1465,45 +1468,55 @@ function deploy_vim_environment() {
 # TODO: 
 function deploy_tmux_environment() {
 
+    local destination_dir="${HOME}/.tmux/plugins/tpm"
+
     # Install tmux plugin manager
     # https://github.com/tmux-plugins/tpm
-    determin_update_type_of_repository "${HOME}/.tmux/plugins/tpm" "origin" "https://github.com/tmux-plugins/tpm" "master" 1
+    determin_update_type_of_repository "${destination_dir}" "origin" "$URL_OF_TMUX_PLUGIN" "master" 1
     local update_type=$?
 
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
-            git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+            git clone ${URL_OF_TMUX_PLUGIN} ${destination_dir} || {
+                logger_err "Just clone https://github.com/tmux-plugins/tpm was failed."
+                return 1
+            }
             ;;
         $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY \
-            $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE \
-            $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET \
-            $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
-            true
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
+            rm -rf ${destination_dir}
+            git clone ${URL_OF_TMUX_PLUGIN} ${destination_dir} || {
+                logger_err "Remove then clone ${URL_OF_TMUX_PLUGIN} was failed"
+                return 1
+            }
             ;;
         $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL )
-            true
+            pushd ~/.tmux/plugins/tpm
+            git reset --hard || {
+                logger_err "Failed to git reset --hard ${URL_OF_TMUX_PLUGIN}"
+                popd; return 1
+            }
+            git pull ${URL_OF_TMUX_PLUGIN} || {
+                logger_err "Failed to pull repository ${URL_OF_TMUX_PLUGIN}"
+                popd; return 1
+            }
+            popd
             ;;
         $GIT_UPDATE_TYPE_JUST_PULL )
-            true
+            pushd ~/.tmux/plugins/tpm
+            git pull origin HEAD || {
+                logger_err "Fatiled to pull repository ${URL_OF_TMUX_PLUGIN}"
+                popd; return 1
+            }
+            popd
             ;;
-        $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
-            true
-            ;;
-        $GIT_UPDATE_TYPE_ABOARTED )
-            true
+        * )
+            logger_err "Some error occured when installing ${URL_OF_TMUX_PLUGIN}"
+            return 1
             ;;
     esac
-
-#    GIT_UPDATE_TYPE_JUST_CLONE
-#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY
-#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE
-#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET
-#    GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL
-#    GIT_UPDATE_TYPE_JUST_PULL
-#    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT
-#    GIT_UPDATE_TYPE_ABOARTED
-
-    # git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
     return 0
 }
