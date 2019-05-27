@@ -1470,6 +1470,30 @@ function deploy_tmux_environment() {
     determin_update_type_of_repository "${HOME}/.tmux/plugins/tpm" "origin" "https://github.com/tmux-plugins/tpm" "master" 1
     local update_type=$?
 
+    case $update_type in
+        $GIT_UPDATE_TYPE_JUST_CLONE )
+            git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+            ;;
+        $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY \
+            $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE \
+            $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET \
+            $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
+            true
+            ;;
+        $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL )
+            true
+            ;;
+        $GIT_UPDATE_TYPE_JUST_PULL )
+            true
+            ;;
+        $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
+            true
+            ;;
+        $GIT_UPDATE_TYPE_ABOARTED )
+            true
+            ;;
+    esac
+
 #    GIT_UPDATE_TYPE_JUST_CLONE
 #    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY
 #    GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE
