@@ -1500,7 +1500,7 @@ function _install_tmux_plugin_manager() {
             }
             ;;
         $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL )
-            pushd ~/.tmux/plugins/tpm
+            pushd "$install_dir"
             git reset --hard || {
                 logger_err "Failed to git reset --hard ${URL_OF_TMUX_PLUGIN}"
                 popd; return 1
