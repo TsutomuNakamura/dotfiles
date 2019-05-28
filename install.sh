@@ -1467,27 +1467,34 @@ function deploy_vim_environment() {
 
 # TODO: 
 function deploy_tmux_environment() {
+    _install_tmux_plugin_manager "${HOME}/.tmux/plugins/tpm" || {
+        logger_err "Failed to install tmux_plugin_manager"
+        return 1
+    }
+    return 0
+}
 
-    local destination_dir="${HOME}/.tmux/plugins/tpm"
+function _install_tmux_plugin_manager() {
+    local install_dir="$1"
 
     # Install tmux plugin manager
     # https://github.com/tmux-plugins/tpm
-    determin_update_type_of_repository "${destination_dir}" "origin" "$URL_OF_TMUX_PLUGIN" "master" 1
+    determin_update_type_of_repository "${install_dir}" "origin" "$URL_OF_TMUX_PLUGIN" "master" 1
     local update_type=$?
 
     case $update_type in
         $GIT_UPDATE_TYPE_JUST_CLONE )
-            git clone ${URL_OF_TMUX_PLUGIN} ${destination_dir} || {
+            git clone ${URL_OF_TMUX_PLUGIN} ${install_dir} || {
                 logger_err "Just clone https://github.com/tmux-plugins/tpm was failed."
                 return 1
             }
             ;;
-        $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY \
-                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE \
-                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET \
+        $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET | \
                 $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
-            rm -rf ${destination_dir}
-            git clone ${URL_OF_TMUX_PLUGIN} ${destination_dir} || {
+            rm -rf ${install_dir}
+            git clone ${URL_OF_TMUX_PLUGIN} ${install_dir} || {
                 logger_err "Remove then clone ${URL_OF_TMUX_PLUGIN} was failed"
                 return 1
             }
