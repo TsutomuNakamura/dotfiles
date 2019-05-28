@@ -128,23 +128,69 @@ function teardown() {
 #    stub_called_with_exactly_times logger_err 1 "Remove then clone ${URL_OF_TMUX_PLUGIN} was failed"
 #}
 
-@test '#_install_tmux_plugin_manager should return 0 if determin_update_type_of_repository returns GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL then git clone was succeeded' {
+#@test '#_install_tmux_plugin_manager should return 0 if determin_update_type_of_repository returns GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL then git was succeeded' {
+#    stub pushd; stub popd
+#    stub_and_eval determin_update_type_of_repository '{ return $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL; }'
+#    stub git
+#    run _install_tmux_plugin_manager "${HOME}/.tmux/plugins/tpm"
+#
+#    [[ "$status"                                                        -eq 0 ]]
+#    [[ "$(stub_called_times determin_update_type_of_repository)"        -eq 1 ]]
+#    [[ "$(stub_called_times git)"                                       -eq 2 ]]
+#    [[ "$(stub_called_times logger_err)"                                -eq 0 ]]
+#    [[ "$(stub_called_times rm)"                                        -eq 0 ]]
+#    [[ "$(stub_called_times pushd)"                                     -eq 1 ]]
+#    [[ "$(stub_called_times popd)"                                      -eq 1 ]]
+#
+#    stub_called_with_exactly_times determin_update_type_of_repository 1 "${HOME}/.tmux/plugins/tpm" "origin" "$URL_OF_TMUX_PLUGIN" "master" 1
+#    stub_called_with_exactly_times git 1 reset --hard
+#    stub_called_with_exactly_times git 1 pull "$URL_OF_TMUX_PLUGIN"
+#    stub_called_with_exactly_times pushd 1 "${HOME}/.tmux/plugins/tpm"
+#}
+
+@test '#_install_tmux_plugin_manager should return 1 if determin_update_type_of_repository returns GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL then git reset was failed' {
     stub pushd; stub popd
     stub_and_eval determin_update_type_of_repository '{ return $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL; }'
-    stub git
+    stub_and_eval git '{
+        [[ "$1" == "reset" ]] && return 1
+        return 0
+    }'
     run _install_tmux_plugin_manager "${HOME}/.tmux/plugins/tpm"
 
-    [[ "$status"                                                        -eq 0 ]]
+    [[ "$status"                                                        -eq 1 ]]
     [[ "$(stub_called_times determin_update_type_of_repository)"        -eq 1 ]]
-    [[ "$(stub_called_times git)"                                       -eq 2 ]]
-    [[ "$(stub_called_times logger_err)"                                -eq 0 ]]
+    [[ "$(stub_called_times git)"                                       -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                                -eq 1 ]]
     [[ "$(stub_called_times rm)"                                        -eq 0 ]]
     [[ "$(stub_called_times pushd)"                                     -eq 1 ]]
     [[ "$(stub_called_times popd)"                                      -eq 1 ]]
 
     stub_called_with_exactly_times determin_update_type_of_repository 1 "${HOME}/.tmux/plugins/tpm" "origin" "$URL_OF_TMUX_PLUGIN" "master" 1
     stub_called_with_exactly_times git 1 reset --hard
-    stub_called_with_exactly_times git 1 pull "$URL_OF_TMUX_PLUGIN"
     stub_called_with_exactly_times pushd 1 "${HOME}/.tmux/plugins/tpm"
+    stub_called_with_exactly_times logger_err 1 "Failed to git reset --hard ${URL_OF_TMUX_PLUGIN}"
 }
 
+@test '#_install_tmux_plugin_manager should return 1 if determin_update_type_of_repository returns GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL then git pull was failed' {
+    stub pushd; stub popd
+    stub_and_eval determin_update_type_of_repository '{ return $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL; }'
+    stub_and_eval git '{
+        [[ "$1" == "pull" ]] && return 1
+        return 0
+    }'
+    run _install_tmux_plugin_manager "${HOME}/.tmux/plugins/tpm"
+
+    [[ "$status"                                                        -eq 1 ]]
+    [[ "$(stub_called_times determin_update_type_of_repository)"        -eq 1 ]]
+    [[ "$(stub_called_times git)"                                       -eq 2 ]]
+    [[ "$(stub_called_times logger_err)"                                -eq 1 ]]
+    [[ "$(stub_called_times rm)"                                        -eq 0 ]]
+    [[ "$(stub_called_times pushd)"                                     -eq 1 ]]
+    [[ "$(stub_called_times popd)"                                      -eq 1 ]]
+
+    stub_called_with_exactly_times determin_update_type_of_repository 1 "${HOME}/.tmux/plugins/tpm" "origin" "$URL_OF_TMUX_PLUGIN" "master" 1
+    stub_called_with_exactly_times git 1 reset --hard
+    stub_called_with_exactly_times git 1 pull "${URL_OF_TMUX_PLUGIN}"
+    stub_called_with_exactly_times pushd 1 "${HOME}/.tmux/plugins/tpm"
+    stub_called_with_exactly_times logger_err 1 "Failed to pull repository ${URL_OF_TMUX_PLUGIN}"
+}
