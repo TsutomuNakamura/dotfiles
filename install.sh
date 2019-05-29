@@ -1512,7 +1512,7 @@ function _install_tmux_plugin_manager() {
             popd
             ;;
         $GIT_UPDATE_TYPE_JUST_PULL )
-            pushd ~/.tmux/plugins/tpm
+            pushd "$install_dir"
             git pull origin HEAD || {
                 logger_err "Fatiled to pull repository ${URL_OF_TMUX_PLUGIN}"
                 popd; return 1
