@@ -1465,15 +1465,25 @@ function deploy_vim_environment() {
     return 0
 }
 
-# TODO: 
+# Dploy tmux environment
 function deploy_tmux_environment() {
     _install_tmux_plugin_manager "${HOME}/.tmux/plugins/tpm" || {
         logger_err "Failed to install tmux_plugin_manager"
         return 1
     }
+    # TODO:
+    _install_and_update_tmux_plugins
+
     return 0
 }
 
+function _install_and_update_tmux_plugins() {
+    # https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.md
+    # https://unix.stackexchange.com/questions/409861/its-possible-to-send-input-to-a-tmux-session-without-connecting-to-it
+    true
+}
+
+# Install tmux plugins manager
 function _install_tmux_plugin_manager() {
     local install_dir="$1"
 
