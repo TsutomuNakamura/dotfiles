@@ -1480,6 +1480,20 @@ function deploy_tmux_environment() {
 function _install_and_update_tmux_plugins() {
     # https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.md
     # https://unix.stackexchange.com/questions/409861/its-possible-to-send-input-to-a-tmux-session-without-connecting-to-it
+    if [[ -z "$TMUX" ]]; then
+        # Create one tmux session then send keys to it
+        # TODO: 
+        true
+    else
+        ${HOME}/.tmux/plugins/tpm/bin/install_plugins || {
+            logger_err "Failed to install tmux plugins"
+            return 1
+        }
+        ${HOME}/.tmux/plugins/tpm/bin/update_plugins all || {
+            logger_err "Failed to install tmux plugins"
+            return 1
+        }
+    fi
     true
 }
 
