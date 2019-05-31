@@ -1478,11 +1478,21 @@ function deploy_tmux_environment() {
 }
 
 function _install_and_update_tmux_plugins() {
+    # Temporary tmux-session name to send tmux command
+    local tmux_tmp_session_name="dotfiles_tmp"
+    # Tmux session has upped in this function or not
+    local up_new_tmux_session=0
+
     # https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.md
     # https://unix.stackexchange.com/questions/409861/its-possible-to-send-input-to-a-tmux-session-without-connecting-to-it
     if [[ -z "$TMUX" ]]; then
-        # Create one tmux session then send keys to it
-        # TODO: 
+        # This session does not attached tmux.
+        # Create one tmux session then send keys to install tmux plugins
+        if !(tmux ls -F "#{session_name}" | grep -q -P "^${tmux_tmp_session_name}$"); then
+            tmux new -d -s dotfiles_tmp
+        fi
+
+        # If tmux session named ${tmux_tmp_session_name} is existed, send key to it
         true
     else
         ${HOME}/.tmux/plugins/tpm/bin/install_plugins || {
