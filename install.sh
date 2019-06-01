@@ -1463,7 +1463,7 @@ function deploy_vim_environment() {
             logger_err "Failed to change directory ${HOME}/.config"
             return 1
         }
-        lln "../Library/Preferences/neovim" "." || {
+        lln "../Library/Preferences/nvim" "." || {
             logger_err "Failed to create symlink with \`ln -sf ../Library/Preferences/neovim .\` from ${HOME}/.config"
             popd
             return 1
