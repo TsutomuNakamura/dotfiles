@@ -1471,12 +1471,15 @@ function deploy_tmux_environment() {
         logger_err "Failed to install tmux_plugin_manager"
         return 1
     }
-    # TODO:
-    _install_and_update_tmux_plugins
+    _install_and_update_tmux_plugins || {
+        logger_err "Failed to install or update tmux plugins"
+        return 1
+    }
 
     return 0
 }
 
+# Install tmux plugins
 function _install_and_update_tmux_plugins() {
     if [[ -z "$TMUX" ]]; then
         # This session does not be attached tmux.
@@ -1499,10 +1502,6 @@ function _install_and_update_tmux_plugins() {
     fi
 
     return 0
-}
-
-function _get_tmp_tmux_session_name() {
-    tmp_dot
 }
 
 # Install tmux plugins manager
