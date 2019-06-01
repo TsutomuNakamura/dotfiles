@@ -2202,6 +2202,11 @@ function vercomp() {
 
 # Is desktop installed?
 function has_desktop_env() {
+    if [[ "$(get_distribution_name)" == "mac" ]]; then
+        return 0
+    fi
+
+    # If your environment is not Mac, check exactly whether the machine has desktop.
     [[ -d "/usr/share/xsessions" ]] && [[ ! -z "$(ls -A /usr/share/xsessions/*.desktop 2> /dev/null)" ]]
 }
 
