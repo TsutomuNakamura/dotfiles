@@ -1485,14 +1485,14 @@ function _install_and_update_tmux_plugins() {
         # This session does not be attached tmux.
         # Create one tmux session then send keys to install tmux plugins
         # TODO: This should handle errors
-        tmux new \; set-buffer "${HOME}/.tmux/plugins/tpm/bin/install_plugins; ${HOME}/.tmux/plugins/tpm/bin/update_plugins all"\; paste-buffer
+        tmux new \; set-buffer "${HOME}/.tmux/plugins/tpm/bin/install_plugins; ${HOME}/.tmux/plugins/tpm/bin/update_plugins all; exit" \; paste-buffer
     else
         ${HOME}/.tmux/plugins/tpm/bin/install_plugins || {
-            logger_err "Failed to install tmux plugins"
+            logger_err "Failed to install tmux plugins with \`${HOME}/.tmux/plugins/tpm/bin/install_plugins\`"
             return 1
         }
         ${HOME}/.tmux/plugins/tpm/bin/update_plugins all || {
-            logger_err "Failed to install tmux plugins"
+            logger_err "Failed to update tmux plugins with \`${HOME}/.tmux/plugins/tpm/bin/update_plugins all\`"
             return 1
         }
         tmux source-file ${HOME}/.tmux.conf || {
