@@ -82,6 +82,9 @@ PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
 PACKAGES_TO_INSTALL_ON_MAC+=" neovim"
 
+# URL of tmux-plugin
+URL_OF_TMUX_PLUGIN="https://github.com/tmux-plugins/tpm.git"
+
 # Symbolic link list of configuration of vim.
 declare -a VIM_CONF_LINK_LIST=(
     # "<link_dest>,<link_src>"
@@ -1462,26 +1465,96 @@ function deploy_vim_environment() {
     return 0
 }
 
-# TODO: 
+# Dploy tmux environment
 function deploy_tmux_environment() {
-
-    # TODO: Installing battery plugin for tmux will be removed after the pull request has merged.
-    #       https://github.com/Code-Hex/battery/pull/12
-    #       So test cases of this instructions are not created.
-    mkdir -p ${HOME}/bin
-    local url=
-
-    if [[ "$(get_distribution_name)" == "mac" ]]; then
-        url="https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/darwin_amd64/battery"
-    else
-        url="https://raw.githubusercontent.com/TsutomuNakamura/battery/master/build/0.2.0/linux_amd64/battery"
-    fi
-
-    curl -fLo "${HOME}/bin/battery" "$url" || {
-        logger_err "Failed to install battery plugin for tmux on $(get_distribution_name)"
+    _install_tmux_plugin_manager "${HOME}/.tmux/plugins/tpm" || {
+        logger_err "Failed to install tmux_plugin_manager"
         return 1
     }
-    chmod u+x "${HOME}/bin/battery"
+    _install_and_update_tmux_plugins || {
+        logger_err "Failed to install or update tmux plugins"
+        return 1
+    }
+
+    return 0
+}
+
+# Install tmux plugins
+function _install_and_update_tmux_plugins() {
+    if [[ -z "$TMUX" ]]; then
+        # This session does not be attached tmux.
+        # Create one tmux session then send keys to install tmux plugins
+        # TODO: This should handle errors
+        tmux new \; set-buffer "${HOME}/.tmux/plugins/tpm/bin/install_plugins; ${HOME}/.tmux/plugins/tpm/bin/update_plugins all; exit" \; paste-buffer
+    else
+        ${HOME}/.tmux/plugins/tpm/bin/install_plugins || {
+            logger_err "Failed to install tmux plugins with \`${HOME}/.tmux/plugins/tpm/bin/install_plugins\`"
+            return 1
+        }
+        ${HOME}/.tmux/plugins/tpm/bin/update_plugins all || {
+            logger_err "Failed to update tmux plugins with \`${HOME}/.tmux/plugins/tpm/bin/update_plugins all\`"
+            return 1
+        }
+        tmux source-file ${HOME}/.tmux.conf || {
+            logger_err "Failed to reload .tmux.conf by \`tmux source-file ${HOME}/.tmux.conf\`"
+            return 1
+        }
+    fi
+
+    return 0
+}
+
+# Install tmux plugins manager
+function _install_tmux_plugin_manager() {
+    local install_dir="$1"
+
+    # Install tmux plugin manager
+    # https://github.com/tmux-plugins/tpm
+    determin_update_type_of_repository "${install_dir}" "origin" "$URL_OF_TMUX_PLUGIN" "master" 1
+    local update_type=$?
+
+    case $update_type in
+        $GIT_UPDATE_TYPE_JUST_CLONE )
+            git clone ${URL_OF_TMUX_PLUGIN} ${install_dir} || {
+                logger_err "Just clone https://github.com/tmux-plugins/tpm was failed."
+                return 1
+            }
+            ;;
+        $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET | \
+                $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT )
+            rm -rf ${install_dir}
+            git clone ${URL_OF_TMUX_PLUGIN} ${install_dir} || {
+                logger_err "Remove then clone ${URL_OF_TMUX_PLUGIN} was failed"
+                return 1
+            }
+            ;;
+        $GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL )
+            pushd "$install_dir"
+            git reset --hard || {
+                logger_err "Failed to git reset --hard ${URL_OF_TMUX_PLUGIN}"
+                popd; return 1
+            }
+            git pull ${URL_OF_TMUX_PLUGIN} || {
+                logger_err "Failed to pull repository ${URL_OF_TMUX_PLUGIN}"
+                popd; return 1
+            }
+            popd
+            ;;
+        $GIT_UPDATE_TYPE_JUST_PULL )
+            pushd "$install_dir"
+            git pull origin HEAD || {
+                logger_err "Fatiled to pull repository ${URL_OF_TMUX_PLUGIN}"
+                popd; return 1
+            }
+            popd
+            ;;
+        * )
+            logger_err "Some error occured when installing ${URL_OF_TMUX_PLUGIN}"
+            return 1
+            ;;
+    esac
 
     return 0
 }
