@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+load="$(uptime)"
+output+="${load##*:} "
+
+echo -n $output
+
