@@ -249,7 +249,6 @@ function teardown() {
     [[ "$(stub_called_times _install_you_complete_me)"  -eq 1 ]]
     [[ "$(stub_called_times logger_warn)"               -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                -eq 1 ]]
-sleep 1000
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/after/syntax"
     stub_called_with_exactly_times mmkdir 1 "/var/tmp/.dotfiles/.vim/ftdetect"
     stub_called_with_exactly_times mmkdir 1 "${HOME}/.config"
