@@ -1456,6 +1456,19 @@ function deploy_vim_environment() {
         # Change options to compile you_complete_me from Linux distributions due to the issue
         # https://github.com/TsutomuNakamura/dotfiles/issues/61
         _install_you_complete_me || return 1
+
+        # Linke to neovim
+        mmkdir "${HOME}/.config" || return 1
+        pushd "${HOME}/.config" || {
+            logger_err "Failed to change directory ${HOME}/.config"
+            return 1
+        }
+        lln "../Library/Preferences/nvim" "." || {
+            logger_err "Failed to create symlink with \`ln -sf ../Library/Preferences/nvim .\` from ${HOME}/.config"
+            popd
+            return 1
+        }
+        popd
     elif [[ "$(get_distribution_name)" != "centos" ]]; then
         _install_you_complete_me --clang-completer --system-libclang || return 1
     else
