@@ -1276,7 +1276,11 @@ function backup_git_personal_properties() {
     declare -a created_files=()
 
     # Skip if GIT_USER_EMAIL_STORE_FILE_FULL_PATH and GIT_USER_NAME_STORE_FILE_FULL_PATH are already existed
-    [[ -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]] && [[ -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]] && return 0
+    [[ -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]] \
+            && [[ -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]] \
+            && [[ -f "$GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH" ]] \
+            && [[ -f "$GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH" ]] \
+            && return 0
 
     # May for the first time.
     [[ ! -f "${HOME}/.gitconfig" ]] && {
@@ -1300,7 +1304,7 @@ function backup_git_personal_properties() {
         }
     fi
 
-    read_ini "${HOME}/.gitconfig" || {
+    read_ini --booleans 0 "${HOME}/.gitconfig" || {
         logger_err "Failed to parse \"${HOME}/.gitconfig\""
         return 1
     }
@@ -1309,7 +1313,7 @@ function backup_git_personal_properties() {
     for taple in "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}	email	${INI__user__email}" \
                     "${GIT_USER_NAME_STORE_FILE_FULL_PATH}	name	${INI__user__name}" \
                     "${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}	signingkey_id	${INI__user__signingkey}" \
-                    "${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}	gpgsign_flag	${INI__commit_gpgsign}"
+                    "${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}	gpgsign_flag	${INI__commit__gpgsign}"
     do
         local file_path=$(cut -f 1 <<< "$taple")
         local label=$(cut -f 2 <<< "$taple")
@@ -1320,7 +1324,7 @@ function backup_git_personal_properties() {
         if [[ ! -f "$file_path" ]]; then
             created_files+=("$file_path")
             echo "$value" > "$file_path" || {
-                logger_err "Failed to store git property \"${label}\" to \"$file_path\""
+                logger_err "Failed to store git property \"${label}\" to \"${file_path}\""
                 clear_tmp_backup_files "${created_files[@]}"
                 return 1
             }
