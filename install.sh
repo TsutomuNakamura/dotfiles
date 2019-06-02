@@ -1464,7 +1464,7 @@ function deploy_vim_environment() {
             return 1
         }
         lln "../Library/Preferences/nvim" "." || {
-            logger_err "Failed to create symlink with \`ln -sf ../Library/Preferences/neovim .\` from ${HOME}/.config"
+            logger_err "Failed to create symlink with \`ln -sf ../Library/Preferences/nvim .\` from ${HOME}/.config"
             popd
             return 1
         }
