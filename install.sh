@@ -42,11 +42,19 @@ DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
 # Temporary git user email full path from previous .gitconfig
-GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_email"
+GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}"
 # Temporary git user name from previous .gitconfig
 GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
 # Temporary git user name full path from previous .gitconfig
-GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_name"
+GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}"
+# Temporary git user signingkey from previous .gitconfig
+GIT_USER_SIGNINGKEY_STORE_FILE="git_tmp_user_signingkey"
+# Temporary git user signingkey full path from previous .gitconfig
+GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}"
+# Temporary git commit gpgsign from previous .gitconfig
+GIT_COMMIT_GPGSIGN_STORE_FILE="git_tmp_commit_gpgsign"
+# Temporary git commit gpgsign full path from previous .gitconfig
+GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE}"
 
 # Git user name to store .gitconfig
 GIT_USER_NAME=
@@ -1265,7 +1273,7 @@ function backup_git_personal_properties() {
     local dotfiles_dir="$1"
 
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
-    local has_email_store_created=0
+    declare -a created_files=()
 
     # Skip if GIT_USER_EMAIL_STORE_FILE_FULL_PATH and GIT_USER_NAME_STORE_FILE_FULL_PATH are already existed
     [[ -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]] && [[ -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]] && return 0
@@ -1297,27 +1305,34 @@ function backup_git_personal_properties() {
         return 1
     }
 
-    # Set and restore git-email property
-    if [[ ! -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]]; then
-        echo "${INI__user__email}" > "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" || {
-            logger_err "Failed to store user's email of git to \"${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}\""
-            rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
-            return 1
-        }
-        has_email_store_created=1
-    fi
+    local value
+    for taple in "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}	email	${INI__user__email}" \
+                    "${GIT_USER_NAME_STORE_FILE_FULL_PATH}	name	${INI__user__name}" \
+                    "${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}	signingkey_id	${INI__user__signingkey}" \
+                    "${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}	gpgsign_flag	${INI__commit_gpgsign}"
+    do
+        local file_path=$(cut -f 1 <<< "$taple")
+        local label=$(cut -f 2 <<< "$taple")
+        local value=$(cut -f 3 <<< "$taple")
 
-    # Set and restore git-name property
-    if [[ ! -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]]; then
-        echo "${INI__user__name}" > "$GIT_USER_NAME_STORE_FILE_FULL_PATH" || {
-            logger_err "Failed to store user's name of git to \"${GIT_USER_NAME_STORE_FILE_FULL_PATH}\""
-            [[ "$has_email_store_created" -eq 1 ]] && rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
-            rm -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
-            return 1
-        }
-    fi
+        [[ -z "$label" ]] && continue
+
+        if [[ ! -f "$file_path" ]]; then
+            created_files+=("$file_path")
+            echo "$value" > "$file_path" || {
+                logger_err "Failed to store git property \"${label}\" to \"$file_path\""
+                clear_tmp_backup_files "${created_files[@]}"
+                return 1
+            }
+        fi
+    done
 
     return 0
+}
+
+function clear_tmp_backup_files() {
+    local targets=("$@")
+
 }
 
 # Restore git personal properties
