@@ -603,7 +603,7 @@ function count() {
     rm -rf ${HOME}/bin ${HOME}/{foo,bar}
 }
 
-@test '#backup_current_dotfiles should backup some symlinks and some files as a file' {
+@test '#backup_current_dotfiles should backup some symlinks and 4 files as a file' {
     rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
     mkdir -p ${HOME}/${DOTDIR}/bin
     touch ${HOME}/${DOTDIR}/bin/foo
@@ -653,7 +653,7 @@ function count() {
     rm -rf ${HOME}/bin ${HOME}/{foo,bar}
 }
 
-@test '#backup_current_dotfiles should backup some symlinks and some files as a file' {
+@test '#backup_current_dotfiles should backup some symlinks and 2 files as a file' {
     rm -rf ${HOME}/${DOTDIR}/bin ${HOME}/bin
     mkdir -p ${HOME}/${DOTDIR}/bin
     touch ${HOME}/${DOTDIR}/bin/foo
