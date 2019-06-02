@@ -1336,7 +1336,10 @@ function backup_git_personal_properties() {
 
 function clear_tmp_backup_files() {
     local targets=("$@")
-
+    local f
+    for f in "${targets[@]}"; do
+        rm -f "$f"
+    done
 }
 
 # Restore git personal properties
