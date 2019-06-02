@@ -54,7 +54,7 @@ function setup() {
     stub_called_with_exactly_times logger_err 1 "Failed to get available packages with \"pacman -Ss\""
 }
 
-@test '#install_packages_with_pacman should be failed if the command to get all available list "pacman -Ss" was failed' {
+@test '#install_packages_with_pacman should be return 0 if a package is not exist on repo and there are no packages to install' {
     run install_packages_with_pacman "seeeeeeeeeed"
 
     declare -a outputs; IFS=$'\n' outputs=($output)

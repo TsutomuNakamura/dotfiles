@@ -159,7 +159,7 @@ function teardown() {
     stub_called_with_exactly_times rm 1 "-rf" migu-1m-20150712 migu-1m-20150712.zip migu-1m-bold.ttf migu-1m-regular.ttf
 }
 
-@test '#_install_font_migu1m should return 2 if the unzip extracts migu-1m-bold.ttf but its size is 0.' {
+@test '#_install_font_migu1m should return 2 if the unzip extracts migu-1m-regular.ttf but its size is 0.' {
     stub_and_eval unzip '{
         command mkdir migu-1m-20150712
         command rm -f ./migu-1m-20150712/migu-1m-bold.ttf ./migu-1m-20150712/migu-1m-regular.ttf
