@@ -57,8 +57,6 @@ declare -A GIT_PROPERTIES_TO_KEEP=(
     ['gpgsign_flag']="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign"
 )
 
-
-
 # Git user name to store .gitconfig
 GIT_USER_NAME=
 # Git user email to store .gitconfig
@@ -1312,27 +1310,21 @@ function backup_git_personal_properties() {
         return 1
     }
 
-    local value
-    local table
-    for taple in "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}	email	${INI__user__email}" \
-                    "${GIT_USER_NAME_STORE_FILE_FULL_PATH}	name	${INI__user__name}" \
-                    "${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}	signingkey_id	${INI__user__signingkey}" \
-                    "${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}	gpgsign_flag	${INI__commit__gpgsign}"
-    do
-        local file_path=$(cut -f 1 <<< "$taple")
-        local label=$(cut -f 2 <<< "$taple")
-        local value=$(cut -f 3 <<< "$taple")
+    local key
 
-        [[ -z "$label" ]] && continue
+    for key in "${!GIT_PROPERTIES_TO_KEEP[@]}"; do
+        local value="${GIT_PROPERTIES_TO_KEEP[$key]}"
 
-        if [[ ! -f "$file_path" ]]; then
-            created_files+=("$file_path")
-            echo "$value" > "$file_path" || {
-                logger_err "Failed to store git property \"${label}\" to \"${file_path}\""
-                clear_tmp_backup_files "${created_files[@]}"
-                return 1
-            }
-        fi
+        local file_path=$(cut -d"$GLOBAL_DELIMITOR" -f 1 <<< "$value")
+        local name_of_val=$(cut -d"$GLOBAL_DELIMITOR" -f 2 <<< "$value")
+        local val_to_keep=$(eval "echo \${${name_of_val}}")
+
+        created_files+=("$file_path")
+        echo "$val_to_keep" > "$file_path" || {
+            logger_err "Failed to store git property \"${label}\" to \"${file_path}\""
+            clear_tmp_backup_files "${created_files[@]}"
+            return 1
+        }
     done
 
     return 0
