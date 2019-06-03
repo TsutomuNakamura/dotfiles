@@ -1276,13 +1276,6 @@ function backup_git_personal_properties() {
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
     declare -a created_files=()
 
-    # Skip if GIT_USER_EMAIL_STORE_FILE_FULL_PATH and GIT_USER_NAME_STORE_FILE_FULL_PATH are already existed
-    [[ -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]] \
-            && [[ -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]] \
-            && [[ -f "$GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH" ]] \
-            && [[ -f "$GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH" ]] \
-            && return 0
-
     # May for the first time.
     [[ ! -f "${HOME}/.gitconfig" ]] && {
         logger_info "There is no ${HOME}/.gitconfig. Skip getting user.name and user.email for new .gitconfig."
@@ -1318,6 +1311,8 @@ function backup_git_personal_properties() {
         local file_path=$(cut -d"$GLOBAL_DELIMITOR" -f 1 <<< "$value")
         local name_of_val=$(cut -d"$GLOBAL_DELIMITOR" -f 2 <<< "$value")
         local val_to_keep=$(eval "echo \${${name_of_val}}")
+
+        [[ -f "$file_path" ]] && continue
 
         created_files+=("$file_path")
         echo "$val_to_keep" > "$file_path" || {
