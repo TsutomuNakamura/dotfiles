@@ -48,13 +48,17 @@ GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
 GIT_USER_SIGNINGKEY_STORE_FILE="git_tmp_user_signingkey"
 # Temporary git commit gpgsign from previous .gitconfig
 GIT_COMMIT_GPGSIGN_STORE_FILE="git_tmp_commit_gpgsign"
+# Temporary git gpg program from previous .gitconfig
+GIT_GPG_PROGRAM_STORE_FILE="git_tmp_gpg_program"
 
 GLOBAL_DELIMITOR=','
 declare -A GIT_PROPERTIES_TO_KEEP=(
-    ['email']="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__email"
-    ['name']="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__name"
-    ['signingkey_id']="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__signingkey"
-    ['gpgsign_flag']="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign"
+    # ['label']="${tmp_file_path},${name_of_variable},${command_to_restore}"
+    ['email']="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__email${GLOBAL_DELIMITOR}git config --global user.email \"\${__arg__}\""
+    ['name']="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__name${GLOBAL_DELIMITOR}git config --global user.name \"\${__arg__}\""
+    ['signingkey_id']="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__signingkey${GLOBAL_DELIMITOR}git config --global user.signingkey \"\${__arg__}\""
+    ['gpgsign_flag']="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE}${GLOBAL_DELIMITOR}INI__commit__gpgsign${GLOBAL_DELIMITOR}git config --global commit.gpgsign \"\${__arg__}\""
+    ['gpgprogram']="${FULL_BACKUPDIR_PATH}/${GIT_GPG_PROGRAM_STORE_FILE}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
 )
 
 # Git user name to store .gitconfig
@@ -1342,30 +1346,16 @@ function restore_git_personal_properties() {
         local value="${GIT_PROPERTIES_TO_KEEP[$key]}"
 
         local file_path=$(cut -d"$GLOBAL_DELIMITOR" -f 1 <<< "$value")
+        local cmd=$(cut -d"$GLOBAL_DELIMITOR" -f 3 <<< "$value")
+
         [[ ! -f "$file_path" ]] && continue
-
-        local parameter="$(cat $file_path)"
-
-        case "$key" in
-            email )
-                true
-                ;;
-            name )
-                true
-                ;;
-            signingkey_id )
-                true
-                ;;
-            gpgsign_flag )
-                true
-                ;;
-            * )
-                logger_err "Unknown key of git properties \"${key}\""
-                return 1
-                ;;
-        esac
-
         will_be_deleted+=("$file_path")
+
+        local __arg__="$(cat $file_path)"
+        [[ -z "$__arg__" ]] && continue
+
+        # Restore a git parameter by command
+        eval "$cmd"
     done
 
     clear_tmp_backup_files "${will_be_deleted[@]}"
