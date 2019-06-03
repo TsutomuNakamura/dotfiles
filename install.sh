@@ -1340,43 +1340,38 @@ function clear_tmp_backup_files() {
 
 # Restore git personal properties
 function restore_git_personal_properties() {
-    local dotfiles_dir="$1"
+    declare -a will_be_deleted=()
 
-    local gitconfig="${FULL_DOTDIR_PATH}/.gitconfig"
+    # TODO: More efficient way
+    for key in "${!GIT_PROPERTIES_TO_KEEP[@]}"; do
+        local value="${GIT_PROPERTIES_TO_KEEP[$key]}"
 
-    if [[ -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]; then
-        local git_email="$(cat ${GIT_USER_EMAIL_STORE_FILE_FULL_PATH})"
+        local file_path=$(cut -d"$GLOBAL_DELIMITOR" -f 1 <<< "$value")
+        [[ ! -f "$file_path" ]] && continue
 
-        if [[ "$(get_distribution_name)" == "mac" ]]; then
-            sed -i "" -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
-                logger_err "Failed to restore email of the .gitconfig on your mac"
+        local parameter="$(cat $file_path)"
+
+        case "$key" in
+            email )
+                true
+                ;;
+            name )
+                true
+                ;;
+            signingkey_id )
+                true
+                ;;
+            gpgsign_flag )
+                true
+                ;;
+            * )
+                logger_err "Unknown key of git properties \"${key}\""
                 return 1
-            }
-        else
-            sed -i -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
-                logger_err "Failed to restore email of the .gitconfig"
-                return 1
-            }
-        fi
-    fi
+                ;;
+        esac
 
-    if [[ -f "${GIT_USER_NAME_STORE_FILE_FULL_PATH}" ]]; then
-        local git_name="$(cat ${GIT_USER_NAME_STORE_FILE_FULL_PATH})"
-
-        if [[ "$(get_distribution_name)" == "mac" ]]; then
-            sed -i "" -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
-                # TODO: Should restore .gitconfig fot atomicity?
-                logger_err "Failed to restore name of the .gitconfig on your mac"
-                return 1
-            }
-        else
-            sed -i -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
-                # TODO: Should restore .gitconfig fot atomicity?
-                logger_err "Failed to restore name of the .gitconfig"
-                return 1
-            }
-        fi
-    fi
+        will_be_deleted+=("$file_path")
+    done
 
     return 0
 }
