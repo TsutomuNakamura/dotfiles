@@ -1373,6 +1373,8 @@ function restore_git_personal_properties() {
         will_be_deleted+=("$file_path")
     done
 
+    clear_tmp_backup_files "${will_be_deleted[@]}"
+
     return 0
 }
 
