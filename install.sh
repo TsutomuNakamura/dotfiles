@@ -39,22 +39,25 @@ DEFAULT_XDG_DATA_HOME_FOR_LINUX="${HOME}/.local/share"
 # Default XDG_DATA_HOME for Mac
 DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
 
+
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
-# Temporary git user email full path from previous .gitconfig
-GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}"
 # Temporary git user name from previous .gitconfig
 GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
-# Temporary git user name full path from previous .gitconfig
-GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}"
 # Temporary git user signingkey from previous .gitconfig
 GIT_USER_SIGNINGKEY_STORE_FILE="git_tmp_user_signingkey"
-# Temporary git user signingkey full path from previous .gitconfig
-GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}"
 # Temporary git commit gpgsign from previous .gitconfig
 GIT_COMMIT_GPGSIGN_STORE_FILE="git_tmp_commit_gpgsign"
-# Temporary git commit gpgsign full path from previous .gitconfig
-GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE}"
+
+GLOBAL_DELIMITOR=','
+declare -A GIT_PROPERTIES_TO_KEEP=(
+    ['email']="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__email"
+    ['name']="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__name"
+    ['signingkey_id']="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__signingkey"
+    ['gpgsign_flag']="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign"
+)
+
+
 
 # Git user name to store .gitconfig
 GIT_USER_NAME=
@@ -1310,6 +1313,7 @@ function backup_git_personal_properties() {
     }
 
     local value
+    local table
     for taple in "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}	email	${INI__user__email}" \
                     "${GIT_USER_NAME_STORE_FILE_FULL_PATH}	name	${INI__user__name}" \
                     "${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}	signingkey_id	${INI__user__signingkey}" \
