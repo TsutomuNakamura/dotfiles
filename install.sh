@@ -1328,13 +1328,14 @@ function backup_git_personal_properties() {
 
         local file_path=$(cut -d"$GLOBAL_DELIMITOR" -f 1 <<< "$value")
         local name_of_val=$(cut -d"$GLOBAL_DELIMITOR" -f 2 <<< "$value")
-        local val_to_keep=$(eval "echo \${${name_of_val}}")
+        local val_to_keep=$(eval "command echo \${${name_of_val}}")
 
         [[ -f "$file_path" ]] && continue
+        [[ -z "$val_to_keep" ]] && continue
 
         created_files+=("$file_path")
         echo "$val_to_keep" > "$file_path" || {
-            logger_err "Failed to store git property \"${label}\" to \"${file_path}\""
+            logger_err "Failed to store git property \"${key}\" to \"${file_path}\""
             clear_tmp_backup_files "${created_files[@]}"
             return 1
         }
