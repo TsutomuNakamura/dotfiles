@@ -72,7 +72,7 @@ declare -g -A GIT_PROPERTIES_TO_KEEP=(
     ['name']="${GIT_USER_NAME_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__name${GLOBAL_DELIMITOR}git config --global user.name \"\${__arg__}\""
     ['signingkey_id']="${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__signingkey${GLOBAL_DELIMITOR}git config --global user.signingkey \"\${__arg__}\""
     ['gpgsign_flag']="${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign${GLOBAL_DELIMITOR}git config --global commit.gpgsign \"\${__arg__}\""
-    ['gpgprogram']="${GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
+    ['gpg_program']="${GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
 )
 
 # Git user name to store .gitconfig
