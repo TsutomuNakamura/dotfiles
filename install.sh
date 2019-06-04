@@ -42,23 +42,37 @@ DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
 
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
+# Full file path of temporary git user email from previous .gitconfig
+GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}"
+
 # Temporary git user name from previous .gitconfig
 GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
+# Full file path of temporary git user name from previous .gitconfig
+GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}"
+
 # Temporary git user signingkey from previous .gitconfig
 GIT_USER_SIGNINGKEY_STORE_FILE="git_tmp_user_signingkey"
+# Full file path of temporary git user signingkey from previous .gitconfig
+GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}"
+
 # Temporary git commit gpgsign from previous .gitconfig
 GIT_COMMIT_GPGSIGN_STORE_FILE="git_tmp_commit_gpgsign"
+# Full file path of temporary git commit gpgsign from previous .gitconfig
+GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE}"
+
 # Temporary git gpg program from previous .gitconfig
 GIT_GPG_PROGRAM_STORE_FILE="git_tmp_gpg_program"
+# Full file path of temporary git gpg program from previous .gitconfig
+GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_GPG_PROGRAM_STORE_FILE}"
 
 GLOBAL_DELIMITOR=','
-declare -A GIT_PROPERTIES_TO_KEEP=(
+declare -g -A GIT_PROPERTIES_TO_KEEP=(
     # ['label']="${tmp_file_path},${name_of_variable},${command_to_restore}"
-    ['email']="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__email${GLOBAL_DELIMITOR}git config --global user.email \"\${__arg__}\""
-    ['name']="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__name${GLOBAL_DELIMITOR}git config --global user.name \"\${__arg__}\""
-    ['signingkey_id']="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}${GLOBAL_DELIMITOR}INI__user__signingkey${GLOBAL_DELIMITOR}git config --global user.signingkey \"\${__arg__}\""
-    ['gpgsign_flag']="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE}${GLOBAL_DELIMITOR}INI__commit__gpgsign${GLOBAL_DELIMITOR}git config --global commit.gpgsign \"\${__arg__}\""
-    ['gpgprogram']="${FULL_BACKUPDIR_PATH}/${GIT_GPG_PROGRAM_STORE_FILE}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
+    ['email']="${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__email${GLOBAL_DELIMITOR}git config --global user.email \"\${__arg__}\""
+    ['name']="${GIT_USER_NAME_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__name${GLOBAL_DELIMITOR}git config --global user.name \"\${__arg__}\""
+    ['signingkey_id']="${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__signingkey${GLOBAL_DELIMITOR}git config --global user.signingkey \"\${__arg__}\""
+    ['gpgsign_flag']="${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign${GLOBAL_DELIMITOR}git config --global commit.gpgsign \"\${__arg__}\""
+    ['gpgprogram']="${GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
 )
 
 # Git user name to store .gitconfig
@@ -72,7 +86,7 @@ CASH_ABSOLUTE_BACKUPDIR=
 DISTRIBUTION=
 
 # Post message list
-declare -a POST_MESSAGES=()
+declare -g -a POST_MESSAGES=()
 
 PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev xclip build-essential"
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
@@ -99,7 +113,7 @@ PACKAGES_TO_INSTALL_ON_MAC+=" neovim"
 URL_OF_TMUX_PLUGIN="https://github.com/tmux-plugins/tpm.git"
 
 # Symbolic link list of configuration of vim.
-declare -a VIM_CONF_LINK_LIST=(
+declare -g -a VIM_CONF_LINK_LIST=(
     # "<link_dest>,<link_src>"
     "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim,${FULL_DOTDIR_PATH}/.vim/after/syntax"
     "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim,${FULL_DOTDIR_PATH}/.vim/ftdetect"
@@ -108,10 +122,10 @@ declare -a VIM_CONF_LINK_LIST=(
 )
 
 # Directories should be deep linked
-declare -a DEEP_LINK_DIRECTORIES=(".config" "bin" ".local")
+declare -g -a DEEP_LINK_DIRECTORIES=(".config" "bin" ".local")
 
 # Files should be copied on only Mac
-declare -a FILES_SHOULD_BE_COPIED_ON_ONLY_MAC=("Inconsolata for Powerline.otf")
+declare -g -a FILES_SHOULD_BE_COPIED_ON_ONLY_MAC=("Inconsolata for Powerline.otf")
 
 # Answer status for question() yes
 ANSWER_OF_QUESTION_YES=0
@@ -1316,7 +1330,10 @@ function backup_git_personal_properties() {
         local name_of_val=$(cut -d"$GLOBAL_DELIMITOR" -f 2 <<< "$value")
         local val_to_keep=$(eval "echo \${${name_of_val}}")
 
+
         [[ -f "$file_path" ]] && continue
+
+        echo "file_path -> $file_path, name_of_val -> $name_of_val, val_to_keep -> $val_to_keep"
 
         created_files+=("$file_path")
         echo "$val_to_keep" > "$file_path" || {
@@ -1354,7 +1371,8 @@ function restore_git_personal_properties() {
         local __arg__="$(cat $file_path)"
         [[ -z "$__arg__" ]] && continue
 
-        # Restore a git parameter by command
+        # Restore a git parameter by command.
+        # __arg__ parameter must be set before run this eval.
         eval "$cmd"
     done
 
