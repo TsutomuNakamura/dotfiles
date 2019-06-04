@@ -1330,10 +1330,7 @@ function backup_git_personal_properties() {
         local name_of_val=$(cut -d"$GLOBAL_DELIMITOR" -f 2 <<< "$value")
         local val_to_keep=$(eval "echo \${${name_of_val}}")
 
-
         [[ -f "$file_path" ]] && continue
-
-        echo "file_path -> $file_path, name_of_val -> $name_of_val, val_to_keep -> $val_to_keep"
 
         created_files+=("$file_path")
         echo "$val_to_keep" > "$file_path" || {
