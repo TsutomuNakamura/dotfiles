@@ -1371,7 +1371,10 @@ function restore_git_personal_properties() {
 
         # Restore a git parameter by command.
         # __arg__ parameter must be set before run this eval.
-        eval "$cmd"
+        eval "$cmd" || {
+            logger_err "Failed to execute \`$cmd\`"
+            return 1
+        }
     done
 
     clear_tmp_backup_files "${will_be_deleted[@]}"
