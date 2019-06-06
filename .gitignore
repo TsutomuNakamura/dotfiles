@@ -19,6 +19,9 @@
 /.vim/autoload/plug.vim
 /.vim/plugged/
 
+# tmux-plug
+.tmux/plugins/
+
 # test log
 /*.log
 
