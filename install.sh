@@ -39,14 +39,41 @@ DEFAULT_XDG_DATA_HOME_FOR_LINUX="${HOME}/.local/share"
 # Default XDG_DATA_HOME for Mac
 DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
 
+
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
-# Temporary git user email full path from previous .gitconfig
-GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_email"
+# Full file path of temporary git user email from previous .gitconfig
+GIT_USER_EMAIL_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}"
+
 # Temporary git user name from previous .gitconfig
 GIT_USER_NAME_STORE_FILE="git_tmp_user_name"
-# Temporary git user name full path from previous .gitconfig
-GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/git_tmp_user_name"
+# Full file path of temporary git user name from previous .gitconfig
+GIT_USER_NAME_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}"
+
+# Temporary git user signingkey from previous .gitconfig
+GIT_USER_SIGNINGKEY_STORE_FILE="git_tmp_user_signingkey"
+# Full file path of temporary git user signingkey from previous .gitconfig
+GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_USER_SIGNINGKEY_STORE_FILE}"
+
+# Temporary git commit gpgsign from previous .gitconfig
+GIT_COMMIT_GPGSIGN_STORE_FILE="git_tmp_commit_gpgsign"
+# Full file path of temporary git commit gpgsign from previous .gitconfig
+GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_COMMIT_GPGSIGN_STORE_FILE}"
+
+# Temporary git gpg program from previous .gitconfig
+GIT_GPG_PROGRAM_STORE_FILE="git_tmp_gpg_program"
+# Full file path of temporary git gpg program from previous .gitconfig
+GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH="${FULL_BACKUPDIR_PATH}/${GIT_GPG_PROGRAM_STORE_FILE}"
+
+GLOBAL_DELIMITOR=','
+declare -g -A GIT_PROPERTIES_TO_KEEP=(
+    # ['label']="${tmp_file_path},${name_of_variable},${command_to_restore}"
+    ['email']="${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__email${GLOBAL_DELIMITOR}git config --global user.email \"\${__arg__}\""
+    ['name']="${GIT_USER_NAME_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__name${GLOBAL_DELIMITOR}git config --global user.name \"\${__arg__}\""
+    ['signingkey_id']="${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__signingkey${GLOBAL_DELIMITOR}git config --global user.signingkey \"\${__arg__}\""
+    ['gpgsign_flag']="${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign${GLOBAL_DELIMITOR}git config --global commit.gpgsign \"\${__arg__}\""
+    ['gpg_program']="${GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
+)
 
 # Git user name to store .gitconfig
 GIT_USER_NAME=
@@ -59,7 +86,7 @@ CASH_ABSOLUTE_BACKUPDIR=
 DISTRIBUTION=
 
 # Post message list
-declare -a POST_MESSAGES=()
+declare -g -a POST_MESSAGES=()
 
 PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev xclip build-essential"
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
@@ -86,7 +113,7 @@ PACKAGES_TO_INSTALL_ON_MAC+=" neovim"
 URL_OF_TMUX_PLUGIN="https://github.com/tmux-plugins/tpm.git"
 
 # Symbolic link list of configuration of vim.
-declare -a VIM_CONF_LINK_LIST=(
+declare -g -a VIM_CONF_LINK_LIST=(
     # "<link_dest>,<link_src>"
     "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim,${FULL_DOTDIR_PATH}/.vim/after/syntax"
     "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim,${FULL_DOTDIR_PATH}/.vim/ftdetect"
@@ -95,10 +122,10 @@ declare -a VIM_CONF_LINK_LIST=(
 )
 
 # Directories should be deep linked
-declare -a DEEP_LINK_DIRECTORIES=(".config" "bin" ".local")
+declare -g -a DEEP_LINK_DIRECTORIES=(".config" "bin" ".local")
 
 # Files should be copied on only Mac
-declare -a FILES_SHOULD_BE_COPIED_ON_ONLY_MAC=("Inconsolata for Powerline.otf")
+declare -g -a FILES_SHOULD_BE_COPIED_ON_ONLY_MAC=("Inconsolata for Powerline.otf")
 
 # Answer status for question() yes
 ANSWER_OF_QUESTION_YES=0
@@ -1265,10 +1292,7 @@ function backup_git_personal_properties() {
     local dotfiles_dir="$1"
 
     local read_ini_sh="${dotfiles_dir}/.bash_modules/read_ini.sh"
-    local has_email_store_created=0
-
-    # Skip if GIT_USER_EMAIL_STORE_FILE_FULL_PATH and GIT_USER_NAME_STORE_FILE_FULL_PATH are already existed
-    [[ -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]] && [[ -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]] && return 0
+    declare -a created_files=()
 
     # May for the first time.
     [[ ! -f "${HOME}/.gitconfig" ]] && {
@@ -1292,73 +1316,68 @@ function backup_git_personal_properties() {
         }
     fi
 
-    read_ini "${HOME}/.gitconfig" || {
+    read_ini --booleans 0 "${HOME}/.gitconfig" || {
         logger_err "Failed to parse \"${HOME}/.gitconfig\""
         return 1
     }
 
-    # Set and restore git-email property
-    if [[ ! -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" ]]; then
-        echo "${INI__user__email}" > "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH" || {
-            logger_err "Failed to store user's email of git to \"${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}\""
-            rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
-            return 1
-        }
-        has_email_store_created=1
-    fi
+    local key
 
-    # Set and restore git-name property
-    if [[ ! -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH" ]]; then
-        echo "${INI__user__name}" > "$GIT_USER_NAME_STORE_FILE_FULL_PATH" || {
-            logger_err "Failed to store user's name of git to \"${GIT_USER_NAME_STORE_FILE_FULL_PATH}\""
-            [[ "$has_email_store_created" -eq 1 ]] && rm -f "$GIT_USER_EMAIL_STORE_FILE_FULL_PATH"
-            rm -f "$GIT_USER_NAME_STORE_FILE_FULL_PATH"
+    for key in "${!GIT_PROPERTIES_TO_KEEP[@]}"; do
+        local value="${GIT_PROPERTIES_TO_KEEP[$key]}"
+
+        local file_path=$(cut -d"$GLOBAL_DELIMITOR" -f 1 <<< "$value")
+        local name_of_val=$(cut -d"$GLOBAL_DELIMITOR" -f 2 <<< "$value")
+        local val_to_keep=$(eval "command echo \${${name_of_val}}")
+
+        [[ -f "$file_path" ]] && continue
+        [[ -z "$val_to_keep" ]] && continue
+
+        created_files+=("$file_path")
+        echo "$val_to_keep" > "$file_path" || {
+            logger_err "Failed to store git property \"${key}\" to \"${file_path}\""
+            clear_tmp_backup_files "${created_files[@]}"
             return 1
         }
-    fi
+    done
 
     return 0
 }
 
+function clear_tmp_backup_files() {
+    local targets=("$@")
+    local f
+    for f in "${targets[@]}"; do
+        rm -f "$f"
+    done
+}
+
 # Restore git personal properties
 function restore_git_personal_properties() {
-    local dotfiles_dir="$1"
+    declare -a will_be_deleted=()
 
-    local gitconfig="${FULL_DOTDIR_PATH}/.gitconfig"
+    # TODO: More efficient way
+    for key in "${!GIT_PROPERTIES_TO_KEEP[@]}"; do
+        local value="${GIT_PROPERTIES_TO_KEEP[$key]}"
 
-    if [[ -f "${GIT_USER_EMAIL_STORE_FILE_FULL_PATH}" ]]; then
-        local git_email="$(cat ${GIT_USER_EMAIL_STORE_FILE_FULL_PATH})"
+        local file_path=$(cut -d"$GLOBAL_DELIMITOR" -f 1 <<< "$value")
+        local cmd=$(cut -d"$GLOBAL_DELIMITOR" -f 3 <<< "$value")
 
-        if [[ "$(get_distribution_name)" == "mac" ]]; then
-            sed -i "" -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
-                logger_err "Failed to restore email of the .gitconfig on your mac"
-                return 1
-            }
-        else
-            sed -i -e "s|^\([[:space:]]\+\)email[[:space:]]\+=.*|\1email = ${git_email}|g" "$gitconfig" || {
-                logger_err "Failed to restore email of the .gitconfig"
-                return 1
-            }
-        fi
-    fi
+        [[ ! -f "$file_path" ]] && continue
+        will_be_deleted+=("$file_path")
 
-    if [[ -f "${GIT_USER_NAME_STORE_FILE_FULL_PATH}" ]]; then
-        local git_name="$(cat ${GIT_USER_NAME_STORE_FILE_FULL_PATH})"
+        local __arg__="$(cat $file_path)"
+        [[ -z "$__arg__" ]] && continue
 
-        if [[ "$(get_distribution_name)" == "mac" ]]; then
-            sed -i "" -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
-                # TODO: Should restore .gitconfig fot atomicity?
-                logger_err "Failed to restore name of the .gitconfig on your mac"
-                return 1
-            }
-        else
-            sed -i -e "s|^\([[:space:]]\+\)name[[:space:]]\+=.*|\1name = ${git_name}|g" "$gitconfig" || {
-                # TODO: Should restore .gitconfig fot atomicity?
-                logger_err "Failed to restore name of the .gitconfig"
-                return 1
-            }
-        fi
-    fi
+        # Restore a git parameter by command.
+        # __arg__ parameter must be set before run this eval.
+        eval "$cmd" || {
+            logger_err "Failed to execute \`$cmd\`"
+            return 1
+        }
+    done
+
+    clear_tmp_backup_files "${will_be_deleted[@]}"
 
     return 0
 }
