@@ -3,104 +3,42 @@ load helpers "install.sh"
 
 function setup() {
     cd ${HOME}
+    stub link_xdg_base_directory
 }
 
 function teardown() {
     command rm -rf ./.dotfiles ./.config ./.local ./Library
 }
 
-function count() {
-    find $1 -maxdepth 1 -mindepth 1 \( -type f -or -type d -or -type l \) | wc -l;
-}
+#function count() {
+#    find $1 -maxdepth 1 -mindepth 1 \( -type f -or -type d -or -type l \) | wc -l;
+#}
 
-@test '#deploy_xdg_base_directory should deploy resources in "~/.dotfiles/XDG_CONFIG_HOME" to "~/.config" on Linux' {
-    mkdir -p .dotfiles/XDG_CONFIG_HOME/foo
-    touch .dotfiles/XDG_CONFIG_HOME/bar.txt
-    touch .dotfiles/XDG_CONFIG_HOME/foo/baz.sh
-
-    function get_distribution_name() { echo "arch"; }
+@test '#deploy_xdg_base_directory should call link_xdg_base_directory proper parameters on Linux' {
+    # Linux
+    stub_and_eval get_xdg_config_home '{ echo "${HOME}/.config"; }'
+    stub_and_eval get_xdg_data_home '{ echo "${HOME}/.local/share"; }'
 
     run deploy_xdg_base_directory
 
-    echo "$output"
     [[ "$status" -eq 0 ]]
-    [[ -L "./.config/bar.txt" ]]
-    [[ -L "./.config/foo/baz.sh" ]]
-    [[ "$(count ./.config)" -eq 2 ]]
-    [[ "$(readlink ./.config/bar.txt)" = "../.dotfiles/XDG_CONFIG_HOME/bar.txt" ]]
-    [[ "$(count ./.config/foo)" -eq 1 ]]
-    [[ "$(readlink ./.config/foo/baz.sh)" = "../../.dotfiles/XDG_CONFIG_HOME/foo/baz.sh" ]]
+    [[ $(stub_called_times link_xdg_base_directory)      -eq 2 ]]
+
+    stub_called_with_exactly_times link_xdg_base_directory 1 "XDG_CONFIG_HOME" "${HOME}/.config"
+    stub_called_with_exactly_times link_xdg_base_directory 1 "XDG_DATA_HOME" "${HOME}/.local/share"
 }
 
-@test '#deploy_xdg_base_directory should deploy resources in "~/.dotfiles/XDG_DATA_HOME" to "~/.local/share" on Linux' {
-    mkdir -p .dotfiles/XDG_DATA_HOME/foo
-    touch .dotfiles/XDG_DATA_HOME/bar.txt
-    touch .dotfiles/XDG_DATA_HOME/foo/baz.sh
-
-    function get_distribution_name() { echo "arch"; }
+@test '#deploy_xdg_base_directory should call link_xdg_base_directory proper parameters on Mac' {
+    # Linux
+    stub_and_eval get_xdg_config_home '{ echo "${HOME}/Library/Preferences"; }'
+    stub_and_eval get_xdg_data_home '{ echo "${HOME}/Library"; }'
 
     run deploy_xdg_base_directory
 
-    echo "$output"
     [[ "$status" -eq 0 ]]
-    [[ -L "./.local/share/bar.txt" ]]
-    [[ -L "./.local/share/foo/baz.sh" ]]
-    [[ "$(count ./.local/share)" -eq 2 ]]
-    [[ "$(readlink ./.local/share/bar.txt)" = "../../.dotfiles/XDG_DATA_HOME/bar.txt" ]]
-    [[ "$(count ./.local/share/foo)" -eq 1 ]]
-    [[ "$(readlink ./.local/share/foo/baz.sh)" = "../../../.dotfiles/XDG_DATA_HOME/foo/baz.sh" ]]
-}
+    [[ $(stub_called_times link_xdg_base_directory)      -eq 2 ]]
 
-@test '#deploy_xdg_base_directory should deploy resources in "~/.dotfiles/XDG_CONFIG_HOME" to "~/Library/Preferences" on Mac' {
-    mkdir -p .dotfiles/XDG_CONFIG_HOME/foo
-    touch .dotfiles/XDG_CONFIG_HOME/bar.txt
-    touch .dotfiles/XDG_CONFIG_HOME/foo/baz.sh
-
-    function get_distribution_name() { echo "mac"; }
-
-    run deploy_xdg_base_directory
-
-    echo "$output"
-    [[ "$status" -eq 0 ]]
-    [[ -L "./Library/Preferences/bar.txt" ]]
-    [[ -L "./Library/Preferences/foo/baz.sh" ]]
-    [[ "$(count ./Library/Preferences)" -eq 2 ]]
-    [[ "$(readlink ./Library/Preferences/bar.txt)" = "../../.dotfiles/XDG_CONFIG_HOME/bar.txt" ]]
-    [[ "$(count ./Library/Preferences/foo)" -eq 1 ]]
-    [[ "$(readlink ./Library/Preferences/foo/baz.sh)" = "../../../.dotfiles/XDG_CONFIG_HOME/foo/baz.sh" ]]
-}
-
-@test '#deploy_xdg_base_directory should deploy resources in "~/.dotfiles/XDG_DATA_HOME" to "~/Library" on Mac' {
-    mkdir -p .dotfiles/XDG_DATA_HOME/foo
-    touch .dotfiles/XDG_DATA_HOME/bar.txt
-    touch .dotfiles/XDG_DATA_HOME/foo/baz.sh
-
-    function get_distribution_name() { echo "mac"; }
-
-    run deploy_xdg_base_directory
-
-    echo "$output"
-    [[ "$status" -eq 0 ]]
-    [[ -L "./Library/bar.txt" ]]
-    [[ -L "./Library/foo/baz.sh" ]]
-    [[ "$(count ./Library)" -eq 2 ]]
-    [[ "$(readlink ./Library/bar.txt)" = "../.dotfiles/XDG_DATA_HOME/bar.txt" ]]
-    [[ "$(count ./Library/foo)" -eq 1 ]]
-    [[ "$(readlink ./Library/foo/baz.sh)" = "../../.dotfiles/XDG_DATA_HOME/foo/baz.sh" ]]
-}
-
-@test '#deploy_xdg_base_directory should deploy fonts "~/Library/Fonts" (not to ~/Library/fonts) on Mac' {
-    mkdir -p .dotfiles/XDG_DATA_HOME/fonts
-    touch ".dotfiles/XDG_DATA_HOME/fonts/Inconsolata for Powerline.otf"
-
-    function get_distribution_name() { echo "mac"; }
-
-    run deploy_xdg_base_directory
-
-    echo "$output"
-    [[ "$status" -eq 0 ]]
-    [[ -L "./Library/Fonts/Inconsolata for Powerline.otf" ]]
-    [[ "$(count ./Library/Fonts)" -eq 1 ]]
-    [[ "$(readlink "./Library/Fonts/Inconsolata for Powerline.otf")" = "../../.dotfiles/XDG_DATA_HOME/fonts/Inconsolata for Powerline.otf" ]]
+    stub_called_with_exactly_times link_xdg_base_directory 1 "XDG_CONFIG_HOME" "${HOME}/Library/Preferences"
+    stub_called_with_exactly_times link_xdg_base_directory 1 "XDG_DATA_HOME" "${HOME}/Library"
 }
 
