@@ -262,6 +262,7 @@ function check_environment() {
             echo "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\"" >&2
         fi
         echo "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset." >&2
+
         return 1
     }
 
