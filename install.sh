@@ -170,24 +170,7 @@ function main() {
         return 1
     }
 
-
-    is_customized_xdg_base_directories || {
-        echo "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
-        echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
-        if [[ -z "${XDG_CONFIG_HOME}" ]]; then
-            echo "       XDG_CONFIG_HOME=(unset)"
-        else
-            echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\""
-        fi
-        echo "           -> This must be set \"\${HOME}/.config\" in Linux or \"\${HOME}/Library/Preferences\" in Mac or unset."
-        if [[ -z "${XDG_DATA_HOME}" ]]; then
-            echo "       XDG_DATA_HOME=(unset)"
-        else
-            echo "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\""
-        fi
-        echo "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
-        return 1
-    }
+    check_environment || return 1
 
     local flag_init=0
     local flag_deploy=0
@@ -261,6 +244,28 @@ function main() {
     do_post_instructions || (( error_count++ ))
 
     return $error_count
+}
+
+function check_environment() {
+    is_customized_xdg_base_directories || {
+        echo "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments." >&2
+        echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below." >&2
+        if [[ -z "${XDG_CONFIG_HOME}" ]]; then
+            echo "       XDG_CONFIG_HOME=(unset)" >&2
+        else
+            echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\"" >&2
+        fi
+        echo "           -> This must be set \"\${HOME}/.config\" in Linux or \"\${HOME}/Library/Preferences\" in Mac or unset." >&2
+        if [[ -z "${XDG_DATA_HOME}" ]]; then
+            echo "       XDG_DATA_HOME=(unset)" >&2
+        else
+            echo "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\"" >&2
+        fi
+        echo "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset." >&2
+        return 1
+    }
+
+    return 0
 }
 
 # Run post instructions
