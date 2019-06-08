@@ -265,6 +265,26 @@ function check_environment() {
         return 1
     }
 
+    [[ -z "$BASH" ]] && {
+        echo "ERROR: This script must run as bash script" >&2
+        return 1
+    }
+    [[ -z "$BASH_VERSION" ]] && {
+        echo "ERROR: This session does not have BASH_VERSION environment variable. Is this a proper bash session?" >&2
+        return 1
+    }
+
+    local current_bash_version=$(grep -o -E '^[0-9](\.[0-9])+' <<< "$BASH_VERSION")
+    vercomp "4.0.0" "$current_bash_version"
+
+    local result="$?"
+    [[ "$result" -eq 2 ]] && {
+        # version of bash
+        true
+    }
+
+
+
     return 0
 }
 
@@ -2205,6 +2225,9 @@ function popd() {
 }
 
 # Compareing versions
+# Return 1 if $1 greater than $2.
+# Return 2 if $1 less than $2.
+# Return 0 if $1 equals $2.
 # https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 function vercomp() {
     if [[ $1 == $2 ]]
