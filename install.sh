@@ -279,11 +279,16 @@ function check_environment() {
 
     local result="$?"
     [[ "$result" -eq 2 ]] && {
-        # version of bash
-        true
+        echo "ERROR: Version of bash have to greater than 4.0.0."                                                           >&2
+        echo "       Please update your bash greater than 4.0.0 then run this script again."                                >&2
+        echo "       If you use mac, you can change new version of bash by running commands like below..."                  >&2
+        echo "         $ brew install bash"                                                                                 >&2
+        echo "         $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"   >&2
+        echo "         $ chsh -s /usr/local/bin/bash"                                                                       >&2
+        echo "       ...then relogin or restart your Mac"                                                                   >&2
+
+        return 1
     }
-
-
 
     return 0
 }
