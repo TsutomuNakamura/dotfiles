@@ -170,24 +170,7 @@ function main() {
         return 1
     }
 
-
-    is_customized_xdg_base_directories || {
-        echo "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
-        echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
-        if [[ -z "${XDG_CONFIG_HOME}" ]]; then
-            echo "       XDG_CONFIG_HOME=(unset)"
-        else
-            echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\""
-        fi
-        echo "           -> This must be set \"\${HOME}/.config\" in Linux or \"\${HOME}/Library/Preferences\" in Mac or unset."
-        if [[ -z "${XDG_DATA_HOME}" ]]; then
-            echo "       XDG_DATA_HOME=(unset)"
-        else
-            echo "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\""
-        fi
-        echo "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
-        return 1
-    }
+    check_environment || return 1
 
     local flag_init=0
     local flag_deploy=0
@@ -261,6 +244,54 @@ function main() {
     do_post_instructions || (( error_count++ ))
 
     return $error_count
+}
+
+function check_environment() {
+    is_customized_xdg_base_directories || {
+        echo "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments." >&2
+        echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below." >&2
+        if [[ -z "${XDG_CONFIG_HOME}" ]]; then
+            echo "       XDG_CONFIG_HOME=(unset)" >&2
+        else
+            echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\"" >&2
+        fi
+        echo "           -> This must be set \"\${HOME}/.config\" in Linux or \"\${HOME}/Library/Preferences\" in Mac or unset." >&2
+        if [[ -z "${XDG_DATA_HOME}" ]]; then
+            echo "       XDG_DATA_HOME=(unset)" >&2
+        else
+            echo "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\"" >&2
+        fi
+        echo "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset." >&2
+
+        return 1
+    }
+
+    [[ -z "$BASH" ]] && {
+        echo "ERROR: This script must run as bash script" >&2
+        return 1
+    }
+    [[ -z "$BASH_VERSION" ]] && {
+        echo "ERROR: This session does not have BASH_VERSION environment variable. Is this a proper bash session?" >&2
+        return 1
+    }
+
+    local current_bash_version=$(grep -o -E '^[0-9](\.[0-9])+' <<< "$BASH_VERSION")
+    vercomp "4.0.0" "$current_bash_version"
+
+    local result="$?"
+    [[ "$result" -eq 1 ]] && {
+        echo "ERROR: Version of bash have to greater than 4.0.0."                                                           >&2
+        echo "       Please update your bash greater than 4.0.0 then run this script again."                                >&2
+        echo "       If you use mac, you can change new version of bash by running commands like below..."                  >&2
+        echo "         $ brew install bash"                                                                                 >&2
+        echo "         $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"   >&2
+        echo "         $ chsh -s /usr/local/bin/bash"                                                                       >&2
+        echo "       ...then relogin or restart your Mac"                                                                   >&2
+
+        return 1
+    }
+
+    return 0
 }
 
 # Run post instructions
@@ -2200,6 +2231,9 @@ function popd() {
 }
 
 # Compareing versions
+# Return 1 if $1 greater than $2.
+# Return 2 if $1 less than $2.
+# Return 0 if $1 equals $2.
 # https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 function vercomp() {
     if [[ $1 == $2 ]]
