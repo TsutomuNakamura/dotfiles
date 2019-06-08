@@ -279,7 +279,7 @@ function check_environment() {
     vercomp "4.0.0" "$current_bash_version"
 
     local result="$?"
-    [[ "$result" -eq 2 ]] && {
+    [[ "$result" -eq 1 ]] && {
         echo "ERROR: Version of bash have to greater than 4.0.0."                                                           >&2
         echo "       Please update your bash greater than 4.0.0 then run this script again."                                >&2
         echo "       If you use mac, you can change new version of bash by running commands like below..."                  >&2
