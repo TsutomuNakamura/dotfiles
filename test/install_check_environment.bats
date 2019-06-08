@@ -112,9 +112,9 @@ function teardown() {
     stub_called_with_exactly_times echo 1 "ERROR: This session does not have BASH_VERSION environment variable. Is this a proper bash session?"
 }
 
-@test '#check_environment should return 1 and if vercomp() return 2' {
+@test '#check_environment should return 1 and if vercomp() return 1' {
     export XDG_DATA_HOME="$HOME/.local/share"
-    stub_and_eval vercomp '{ return 2; }'
+    stub_and_eval vercomp '{ return 1; }'
 
     run check_environment
 
