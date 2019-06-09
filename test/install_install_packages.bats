@@ -27,8 +27,6 @@ function setup() {
 
     PACKAGES_TO_INSTALL_ON_ARCH="arch_cli_a arch_cli_b"
     PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="arch_gui_a arch_gui_b"
-
-    PACKAGES_TO_INSTALL_ON_MAC="mac_a mac_b"
 }
 #function teardown() {}
 
