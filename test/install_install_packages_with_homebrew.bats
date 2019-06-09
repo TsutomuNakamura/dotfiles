@@ -3,7 +3,7 @@
 load helpers "install.sh"
 
 function setup() {
-    rm -f /tmp/.*BrewfileOfDotfiles || true
+    command rm -f /tmp/.*BrewfileOfDotfiles
 
     stub curl
     stub brew
@@ -12,8 +12,10 @@ function setup() {
     stub logger_err
     export __USERID__="$(id -u)"
 }
+
 function teardown() {
-    rm -f /tmp/.*BrewfileOfDotfiles || true
+    command rm -f /tmp/.*BrewfileOfDotfiles
+    unset rm
 }
 
 @test '#install_packages_with_homebrew should return 0 and get Brewfile from master branch' {
