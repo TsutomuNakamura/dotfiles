@@ -1051,7 +1051,7 @@ function install_packages_with_homebrew() {
         return 1
     }
 
-    brew bundle --file="/tmp/.$(id -u)_BrewfileOfDotfiles" || {
+    brew bundle --file="/tmp/.${user_id}_BrewfileOfDotfiles" || {
         logger_err "Failed to install packages with brew bundle"
         return 1
     }
