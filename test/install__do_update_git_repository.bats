@@ -16,7 +16,7 @@ function teardown() {
     command rm -rf "/var/tmp/.dotfiles"
 }
 
-@test '#_do_update_git_repository should call "git clone -b master <url> <dir>" if the update_type is GIT_UPDATE_TYPE_JUST_CLONE' {
+@test '#_do_update_git_repository should call \`git clone -b master <url> <dir>\` if the update_type is GIT_UPDATE_TYPE_JUST_CLONE' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_JUST_CLONE
 
     [[ "$status" -eq 0 ]]
@@ -53,7 +53,7 @@ function teardown() {
     stub_called_with_exactly_times pushd 1 "/var/tmp"
 }
 
-@test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir>" if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY' {
+@test '#_do_update_git_repository should call rm then \`git clone -b master <url> <dir>\` if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_NOT_GIT_REPOSITORY
 
     [[ "$status" -eq 0 ]]
@@ -96,7 +96,7 @@ function teardown() {
     stub_called_with_exactly_times pushd 1 "/var/tmp"
 }
 
-@test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE"' {
+@test '#_do_update_git_repository should call rm then \`git clone -b master <url> <dir>\` if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_WRONG_REMOTE
 
     [[ "$status" -eq 0 ]]
@@ -126,7 +126,7 @@ function teardown() {
 ##    stub_called_with_exactly_times pushd 1 "/var/tmp"
 ##}
 
-@test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET"' {
+@test '#_do_update_git_repository should call rm then \`git clone -b master <url> <dir>\` if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_UN_PUSHED_YET
 
     [[ "$status" -eq 0 ]]
@@ -153,7 +153,7 @@ function teardown() {
 ##    stub_called_with_exactly_times logger_err 1 "Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 ##}
 
-@test '#_do_update_git_repository should call rm then "git clone -b master <url> <dir> if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT"' {
+@test '#_do_update_git_repository should call rm then \`git clone -b master <url> <dir>\` if the update_type is GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_REMOVE_THEN_CLONE_DUE_TO_BRANCH_IS_DIFFERENT
 
     [[ "$status" -eq 0 ]]
@@ -179,7 +179,7 @@ function teardown() {
 ##    stub_called_with_exactly_times logger_err 1 "Failed to clone the repository(git -C \"/var/tmp\" clone -b \"master\" \"https://github.com/TsutomuNakamura/dotfiles.git\" \".dotfiles\")"
 ##}
 
-@test '#_do_update_git_repository should return GIT_UPDATE_TYPE_ABOARTED if the update_type is GIT_UPDATE_TYPE_ABOARTED"' {
+@test '#_do_update_git_repository should return GIT_UPDATE_TYPE_ABOARTED if the update_type is GIT_UPDATE_TYPE_ABOARTED' {
     run _do_update_git_repository "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_ABOARTED
 
     [[ "$status" -eq $GIT_UPDATE_TYPE_ABOARTED ]]
@@ -194,7 +194,7 @@ function teardown() {
 
 ## - In case of *)
 
-@test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL and remote is different from "origin"' {
+@test '#_do_update_git_repository should return 1 if the update_type is GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL and remote is different from origin' {
     stub_and_eval git '{
         [[ "$1" == "rev-parse" ]] && echo "master"
         return 0
@@ -212,7 +212,7 @@ function teardown() {
     stub_called_with_exactly_times logger_err 1 "Sorry, this script only supports remote as \"origin\". The repository had been going to clone remote as \"origine\""
 }
 
-@test '#_do_update_git_repository should call git-reset then remove-untracked-tiles then git-pull if the update_type is GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL"' {
+@test '#_do_update_git_repository should call git-reset then remove-untracked-tiles then git-pull if the update_type is GIT_UPDATE_TYPE_RESET_THEN_REMOVE_UNTRACKED_THEN_PULL' {
     stub_and_eval git '{
         [[ "$1" == "rev-parse" ]] && echo "master"
         return 0
@@ -320,7 +320,7 @@ function teardown() {
     stub_called_with_exactly_times pushd 1 "/var/tmp/.dotfiles"
 }
 
-@test '#_do_update_git_repository should just call git pull if the update_type is GIT_UPDATE_TYPE_JUST_PULL"' {
+@test '#_do_update_git_repository should just call git pull if the update_type is GIT_UPDATE_TYPE_JUST_PULL' {
     stub_and_eval git '{
         [[ "$1" == "rev-parse" ]] && echo "master"
         return 0
