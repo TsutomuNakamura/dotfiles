@@ -76,6 +76,8 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times install_packages 1 "master"
 }
 
 @test "#main should return 1 when opsions -o(only_install_packages) is set and install_packages is failed" {
@@ -91,6 +93,8 @@ function setup() {
     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 0 ]]
     [[ "$(stub_called_times init)"                                  -eq 0 ]]
     [[ "$(stub_called_times deploy)"                                -eq 0 ]]
+
+    stub_called_with_exactly_times install_packages 1 "master"
 }
 
 @test "#main should not call install_packages() and return 1 when opsions -o(only_install_packages) is set and do_i_have_admin_privileges returns false" {
