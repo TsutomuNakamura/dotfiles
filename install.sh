@@ -500,7 +500,7 @@ function init() {
 # Install packages.
 # Fonts will be installed only when the machine have some desktop environments.
 function install_packages() {
-    local branch="$1"
+    local branch="${1:-master}"
 
     local result=0
     local packages=
