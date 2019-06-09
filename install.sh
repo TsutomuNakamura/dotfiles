@@ -538,21 +538,21 @@ function install_packages() {
     return $result
 }
 
+# Add additional repositories for ubuntu.
+# This function should call after do_i_have_admin_privileges() has passed
 function add_additional_repositories_for_ubuntu() {
-    local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
-
-    ${prefix} apt-get update || {
+    sudo apt-get update || {
         logger_err "Some error has occured when updating packages with apt-get update."
         return 1
     }
     command -v add-apt-repository || {
-        ${prefix} DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common || {
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common || {
             logger_err "Failed to install software-properties-common"
             return 1
         }
     }
     # Added ppa:neovim-ppa/stable to install neovim
-    ${prefix} add-apt-repository ppa:neovim-ppa/stable -y || {
+    sudo add-apt-repository ppa:neovim-ppa/stable -y || {
         logger_err "Failed to add repository ppa:neovim-ppa/stable"
         return 1
     }
@@ -815,10 +815,9 @@ function _install_font_noto_emoji() {
 function install_packages_with_apt() {
     declare -a packages=($@)
     declare -a packages_will_be_installed
-    local prefix=$( (command -v sudo > /dev/null 2>&1) && echo "sudo" )
     local output
 
-    ${prefix} apt-get update || {
+    sudo apt-get update || {
         logger_err "Some error has occured when updating packages with apt-get update."
         return 1
     }
@@ -830,7 +829,7 @@ function install_packages_with_apt() {
     fi
 
     local available_packages=
-    available_packages="$(${prefix} apt-cache pkgnames)"
+    available_packages="$(sudo apt-cache pkgnames)"
     if [[ -z "$available_packages" ]]; then
         logger_err "Failed to get available package list with 'apt-cache pkgnames'"
         return 1
@@ -859,7 +858,7 @@ function install_packages_with_apt() {
 
     echo "Installing ${packages_will_be_installed[@]}..."
 
-    ${prefix} DEBIAN_FRONTEND=noninteractive apt-get install -y ${packages_will_be_installed[@]} || {
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ${packages_will_be_installed[@]} || {
         logger_err "Some error occured when installing ${packages_will_be_installed[@]} with apt-get install."
         return 1
     }

@@ -44,7 +44,7 @@ function teardown() {
     stub_called_with_exactly_times logger_err 1 'Some error has occured when updating packages with apt-get update.'
 }
 
-@test '#add_additional_repositories_for_ubuntu should return 1 if `apt-get install -y software-properties-common` was failed' {
+@test '#add_additional_repositories_for_ubuntu should return 1 if \`apt-get install -y software-properties-common\` was failed' {
     stub_and_eval sudo '{
         [[ "$1" == "DEBIAN_FRONTEND=noninteractive" ]] && [[ "$2" == "apt-get" ]] && [[ "$3" == "install" ]] && [[ "$4" == "-y" ]] && [[ "$5" == "software-properties-common" ]] && {
             return 1
@@ -59,7 +59,7 @@ function teardown() {
     stub_called_with_exactly_times logger_err 1 'Failed to install software-properties-common'
 }
 
-@test '#add_additional_repositories_for_ubuntu should return 1 if `add-apt-repository ppa:neovim-ppa/stable -y` was failed' {
+@test '#add_additional_repositories_for_ubuntu should return 1 if \`add-apt-repository ppa:neovim-ppa/stable -y\` was failed' {
     stub_and_eval sudo '{
         [[ "$1" == "add-apt-repository" ]] && [[ "$2" == "ppa:neovim-ppa/stable" ]] && [[ "$3" == "-y" ]] && {
             return 1
