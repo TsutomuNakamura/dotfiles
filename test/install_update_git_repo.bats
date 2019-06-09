@@ -114,7 +114,7 @@ function teardown() {
     stub_called_with_exactly_times logger_err 1 "Failed to create the directory \"/var/tmp/foo\""
 }
 
-@test '#update_git_repo should call determin_update_type_of_repository() with one of a parameter path_to_git_directory is "/var/tmp/.dotfiles (end of slash)"' {
+@test '#update_git_repo should call determin_update_type_of_repository() with one of a parameter path_to_git_directory is /var/tmp/.dotfiles (end of slash)' {
     run update_git_repo "/var/tmp/" ".dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "master"
 
     [[ "$status" -eq 0 ]]
@@ -127,7 +127,7 @@ function teardown() {
     stub_called_with_exactly_times _do_update_git_repository 1 "/var/tmp/.dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "origin" "master" $GIT_UPDATE_TYPE_JUST_CLONE
 }
 
-@test '#update_git_repo should return 1 if get_git_remote_aliases() returns an array "remotes=([0]="origine")" (not origin)' {
+@test '#update_git_repo should return 1 if get_git_remote_aliases() returns an array remotes=([0]=\"origine\") (not origin)' {
     stub_and_eval get_git_remote_aliases '{ echo "origine"; }'
     run update_git_repo "/var/tmp" ".dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "master"
 
@@ -141,7 +141,7 @@ function teardown() {
     stub_called_with_exactly_times logger_err 1 "Sorry, this script only supports single remote \"origin\". This repository has branche(s) \"origine\""
 }
 
-@test '#update_git_repo should return 1 if get_git_remote_aliases() returns an array "remotes=([0]="origin" [1]="develop")" (not only origin)' {
+@test '#update_git_repo should return 1 if get_git_remote_aliases() returns an array remotes=([0]=\"origin\" [1]=\"develop\") (not only origin)' {
     stub_and_eval get_git_remote_aliases '{ echo "origin,develop"; }'
     run update_git_repo "/var/tmp" ".dotfiles" "https://github.com/TsutomuNakamura/dotfiles.git" "master" 
 
