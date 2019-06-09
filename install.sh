@@ -29,6 +29,8 @@ STAT_BACKUP_IN_PROGRESS=1
 GIT_REPOSITORY_HTTPS="https://github.com/TsutomuNakamura/dotfiles.git"
 # Git repository location over ssh
 GIT_REPOSITORY_SSH="git@github.com:TsutomuNakamura/dotfiles.git"
+# Raw git repository location over https
+RAW_GIT_REPOSITORY_HTTPS="https://raw.github.com/TsutomuNakamura/dotfiles"
 
 # Default XDG_CONFIG_HOME for Linux
 DEFAULT_XDG_CONFIG_HOME_FOR_LINUX="${HOME}/.config"
@@ -106,8 +108,9 @@ PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger
 PACKAGES_TO_INSTALL_ON_ARCH+=" neovim python-neovim"
 PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 
-PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
-PACKAGES_TO_INSTALL_ON_MAC+=" neovim"
+# Packages will be installed on Mac
+##PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
+##PACKAGES_TO_INSTALL_ON_MAC+=" neovim"
 
 # URL of tmux-plugin
 URL_OF_TMUX_PLUGIN="https://github.com/tmux-plugins/tpm.git"
@@ -210,7 +213,7 @@ function main() {
 
     if [ "$flag_only_install_packages" == "1" ]; then
         if do_i_have_admin_privileges; then
-            install_packages || (( error_count++ ))
+            install_packages "$branch" || (( error_count++ ))
         else
             echo "Sorry, you don't have privileges to install packages." >&2
             (( error_count++ ))
@@ -438,7 +441,7 @@ function init() {
     if [[ "$flag_no_install_packages" == 0 ]]; then
         if do_i_have_admin_privileges; then
             # Am I root? Or, am I in the sudoers?
-            install_packages || {
+            install_packages "$branch" || {
                 local m="Failed to install dependency packages."
                 m+="\n  If you want to continue following processes that after installing packages, you can specify the option \"-n (no-install-packages)\"."
                 m+="\n  ex) "
@@ -497,6 +500,8 @@ function init() {
 # Install packages.
 # Fonts will be installed only when the machine have some desktop environments.
 function install_packages() {
+    local branch="${1:-master}"
+
     local result=0
     local packages=
 
@@ -529,7 +534,7 @@ function install_packages() {
 
         install_packages_with_pacman $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "mac" ]]; then
-        install_packages_with_homebrew ${PACKAGES_TO_INSTALL_ON_MAC} || (( result++ ))
+        install_packages_with_homebrew "$branch" || (( result++ ))
     else
         logger_err "Failed to get OS distribution to install packages."
         (( result++ ))
@@ -1038,14 +1043,27 @@ function install_packages_with_pacman() {
 }
 
 function install_packages_with_homebrew() {
-    declare -a packages=($@)
+    local branch=${1:-master}
+    local user_id="$(id -u)"
 
-    for (( i = 0; i < ${#packages[@]}; i++ )) {
-        brew install ${packages[i]} || {
-            echo "ERROR: Some error occured when installing ${packages[i]}"
-            echo "${output}"
-        }
+    curl -o- "${RAW_GIT_REPOSITORY_HTTPS}/${branch}/BrewfileOfDotfiles" > "/tmp/.${user_id}_BrewfileOfDotfiles" || {
+        logger_err "Failed to download Brewfile from \"${RAW_GIT_REPOSITORY_HTTPS}/${branch}/BrewfileOfDotfiles\""
+        return 1
     }
+
+    brew bundle --file="/tmp/.${user_id}_BrewfileOfDotfiles" || {
+        logger_err "Failed to install packages with brew bundle"
+        return 1
+    }
+
+    rm -f "/tmp/.${user_id}_BrewfileOfDotfiles" || {
+        logger_err "Failed to remove \"/tmp/.${user_id}_BrewfileOfDotfiles\" after brew bundle has succeeded"
+        return 1
+    }
+
+    logger_info "brew bundle has succeeded. Your packages have been already up to date."
+
+    return 0
 }
 
 function should_the_dotfile_be_skipped() {
