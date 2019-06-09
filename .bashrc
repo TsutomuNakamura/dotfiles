@@ -55,6 +55,9 @@ if [[ -d "${HOME}/go/bin" ]]; then
     export PATH="${PATH}:${HOME}/go/bin"
 fi
 
+# Set GPG_PATH
+export GPG_PATH=$(tty)
+
 # Load user specific environment
 [[ -d "${HOME}/.bash_modules/" ]] && while read f; do . "$f"; done < <(find "${HOME}/.bash_modules/" -type f)
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
