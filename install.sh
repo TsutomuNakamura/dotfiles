@@ -1046,7 +1046,7 @@ function install_packages_with_homebrew() {
     local branch=${1:-master}
     local user_id="$(id -u)"
 
-    curl -o- "${RAW_GIT_REPOSITORY_HTTPS}/${branch}/BrewfileOfDotfiles" > "/tmp/.${user_id}_BrewfileOfDotfiles" || {
+    curl -L -o "/tmp/.${user_id}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/${branch}/BrewfileOfDotfiles" || {
         logger_err "Failed to download Brewfile from \"${RAW_GIT_REPOSITORY_HTTPS}/${branch}/BrewfileOfDotfiles\""
         return 1
     }
