@@ -28,9 +28,8 @@ function teardown() {
     [[ "$(stub_called_times rm)"                -eq 1 ]]
     [[ "$(stub_called_times logger_info)"       -eq 1 ]]
     [[ "$(stub_called_times logger_err)"        -eq 0 ]]
-    [[ -f /tmp/.${__USERID__}_BrewfileOfDotfiles      ]]
 
-    stub_called_with_exactly_times curl 1 "-o-" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
+    stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
     stub_called_with_exactly_times brew 1 bundle "--file=/tmp/.${__USERID__}_BrewfileOfDotfiles"
     stub_called_with_exactly_times rm 1 -f "/tmp/.${__USERID__}_BrewfileOfDotfiles"
     logger_info "brew bundle has succeeded. Your packages have been already up to date."
@@ -46,9 +45,8 @@ function teardown() {
     [[ "$(stub_called_times rm)"                -eq 1 ]]
     [[ "$(stub_called_times logger_info)"       -eq 1 ]]
     [[ "$(stub_called_times logger_err)"        -eq 0 ]]
-    [[ -f /tmp/.${__USERID__}_BrewfileOfDotfiles      ]]
 
-    stub_called_with_exactly_times curl 1 "-o-" "${RAW_GIT_REPOSITORY_HTTPS}/develop/BrewfileOfDotfiles"
+    stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/develop/BrewfileOfDotfiles"
     # stub_called_with_exactly_times brew 1 bundle "--file=/tmp/.${__USERID__}_BrewfileOfDotfiles"
     # stub_called_with_exactly_times rm 1 -f "/tmp/.${__USERID__}_BrewfileOfDotfiles"
     # logger_info "brew bundle has succeeded. Your packages have been already up to date."
@@ -67,7 +65,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"        -eq 1 ]]
     # [[ -f /tmp/.${__USERID__}_BrewfileOfDotfiles      ]]
 
-    stub_called_with_exactly_times curl 1 "-o-" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
+    stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to download Brewfile from \"${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles\""
 }
 
@@ -84,7 +82,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"        -eq 1 ]]
     # [[ -f /tmp/.${__USERID__}_BrewfileOfDotfiles      ]]
 
-    stub_called_with_exactly_times curl 1 "-o-" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
+    stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to install packages with brew bundle"
 }
 
@@ -101,7 +99,7 @@ function teardown() {
     [[ "$(stub_called_times logger_err)"        -eq 1 ]]
     # [[ -f /tmp/.${__USERID__}_BrewfileOfDotfiles      ]]
 
-    stub_called_with_exactly_times curl 1 "-o-" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
+    stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to remove \"/tmp/.${__USERID__}_BrewfileOfDotfiles\" after brew bundle has succeeded"
 }
 
