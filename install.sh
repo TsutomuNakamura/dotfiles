@@ -1054,7 +1054,7 @@ function install_packages_with_homebrew() {
     }
 
     # Mac only reached in this function. So options of stat are for Mac's one
-    if [[ ! -f "$local_brewfile" ]] || [[ $(stat -f '%s' "$local_brewfile") -eq 0 ]]; then
+    if [[ ! -f "$local_brewfile" ]] || [[ $(stat -f '%z' "$local_brewfile") -eq 0 ]]; then
         logger_err "Failed to download Brewfile. The file \"${local_brewfile}\" is not found or empty"
         return 1
     fi
