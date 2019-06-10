@@ -1053,12 +1053,13 @@ function install_packages_with_homebrew() {
         return 1
     }
 
-    if [[ ! -f "$local_brewfile" ]] || [[ $(stat --printf="%s" "$local_brewfile") -eq 0 ]]; then
+    # Mac only reached in this function. So options of stat are for Mac's one
+    if [[ ! -f "$local_brewfile" ]] || [[ $(stat -f '%s' "$local_brewfile") -eq 0 ]]; then
         logger_err "Failed to download Brewfile. The file \"${local_brewfile}\" is not found or empty"
         return 1
     fi
 
-    # Check result of the curl
+    # Only Mac can reach this function. So options of command stat are for Macs one
     local amount_of_line="$(cat "$local_brewfile" | wc -l)"
 
     if [[ "$amount_of_line" -eq 1 ]] && (grep -q -E '^[0-9]+: .*' "$local_brewfile" 2> /dev/null); then
