@@ -1053,7 +1053,7 @@ function install_packages_with_homebrew() {
         return 1
     }
 
-    if [[ ! -f "$local_brewfile" ]] || [[ $(stat --printf="%s" "$local_brewfile") ]]; then
+    if [[ ! -f "$local_brewfile" ]] || [[ $(stat --printf="%s" "$local_brewfile") -eq 0 ]]; then
         logger_err "Failed to download Brewfile. The file \"${local_brewfile}\" is not found or empty"
         return 1
     fi
@@ -1061,7 +1061,7 @@ function install_packages_with_homebrew() {
     # Check result of the curl
     local amount_of_line="$(cat "$local_brewfile" | wc -l)"
 
-    if [[ $(wc -l < "$local_brewfile" 2> /dev/null) -eq 1 ]] && (grep -q -E '^[0-9]+: .*' "$local_brewfile" 2> /dev/null); then
+    if [[ "$amount_of_line" -eq 1 ]] && (grep -q -E '^[0-9]+: .*' "$local_brewfile" 2> /dev/null); then
         logger_err "Server returned some status code and downloading Brewfile has failed. (status=$(cat $local_brewfile))"
         return 1
     fi
