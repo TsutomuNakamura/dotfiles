@@ -1045,11 +1045,27 @@ function install_packages_with_pacman() {
 function install_packages_with_homebrew() {
     local branch=${1:-master}
     local user_id="$(id -u)"
+    local local_brewfile="/tmp/.${user_id}_BrewfileOfDotfiles"
+    local remote_brewfile="${RAW_GIT_REPOSITORY_HTTPS}/${branch}/.BrewfileOfDotfiles"
 
-    curl -o- "${RAW_GIT_REPOSITORY_HTTPS}/${branch}/BrewfileOfDotfiles" > "/tmp/.${user_id}_BrewfileOfDotfiles" || {
-        logger_err "Failed to download Brewfile from \"${RAW_GIT_REPOSITORY_HTTPS}/${branch}/BrewfileOfDotfiles\""
+    curl -L -o "$local_brewfile" "$remote_brewfile" || {
+        logger_err "Failed to download Brewfile from \"${remote_brewfile}\""
         return 1
     }
+
+    # Mac only reached in this function. So options of stat are for Mac's one
+    if [[ ! -f "$local_brewfile" ]] || [[ $(stat -f '%z' "$local_brewfile") -eq 0 ]]; then
+        logger_err "Failed to download Brewfile. The file \"${local_brewfile}\" is not found or empty"
+        return 1
+    fi
+
+    # Only Mac can reach this function. So options of command stat are for Macs one
+    local amount_of_line="$(cat "$local_brewfile" | wc -l)"
+
+    if [[ "$amount_of_line" -eq 1 ]] && (grep -q -E '^[0-9]+: .*' "$local_brewfile" 2> /dev/null); then
+        logger_err "Server returned some status code and downloading Brewfile has failed. (status=$(cat $local_brewfile))"
+        return 1
+    fi
 
     brew bundle --file="/tmp/.${user_id}_BrewfileOfDotfiles" || {
         logger_err "Failed to install packages with brew bundle"
@@ -1057,7 +1073,7 @@ function install_packages_with_homebrew() {
     }
 
     rm -f "/tmp/.${user_id}_BrewfileOfDotfiles" || {
-        logger_err "Failed to remove \"/tmp/.${user_id}_BrewfileOfDotfiles\" after brew bundle has succeeded"
+        logger_err "Failed to remove \"${local_brewfile}\" after brew bundle has succeeded"
         return 1
     }
 
