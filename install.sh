@@ -1091,9 +1091,21 @@ function install_packages_with_homebrew() {
 
 function install_or_update_one_package_with_homebrew() {
     local package="$1"
+    local output
+    local result
+
+    echo "Install or upgrade $package"
 
     if brew ls --versions "$package" >/dev/null; then
-        HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade "$package" || return 1
+        output=$(HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade "$package" 2>&1)
+        result=$?
+
+        if [[ "$result" -ne 0 ]]; then
+            echo "$output" | tail -1 | grep -q -E '.*already installed$' || {
+                logger_err "$output"
+                return 1
+            }
+        fi
     else
         HOMEBREW_NO_AUTO_UPDATE=1 brew install "$package" || return 1
     fi
