@@ -1079,7 +1079,10 @@ function install_packages_with_homebrew() {
 
     # FIXME: This function for the issue https://github.com/TsutomuNakamura/dotfiles/issues/131.
     #        Fix this instruction if the issue was solved by the actual cause.
-    install_or_update_one_package_with_homebrew "gnupg"
+    install_or_update_one_package_with_homebrew "gnupg" || {
+        logger_err "Failed to install gnupg with install_or_update_one_package_with_homebrew()"
+        return 1
+    }
 
     logger_info "brew bundle has succeeded. Your packages have been already up to date."
 
@@ -1087,8 +1090,15 @@ function install_packages_with_homebrew() {
 }
 
 function install_or_update_one_package_with_homebrew() {
-    # TODO:
-    true
+    local package="$1"
+
+    if brew ls --versions "$package" >/dev/null; then
+        HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade "$package" || return 1
+    else
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install "$package" || return 1
+    fi
+
+    return 0
 }
 
 function should_the_dotfile_be_skipped() {
