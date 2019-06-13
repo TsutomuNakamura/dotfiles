@@ -294,7 +294,17 @@ function check_environment() {
         return 1
     }
 
+    check_environment_of_mac || {
+        logger_err "Failed to pass check_environment_of_mac()"
+        return 1
+    }
+
     return 0
+}
+
+function check_environment_of_mac() {
+    # TODO:
+    true
 }
 
 # Run post instructions
