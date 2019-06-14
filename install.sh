@@ -341,7 +341,27 @@ function check_environment_of_mac() {
 
 function has_permission_to_rw() {
     local dir="$1"
-    # TODO:
+    local is_owner=0
+    local is_group=0
+
+    declare -a groups=($(id -G -n $(whoami)))
+
+    if [[ "$(stat -f '%Su' "$dir")" != "$(whoami)" ]]; then
+        is_owner=1
+    fi
+
+    local own_group="$(stat -f '%Sg' "$dir")"
+
+    if ! contains_element "$own_group" "${groups[@]}"; then
+        is_group=1
+    fi
+
+    if [[ "$is_owner" -eq 1 ]] && [[ "$is_group" -eq 1 ]]; then
+        # You don't have permission to read/writer to "$dir"
+        return 1
+    fi
+
+    return 0
 }
 
 # Run post instructions
