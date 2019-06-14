@@ -41,7 +41,6 @@ DEFAULT_XDG_DATA_HOME_FOR_LINUX="${HOME}/.local/share"
 # Default XDG_DATA_HOME for Mac
 DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
 
-
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
 # Full file path of temporary git user email from previous .gitconfig
@@ -75,6 +74,12 @@ declare -g -A GIT_PROPERTIES_TO_KEEP=(
     ['signingkey_id']="${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__signingkey${GLOBAL_DELIMITOR}git config --global user.signingkey \"\${__arg__}\""
     ['gpgsign_flag']="${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign${GLOBAL_DELIMITOR}git config --global commit.gpgsign \"\${__arg__}\""
     ['gpg_program']="${GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
+)
+
+# Directories which may be required by brew of Mac
+# These element will be added a prefix in front of them with $(brew --prefix)
+declare -g -a DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC=(
+    "/sbin"
 )
 
 # Git user name to store .gitconfig
@@ -304,6 +309,29 @@ function check_environment() {
 
 function check_environment_of_mac() {
     # TODO:
+
+    local dir
+    local prefix="$(brew --prefix)"
+
+    for dir in "${DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC[@]}"; do
+        dir="${prefix}${dir}"
+
+        if [[ ! -d "${dir}" ]]; then
+            local msg="Directory \"${dir}\" that may be required by brew does not exist.\n"
+            msg+="    Rerun this script after you create directory \"${dir}\"\n"
+            msg+="    example with bash)\n"
+            msg+="        sudo mkdir \"${dir}\""
+            msg+="        sudo chown $(whoami) \"${dir}\""
+            logger_err "$msg"
+
+            return 1
+        fi
+    done
+    
+
+    if [[ $(stat -f '%Su' /usr/local/sbin) ]]; then
+        
+    fi
     true
 }
 
