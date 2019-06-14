@@ -328,7 +328,7 @@ function check_environment_of_mac() {
             return 1
         fi
 
-        if ! has_permission_to_rw; then
+        if ! has_permission_to_rw "$dir"; then
             local msg="Directory \"${dir}\" not permitted to write and read by user $(whoami)."
             msg+="    Please check your permission whether you have a permission to read/write to the directory \"${dir}\""
             logger_err "$msg"
@@ -342,12 +342,13 @@ function check_environment_of_mac() {
 
 function has_permission_to_rw() {
     local dir="$1"
+    local user_name="$(whoami)"
     local is_owner=0
     local is_group=0
 
-    declare -a groups=($(id -G -n $(whoami)))
+    declare -a groups=($(id -G -n $user_name))
 
-    if [[ "$(stat -f '%Su' "$dir")" != "$(whoami)" ]]; then
+    if [[ "$(stat -f '%Su' "$dir")" != "$user_name" ]]; then
         is_owner=1
     fi
 
