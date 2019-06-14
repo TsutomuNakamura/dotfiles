@@ -319,8 +319,8 @@ function check_environment_of_mac() {
 
         if [[ ! -d "${dir}" ]]; then
             local msg="Directory \"${dir}\" that may be required by brew does not exist.\n"
-            msg+="    Rerun this script after you create directory \"${dir}\"\n"
-            msg+="    example with bash)\n"
+            msg+="    Rerun this script after you created a directory \"${dir}\"\n"
+            msg+="    example)\n"
             msg+="        sudo mkdir \"${dir}\"\n"
             msg+="        sudo chown $(whoami) \"${dir}\""
             logger_err "$msg"

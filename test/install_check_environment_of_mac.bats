@@ -53,8 +53,8 @@ function teardown() {
     [[ "$(stub_called_times has_permission_to_rw)"          -eq 0 ]]
 
     local msg="Directory \"/usr/local/un_existed_directory\" that may be required by brew does not exist.\n"
-    msg+="    Rerun this script after you create directory \"/usr/local/un_existed_directory\"\n"
-    msg+="    example with bash)\n"
+    msg+="    Rerun this script after you created a directory \"/usr/local/un_existed_directory\"\n"
+    msg+="    example)\n"
     msg+="        sudo mkdir \"/usr/local/un_existed_directory\"\n"
     msg+="        sudo chown $(whoami) \"/usr/local/un_existed_directory\""
     stub_called_with_exactly_times logger_err 1 "$msg"
