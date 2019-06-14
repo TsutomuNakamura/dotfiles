@@ -326,13 +326,22 @@ function check_environment_of_mac() {
 
             return 1
         fi
-    done
-    
 
-    if [[ $(stat -f '%Su' /usr/local/sbin) ]]; then
-        
-    fi
-    true
+        if ! has_permission_to_rw; then
+            local msg="Directory \"${dir}\" not permitted to write and read by user $(whoami)."
+            msg+="    Please check your permission whether you have a permission to read/write to the directory \"${dir}\""
+            logger_err "$msg"
+
+            return 1
+        fi
+    done
+
+
+}
+
+function has_permission_to_rw() {
+    local dir="$1"
+    # TODO:
 }
 
 # Run post instructions
