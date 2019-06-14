@@ -263,7 +263,7 @@ function check_environment() {
         else
             echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\"" >&2
         fi
-        echo "           -> This must be set \"\${HOME}/.config\" in Linux or \"\${HOME}/Library/Preferences\" in Mac or unset." >&2
+        echo "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset." >&2
         if [[ -z "${XDG_DATA_HOME}" ]]; then
             echo "       XDG_DATA_HOME=(unset)" >&2
         else
@@ -299,17 +299,18 @@ function check_environment() {
         return 1
     }
 
-    check_environment_of_mac || {
-        logger_err "Failed to pass check_environment_of_mac()"
-        return 1
-    }
+    if [[ "$(get_distribution_name)" == "mac" ]]; then
+        check_environment_of_mac || {
+            echo "ERROR: Failed to pass checking the environment of Mac"
+            return 1
+        }
+    fi
 
     return 0
 }
 
+# Check environment of Mac
 function check_environment_of_mac() {
-    # TODO:
-
     local dir
     local prefix="$(brew --prefix)"
 
@@ -336,7 +337,7 @@ function check_environment_of_mac() {
         fi
     done
 
-
+    return 0
 }
 
 function has_permission_to_rw() {
