@@ -132,13 +132,12 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 1 ]]
-    [[ "${#outputs[@]}" == 7 ]]
+    [[ "${#outputs[@]}" == 6 ]]
     [[ "${outputs[i++]}" == "ERROR: Version of bash have to greater than 4.0.0." ]]
     [[ "${outputs[i++]}" == "       Please update your bash greater than 4.0.0 then run this script again." ]]
     [[ "${outputs[i++]}" == "       If you use mac, you can change new version of bash by running commands like below..." ]]
     [[ "${outputs[i++]}" == "         $ brew install bash" ]]
     [[ "${outputs[i++]}" == "         $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells" ]]
-    [[ "${outputs[i++]}" == "         $ chsh -s /usr/local/bin/bash" ]]
     [[ "${outputs[i++]}" == "       ...then relogin or restart your Mac" ]]
 }
 

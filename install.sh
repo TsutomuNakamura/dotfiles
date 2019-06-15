@@ -293,7 +293,6 @@ function check_environment() {
         echo "       If you use mac, you can change new version of bash by running commands like below..."                  >&2
         echo "         $ brew install bash"                                                                                 >&2
         echo "         $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"   >&2
-        echo "         $ chsh -s /usr/local/bin/bash"                                                                       >&2
         echo "       ...then relogin or restart your Mac"                                                                   >&2
 
         return 1
