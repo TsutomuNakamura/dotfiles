@@ -41,7 +41,6 @@ DEFAULT_XDG_DATA_HOME_FOR_LINUX="${HOME}/.local/share"
 # Default XDG_DATA_HOME for Mac
 DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
 
-
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
 # Full file path of temporary git user email from previous .gitconfig
@@ -75,6 +74,12 @@ declare -g -A GIT_PROPERTIES_TO_KEEP=(
     ['signingkey_id']="${GIT_USER_SIGNINGKEY_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__user__signingkey${GLOBAL_DELIMITOR}git config --global user.signingkey \"\${__arg__}\""
     ['gpgsign_flag']="${GIT_COMMIT_GPGSIGN_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__commit__gpgsign${GLOBAL_DELIMITOR}git config --global commit.gpgsign \"\${__arg__}\""
     ['gpg_program']="${GIT_GPG_PROGRAM_STORE_FILE_FULL_PATH}${GLOBAL_DELIMITOR}INI__gpg__program${GLOBAL_DELIMITOR}git config --global gpg.program \"\${__arg__}\""
+)
+
+# Directories which may be required by brew of Mac
+# These element will be added a prefix in front of them with $(brew --prefix)
+declare -g -a DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC=(
+    "/sbin"
 )
 
 # Git user name to store .gitconfig
@@ -258,7 +263,7 @@ function check_environment() {
         else
             echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\"" >&2
         fi
-        echo "           -> This must be set \"\${HOME}/.config\" in Linux or \"\${HOME}/Library/Preferences\" in Mac or unset." >&2
+        echo "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset." >&2
         if [[ -z "${XDG_DATA_HOME}" ]]; then
             echo "       XDG_DATA_HOME=(unset)" >&2
         else
@@ -293,6 +298,70 @@ function check_environment() {
 
         return 1
     }
+
+    if [[ "$(get_distribution_name)" == "mac" ]]; then
+        check_environment_of_mac || {
+            echo "ERROR: Failed to pass checking the environment of Mac"
+            return 1
+        }
+    fi
+
+    return 0
+}
+
+# Check environment of Mac
+function check_environment_of_mac() {
+    local dir
+    local prefix="$(brew --prefix)"
+
+    for dir in "${DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC[@]}"; do
+        dir="${prefix}${dir}"
+
+        if [[ ! -d "${dir}" ]]; then
+            local msg="Directory \"${dir}\" that may be required by brew does not exist.\n"
+            msg+="    Rerun this script after you created a directory \"${dir}\"\n"
+            msg+="    example)\n"
+            msg+="        sudo mkdir \"${dir}\"\n"
+            msg+="        sudo chown $(whoami) \"${dir}\""
+            logger_err "$msg"
+
+            return 1
+        fi
+
+        if ! has_permission_to_rw "$dir"; then
+            local msg="Directory \"${dir}\" not permitted to write and read by user $(whoami)."
+            msg+="    Please check your permission whether you have a permission to read/write to the directory \"${dir}\""
+            logger_err "$msg"
+
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+function has_permission_to_rw() {
+    local dir="$1"
+    local user_name="$(whoami)"
+    local is_owner=0
+    local is_group=0
+
+    declare -a groups=($(id -G -n $user_name))
+
+    if [[ "$(stat -f '%Su' "$dir")" != "$user_name" ]]; then
+        is_owner=1
+    fi
+
+    local own_group="$(stat -f '%Sg' "$dir")"
+
+    if ! contains_element "$own_group" "${groups[@]}"; then
+        is_group=1
+    fi
+
+    if [[ "$is_owner" -eq 1 ]] && [[ "$is_group" -eq 1 ]]; then
+        # You don't have permission to read/writer to "$dir"
+        return 1
+    fi
 
     return 0
 }
@@ -1078,6 +1147,30 @@ function install_packages_with_homebrew() {
     }
 
     logger_info "brew bundle has succeeded. Your packages have been already up to date."
+
+    return 0
+}
+
+function install_or_update_one_package_with_homebrew() {
+    local package="$1"
+    local output
+    local result
+
+    echo "Install or upgrade $package"
+
+    if brew ls --versions "$package" >/dev/null; then
+        output=$(HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade "$package" 2>&1)
+        result=$?
+
+        if [[ "$result" -ne 0 ]]; then
+            echo "$output" | tail -1 | grep -q -E '.*already installed$' || {
+                logger_err "$output"
+                return 1
+            }
+        fi
+    else
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install "$package" || return 1
+    fi
 
     return 0
 }

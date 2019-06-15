@@ -33,13 +33,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 1 ]]
-    [[ "$(stub_called_times wc)"                -eq 1 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 0 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 1 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 1 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times brew 1 bundle "--file=/tmp/.${__USERID__}_BrewfileOfDotfiles"
@@ -52,13 +52,13 @@ function teardown() {
     run install_packages_with_homebrew "develop"
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 1 ]]
-    [[ "$(stub_called_times wc)"                -eq 1 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 0 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 1 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 1 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/develop/.BrewfileOfDotfiles"
     stub_called_with_exactly_times brew 1 bundle "--file=/tmp/.${__USERID__}_BrewfileOfDotfiles"
@@ -72,13 +72,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 0 ]]
-    [[ "$(stub_called_times wc)"                -eq 0 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 0 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 1 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 0 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 0 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to download Brewfile from \"${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles\""
@@ -90,13 +90,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 0 ]]
-    [[ "$(stub_called_times wc)"                -eq 0 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 0 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 1 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 0 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 0 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to download Brewfile. The file \"/tmp/.$(id -u)_BrewfileOfDotfiles\" is not found or empty"
@@ -108,13 +108,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 0 ]]
-    [[ "$(stub_called_times wc)"                -eq 0 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 0 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 1 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 0 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 0 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to download Brewfile. The file \"/tmp/.$(id -u)_BrewfileOfDotfiles\" is not found or empty"
@@ -131,13 +131,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 1 ]]
-    [[ "$(stub_called_times wc)"                -eq 1 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 0 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 1 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 1 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times brew 1 bundle "--file=/tmp/.${__USERID__}_BrewfileOfDotfiles"
@@ -155,13 +155,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 1 ]]
-    [[ "$(stub_called_times wc)"                -eq 1 ]]
-    [[ "$(stub_called_times grep)"              -eq 1 ]]
-    [[ "$(stub_called_times rm)"                -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 0 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 1 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 1 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 1 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times brew 1 bundle "--file=/tmp/.${__USERID__}_BrewfileOfDotfiles"
@@ -176,13 +176,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 0 ]]
-    [[ "$(stub_called_times wc)"                -eq 1 ]]
-    [[ "$(stub_called_times grep)"              -eq 1 ]]
-    [[ "$(stub_called_times rm)"                -eq 0 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 1 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 0 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 1 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 1 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Server returned some status code and downloading Brewfile has failed. (status=$(cat /tmp/.$(id -u)_BrewfileOfDotfiles))"
@@ -194,13 +194,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 1 ]]
-    [[ "$(stub_called_times wc)"                -eq 1 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 0 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 1 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 1 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 1 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to install packages with brew bundle"
@@ -212,13 +212,13 @@ function teardown() {
     run install_packages_with_homebrew
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times curl)"              -eq 1 ]]
-    [[ "$(stub_called_times brew)"              -eq 1 ]]
-    [[ "$(stub_called_times wc)"                -eq 1 ]]
-    [[ "$(stub_called_times grep)"              -eq 0 ]]
-    [[ "$(stub_called_times rm)"                -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"       -eq 0 ]]
-    [[ "$(stub_called_times logger_err)"        -eq 1 ]]
+    [[ "$(stub_called_times curl)"                                          -eq 1 ]]
+    [[ "$(stub_called_times brew)"                                          -eq 1 ]]
+    [[ "$(stub_called_times wc)"                                            -eq 1 ]]
+    [[ "$(stub_called_times grep)"                                          -eq 0 ]]
+    [[ "$(stub_called_times rm)"                                            -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times curl 1 -L -o "/tmp/.${__USERID__}_BrewfileOfDotfiles" "${RAW_GIT_REPOSITORY_HTTPS}/master/.BrewfileOfDotfiles"
     stub_called_with_exactly_times logger_err 1 "Failed to remove \"/tmp/.$(id -u)_BrewfileOfDotfiles\" after brew bundle has succeeded"
