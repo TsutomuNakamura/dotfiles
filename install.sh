@@ -1146,13 +1146,6 @@ function install_packages_with_homebrew() {
         return 1
     }
 
-    # FIXME: This function for the issue https://github.com/TsutomuNakamura/dotfiles/issues/131.
-    #        Fix this instruction if the issue was solved by the actual cause.
-    install_or_update_one_package_with_homebrew "gnupg" || {
-        logger_err "Failed to install gnupg with install_or_update_one_package_with_homebrew()"
-        return 1
-    }
-
     logger_info "brew bundle has succeeded. Your packages have been already up to date."
 
     return 0
