@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+main() {
+    local distribution="$(get_distribution_name_of_dotfiles)"
+    local result
+
+    if [[ "$(get_distribution_name_of_dotfiles)" == "mac" ]]; then
+        pmset -g batt | grep -q -E '\-InternalBattery\-'
+        return $?
+    else
+        upower -e | grep -q 'battery_BAT'
+        return $?
+    fi
+
+    return 1
+}
+
+main
+
