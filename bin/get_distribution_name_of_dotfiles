@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+# Get your OS distribution name
+function get_distribution_name() {
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    # Is Mac OS?
+    if [ "$(uname)" == "Darwin" ] || (command -v brew > /dev/null 2>&1); then
+        DISTRIBUTION="mac"
+    fi
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    local release_info="$(cat /etc/*-release 2> /dev/null)"
+
+    # Check the distribution from release-infos
+    if (grep -i centos <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="centos"
+    elif (grep -i fedora <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="fedora"
+    elif (grep -i ubuntu <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="ubuntu"
+    elif (grep -i debian <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="debian"
+    elif (grep -i "arch linux" <<< "$release_info" > /dev/null 2>&1); then
+        DISTRIBUTION="arch"
+    fi
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    # Check the distribution from command for package management
+    if (command -v apt-get > /dev/null 2>&1); then
+        DISTRIBUTION="debian"
+    elif (command -v dnf > /dev/null 2>&1); then
+        DISTRIBUTION="fedora"
+    elif (command -v yum > /dev/null 2>&1); then
+        DISTRIBUTION="centos"
+    elif (command -v pacman > /dev/null 2>&1); then
+        DISTRIBUTION="arch"
+    fi
+    [ ! -z ${DISTRIBUTION} ] && echo "${DISTRIBUTION}" && return
+
+    # Check the distribution from /proc/version file
+    local proc_version="$(cat /proc/version)"
+
+    if (grep -i arch <<< "$proc_version" > /dev/null 2>&1); then
+        DISTRIBUTION="arch"
+        # TODO: Check for fedora, debian, ubuntu etc...
+    fi
+    [[ ! -z ${DISTRIBUTION} ]] && echo "${DISTRIBUTION}" && return
+
+    echo "unknown"
+}
+
+get_distribution_name
+
