@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+function main() {
+    if [[ -z "$TMUX" ]]; then
+        # This session does not be attached tmux.
+        # Create one tmux session then send keys to install tmux plugins
+        # TODO: This should handle errors
+        tmux new \; set-buffer "${HOME}/.tmux/plugins/tpm/bin/install_plugins; ${HOME}/.tmux/plugins/tpm/bin/update_plugins all; exit" \; paste-buffer
+    else
+        ${HOME}/.tmux/plugins/tpm/bin/install_plugins || {
+            echo "ERROR: Failed to install tmux plugins with \`${HOME}/.tmux/plugins/tpm/bin/install_plugins\`" >&2
+            return 1
+        }
+        ${HOME}/.tmux/plugins/tpm/bin/update_plugins all || {
+            echo "ERROR: Failed to update tmux plugins with \`${HOME}/.tmux/plugins/tpm/bin/update_plugins all\`" >&2
+            return 1
+        }
+        tmux source-file ${HOME}/.tmux.conf || {
+            echo "ERROR: Failed to reload .tmux.conf by \`tmux source-file ${HOME}/.tmux.conf\`" >&2
+            return 1
+        }
+    fi
+
+    return 0
+}
+
+main
+exit $?
+
