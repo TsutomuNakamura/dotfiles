@@ -256,20 +256,20 @@ function main() {
 
 function check_environment() {
     is_customized_xdg_base_directories || {
-        logger_err " Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
-        logger_err " Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
+        logger_err "Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
+        logger_err "Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
         if [[ -z "${XDG_CONFIG_HOME}" ]]; then
-            logger_err "       XDG_CONFIG_HOME=(unset)"
+            logger_err "  XDG_CONFIG_HOME=(unset)"
         else
-            logger_err "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\""
+            logger_err "  XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\""
         fi
-        logger_err "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset."
+        logger_err     "    -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset."
         if [[ -z "${XDG_DATA_HOME}" ]]; then
-            logger_err "       XDG_DATA_HOME=(unset)"
+            logger_err "  XDG_DATA_HOME=(unset)"
         else
-            logger_err "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\""
+            logger_err "  XDG_DATA_HOME=\"${XDG_DATA_HOME}\""
         fi
-        logger_err "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
+        logger_err     "    -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
 
         return 1
     }
@@ -288,19 +288,19 @@ function check_environment() {
 
     local result="$?"
     [[ "$result" -eq 1 ]] && {
-        logger_err " Version of bash have to greater than 4.0.0."
-        logger_err " Please update your bash greater than 4.0.0 then run this script again."
-        logger_err " If you use mac, you can change new version of bash by running commands like below..."
-        logger_err "   $ brew install bash"
-        logger_err "   $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"
-        logger_err " ...then relogin or restart your Mac"
+        logger_err "Version of bash have to greater than 4.0.0."
+        logger_err "Please update your bash greater than 4.0.0 then run this script again."
+        logger_err "If you use mac, you can change new version of bash by running commands like below..."
+        logger_err "  $ brew install bash"
+        logger_err "  $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"
+        logger_err "...then relogin or restart your Mac"
 
         return 1
     }
 
     if [[ "$(get_distribution_name)" == "mac" ]]; then
         check_environment_of_mac || {
-            logger_err " Failed to pass checking the environment of Mac"
+            logger_err "Failed to pass checking the environment of Mac"
             return 1
         }
     fi
