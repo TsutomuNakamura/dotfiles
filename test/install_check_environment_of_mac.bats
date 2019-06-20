@@ -19,7 +19,7 @@ function teardown() {
 }
 
 @test '#check_environment_of_mac return 0 if all instructions were succeeded and DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC has 2 elements' {
-    run check_environment
+    run check_environment_of_mac
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -28,7 +28,7 @@ function teardown() {
 
 @test '#check_environment_of_mac return 0 if all instructions were succeeded and DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC has 1 elements' {
     declare -g -a DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC=("/sbin")
-    run check_environment
+    run check_environment_of_mac
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -37,7 +37,7 @@ function teardown() {
 
 @test '#check_environment_of_mac return 0 if all instructions were succeeded and DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC has no elements' {
     declare -g -a DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC=()
-    run check_environment
+    run check_environment_of_mac
 
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 0 ]]
@@ -46,7 +46,9 @@ function teardown() {
 
 @test '#check_environment_of_mac return 1 if one of a directory in DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC does not existed' {
     declare -g -a DIRECTORIES_MAY_REQUIRED_BY_BREW_ON_MAC=("/un_existed_directory")
-    run check_environment
+    run check_environment_of_mac
+
+    echo "$output"
 
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                    -eq 1 ]]
@@ -62,7 +64,7 @@ function teardown() {
 
 @test '#check_environment_of_mac return 1 if has_permission_to_rw was failed' {
     stub_and_eval has_permission_to_rw '{ return 1; }'
-    run check_environment
+    run check_environment_of_mac
 
 
     [[ "$status" -eq 1 ]]
