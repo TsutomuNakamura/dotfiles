@@ -256,30 +256,30 @@ function main() {
 
 function check_environment() {
     is_customized_xdg_base_directories || {
-        echo "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments." >&2
-        echo "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below." >&2
+        logger_err " Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
+        logger_err " Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
         if [[ -z "${XDG_CONFIG_HOME}" ]]; then
-            echo "       XDG_CONFIG_HOME=(unset)" >&2
+            logger_err "       XDG_CONFIG_HOME=(unset)"
         else
-            echo "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\"" >&2
+            logger_err "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\""
         fi
-        echo "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset." >&2
+        logger_err "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset."
         if [[ -z "${XDG_DATA_HOME}" ]]; then
-            echo "       XDG_DATA_HOME=(unset)" >&2
+            logger_err "       XDG_DATA_HOME=(unset)"
         else
-            echo "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\"" >&2
+            logger_err "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\""
         fi
-        echo "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset." >&2
+        logger_err "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
 
         return 1
     }
 
     [[ -z "$BASH" ]] && {
-        echo "ERROR: This script must run as bash script" >&2
+        logger_err "This script must run as bash script"
         return 1
     }
     [[ -z "$BASH_VERSION" ]] && {
-        echo "ERROR: This session does not have BASH_VERSION environment variable. Is this a proper bash session?" >&2
+        logger_err "This session does not have BASH_VERSION environment variable. Is this a proper bash session?"
         return 1
     }
 
@@ -288,19 +288,19 @@ function check_environment() {
 
     local result="$?"
     [[ "$result" -eq 1 ]] && {
-        echo "ERROR: Version of bash have to greater than 4.0.0."                                                           >&2
-        echo "       Please update your bash greater than 4.0.0 then run this script again."                                >&2
-        echo "       If you use mac, you can change new version of bash by running commands like below..."                  >&2
-        echo "         $ brew install bash"                                                                                 >&2
-        echo "         $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"   >&2
-        echo "       ...then relogin or restart your Mac"                                                                   >&2
+        logger_err " Version of bash have to greater than 4.0.0."
+        logger_err " Please update your bash greater than 4.0.0 then run this script again."
+        logger_err " If you use mac, you can change new version of bash by running commands like below..."
+        logger_err "   $ brew install bash"
+        logger_err "   $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"
+        logger_err " ...then relogin or restart your Mac"
 
         return 1
     }
 
     if [[ "$(get_distribution_name)" == "mac" ]]; then
         check_environment_of_mac || {
-            echo "ERROR: Failed to pass checking the environment of Mac"
+            logger_err " Failed to pass checking the environment of Mac"
             return 1
         }
     fi
