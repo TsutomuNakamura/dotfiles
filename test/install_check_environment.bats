@@ -43,17 +43,16 @@ function teardown() {
 
     run check_environment
 
-    declare -a outputs; IFS=$'\n' outputs=($output); local i=0
     [[ "$status" -eq 1 ]]
-    [[ "${#outputs[@]}"                                              -eq 6 ]]
-    [[ "${outputs[i++]}" == "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments." ]]
-    [[ "${outputs[i++]}" == "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below." ]]
-    [[ "${outputs[i++]}" == "       XDG_CONFIG_HOME=(unset)" ]]
-    [[ "${outputs[i++]}" == "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset." ]]
-    [[ "${outputs[i++]}" == "       XDG_DATA_HOME=(unset)" ]]
-    [[ "${outputs[i++]}" == "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset." ]]
+    [[ "$(stub_called_times logger_err)" -eq 6 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 0 ]]
+
+    stub_called_with_exactly_times logger_err 1 "Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
+    stub_called_with_exactly_times logger_err 1 "  XDG_CONFIG_HOME=(unset)"
+    stub_called_with_exactly_times logger_err 1 "    -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset."
+    stub_called_with_exactly_times logger_err 1 "  XDG_DATA_HOME=(unset)"
+    stub_called_with_exactly_times logger_err 1 "    -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
 }
 
 @test '#check_environment should return 1 and output a message for when XDG_CONFIG_HOME was set if is_customized_xdg_base_directories() was failed' {
@@ -62,17 +61,17 @@ function teardown() {
 
     run check_environment
 
-    declare -a outputs; IFS=$'\n' outputs=($output); local i=0
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 0 ]]
-    [[ "${#outputs[@]}"                                             -eq 6 ]]
-    [[ "${outputs[i++]}" == "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments." ]]
-    [[ "${outputs[i++]}" == "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below." ]]
-    [[ "${outputs[i++]}" == "       XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\"" ]]
-    [[ "${outputs[i++]}" == "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset." ]]
-    [[ "${outputs[i++]}" == "       XDG_DATA_HOME=(unset)" ]]
-    [[ "${outputs[i++]}" == "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset." ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 6 ]]
+
+    stub_called_with_exactly_times logger_err 1 "Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
+    stub_called_with_exactly_times logger_err 1 "Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
+    stub_called_with_exactly_times logger_err 1 "  XDG_CONFIG_HOME=\"${XDG_CONFIG_HOME}\""
+    stub_called_with_exactly_times logger_err 1 "    -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset."
+    stub_called_with_exactly_times logger_err 1 "  XDG_DATA_HOME=(unset)"
+    stub_called_with_exactly_times logger_err 1 "    -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
 }
 
 @test '#check_environment should return 1 and output a message for when XDG_DATA_HOME was set if is_customized_xdg_base_directories() was failed' {
@@ -85,13 +84,14 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 0 ]]
-    [[ "${#outputs[@]}" == 6 ]]
-    [[ "${outputs[i++]}" == "ERROR: Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments." ]]
-    [[ "${outputs[i++]}" == "       Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below." ]]
-    [[ "${outputs[i++]}" == "       XDG_CONFIG_HOME=(unset)" ]]
-    [[ "${outputs[i++]}" == "           -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset." ]]
-    [[ "${outputs[i++]}" == "       XDG_DATA_HOME=\"${XDG_DATA_HOME}\"" ]]
-    [[ "${outputs[i++]}" == "           -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset." ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 6 ]]
+
+    stub_called_with_exactly_times logger_err 1 "Sorry, this dotfiles requires XDG Base Directory as default or unset XDG_CONFIG_HOME and XDG_DATA_HOME environments."
+    stub_called_with_exactly_times logger_err 1 "Current environment variables XDG_CONFIG_HOME and XDG_DATA_HOME is set like below."
+    stub_called_with_exactly_times logger_err 1 "  XDG_CONFIG_HOME=(unset)"
+    stub_called_with_exactly_times logger_err 1 "    -> This must be set \"${HOME}/.config\" in Linux or \"${HOME}/Library/Preferences\" in Mac or unset."
+    stub_called_with_exactly_times logger_err 1 "  XDG_DATA_HOME=\"${XDG_DATA_HOME}\""
+    stub_called_with_exactly_times logger_err 1 "    -> This must be set \"${HOME}/.local/share\" in Linux or \"${HOME}/Library\" in Mac or unset."
 }
 
 @test '#check_environment should return 1 and output a message if BASH was not set' {
@@ -100,12 +100,11 @@ function teardown() {
 
     run check_environment
 
-    declare -a outputs; IFS=$'\n' outputs=($output); local i=0
-    [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 0 ]]
-    [[ "${#outputs[@]}" == 1 ]]
-    [[ "${outputs[i++]}" == "ERROR: This script must run as bash script" ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
+
+    stub_called_with_exactly_times logger_err 1 "This script must run as bash script"
 }
 
 @test '#check_environment should return 1 and output a message if BASH_VERSION was not set' {
@@ -114,12 +113,12 @@ function teardown() {
 
     run check_environment
 
-    declare -a outputs; IFS=$'\n' outputs=($output); local i=0
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 0 ]]
-    [[ "${#outputs[@]}" == 1 ]]
-    [[ "${outputs[i++]}" == "ERROR: This session does not have BASH_VERSION environment variable. Is this a proper bash session?" ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
+
+    stub_called_with_exactly_times logger_err 1 "This session does not have BASH_VERSION environment variable. Is this a proper bash session?"
 }
 
 @test '#check_environment should return 1 and if vercomp() return 1' {
@@ -128,17 +127,17 @@ function teardown() {
 
     run check_environment
 
-    declare -a outputs; IFS=$'\n' outputs=($output); local i=0
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 1 ]]
-    [[ "${#outputs[@]}" == 6 ]]
-    [[ "${outputs[i++]}" == "ERROR: Version of bash have to greater than 4.0.0." ]]
-    [[ "${outputs[i++]}" == "       Please update your bash greater than 4.0.0 then run this script again." ]]
-    [[ "${outputs[i++]}" == "       If you use mac, you can change new version of bash by running commands like below..." ]]
-    [[ "${outputs[i++]}" == "         $ brew install bash" ]]
-    [[ "${outputs[i++]}" == "         $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells" ]]
-    [[ "${outputs[i++]}" == "       ...then relogin or restart your Mac" ]]
+    [[ "$(stub_called_times logger_err)"                            -eq 6 ]]
+
+    stub_called_with_exactly_times logger_err 1 "Version of bash have to greater than 4.0.0."
+    stub_called_with_exactly_times logger_err 1 "Please update your bash greater than 4.0.0 then run this script again."
+    stub_called_with_exactly_times logger_err 1 "If you use mac, you can change new version of bash by running commands like below..."
+    stub_called_with_exactly_times logger_err 1 "  $ brew install bash"
+    stub_called_with_exactly_times logger_err 1 "  $ grep -q '/usr/local/bin/bash' /etc/shells || echo /usr/local/bin/bash | sudo tee -a /etc/shells"
+    stub_called_with_exactly_times logger_err 1 "...then relogin or restart your Mac"
 }
 
 @test '#check_environment should return 1 if check_environment_of_mac Mac' {
@@ -147,12 +146,12 @@ function teardown() {
 
     run check_environment
 
-    declare -a outputs; IFS=$'\n' outputs=($output); local i=0
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times is_customized_xdg_base_directories)"    -eq 1 ]]
     [[ "$(stub_called_times vercomp)"                               -eq 1 ]]
     [[ "$(stub_called_times check_environment_of_mac)"              -eq 1 ]]
-    [[ "${#outputs[@]}"                                             -eq 1 ]]
-    [[ "${outputs[i++]}" == "ERROR: Failed to pass checking the environment of Mac" ]]
+
+    [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
+    stub_called_with_exactly_times logger_err 1 "Failed to pass checking the environment of Mac"
 }
 
