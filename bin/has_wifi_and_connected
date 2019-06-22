@@ -13,8 +13,15 @@ main() {
 }
 
 has_wifi_and_connected_on_mac() {
-    # TODO: 
-    true
+    command -v /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport || {
+        echo "ERROR: Command /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport does not exist on this Mac" >&2
+        return 1
+    }
+
+    # TODO: Which a proper way to check existence of network interfaces?
+    /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I > /dev/null && return 0
+
+    return 1
 }
 
 has_wifi_and_connected_on_linux() {
