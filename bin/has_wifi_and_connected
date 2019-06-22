@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-THIS_NODE_DOES_NOT_HAVE_IW=1
-
-THIS_NODE_DOES_NOT_HAVE_IW=1
-DOES_NOT_HAVE_IW=1
-
 main() {
     local distribution="$(get_distribution_name_of_dotfiles)"
 
@@ -24,11 +19,19 @@ has_wifi_and_connected_on_mac() {
 
 has_wifi_and_connected_on_linux() {
     command -v iw || {
-        return $DOES_NOT_HAVE_IW
+        echo "ERROR: iw command was not found" >&2
+        return 1
     }
 
-    local interface=$(iw dev | awk '$1=="Interface"{print $2}')
+    declare -a interfaces=( $(iw dev | awk '$1=="Interface"{print $2}') )
 
+    if [[ ${#interfaces[@]} -eq 0 ]]; then
+        echo "ERROR: This node does not has any wireless devices" >&2
+        return 1
+    fi
+
+    # Return 0 if this machine has some wireless devices
+    return 0
 }
 
 main
