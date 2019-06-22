@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+main() {
+    local distribution="$(get_distribution_name_of_dotfiles)"
+
+    if [[ "$distribution" == "mac" ]]; then
+        has_wifi_and_connected_on_mac
+        return $?
+    else
+        has_wifi_and_connected_on_linux
+        return $?
+    fi
+}
+
+has_wifi_and_connected_on_mac() {
+    command -v /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport || {
+        echo "ERROR: Command /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport does not exist on this Mac" >&2
+        return 1
+    }
+
+    # TODO: Which a proper way to check existence of network interfaces?
+    /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I > /dev/null && return 0
+
+    return 1
+}
+
+has_wifi_and_connected_on_linux() {
+    command -v iw || {
+        echo "ERROR: iw command was not found" >&2
+        return 1
+    }
+
+    declare -a interfaces=( $(iw dev | awk '$1=="Interface"{print $2}') )
+
+    if [[ ${#interfaces[@]} -eq 0 ]]; then
+        echo "ERROR: This node does not has any wireless devices" >&2
+        return 1
+    fi
+
+    # Return 0 if this machine has some wireless devices
+    return 0
+}
+
+main
+exit $?
+
