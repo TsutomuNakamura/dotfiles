@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+THIS_NODE_DOES_NOT_HAVE_IW=1
+
+THIS_NODE_DOES_NOT_HAVE_IW=1
+DOES_NOT_HAVE_IW=1
+
+main() {
+    local distribution="$(get_distribution_name_of_dotfiles)"
+
+    if [[ "$distribution" == "mac" ]]; then
+        has_wifi_and_connected_on_mac
+        return $?
+    else
+        has_wifi_and_connected_on_linux
+        return $?
+    fi
+}
+
+has_wifi_and_connected_on_mac() {
+    # TODO: 
+    true
+}
+
+has_wifi_and_connected_on_linux() {
+    command -v iw || {
+        return $DOES_NOT_HAVE_IW
+    }
+
+    local interface=$(iw dev | awk '$1=="Interface"{print $2}')
+
+}
+
+main
+exit $?
+
