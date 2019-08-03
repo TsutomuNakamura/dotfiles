@@ -39,6 +39,9 @@ set helplang=en
 set wildmenu
 set wildmode=longest:full,full
 
+" 
+set mouse=a
+
 " enable auto load the file (depending on your platform)
 set autoread
 
