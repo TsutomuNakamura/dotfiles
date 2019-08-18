@@ -1432,6 +1432,7 @@ function deploy() {
     deploy_xdg_base_directory
     deploy_vim_environment
     deploy_tmux_environment
+    deploy_zsh_environment
 
     # FIXME: On Mac, do not ready for fontconfig yet.
     #        For appropriate view, release ambi_width_double settings for vim and 
@@ -1664,6 +1665,14 @@ function deploy_tmux_environment() {
         return 1
     }
 
+    return 0
+}
+
+# Deploy zsh environment
+function deploy_zsh_environment() {
+    # TODO:
+    # Install antigen
+    # Install packages
     return 0
 }
 
