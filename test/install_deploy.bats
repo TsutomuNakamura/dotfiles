@@ -489,7 +489,7 @@ function teardown() {
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
     stub_called_with_exactly_times logger_warn 1 "Failed to clear your temporary git data \"${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\" and \"${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\".\nYou should clear these data with...\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\`\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\`"
- }
+}
 
 @test '#deploy should return 1 if deploy_zsh_environment returnd 1' {
     function get_target_dotfiles() { echo ".vim"; }
@@ -512,5 +512,5 @@ function teardown() {
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
     stub_called_with_exactly_times logger_err 1 "Failed to deploy_zsh_environment()"
- }
+}
 
