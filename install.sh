@@ -1694,10 +1694,10 @@ function deploy_zsh_antigen() {
         return 1
     }
     # Install packages of zsh
-    #source "${HOME}/.zshrc" || {
-    #    logger_err "Failed to load .zshrc to install packages with antigen"
-    #    return 1
-    #}
+    zsh -c "source \"${HOME}/.zshrc\"" || {
+        logger_err "Failed to load .zshrc to install packages with antigen"
+        return 1
+    }
 
     return 0
 }
