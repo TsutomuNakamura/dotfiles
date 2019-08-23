@@ -22,6 +22,7 @@ function setup() {
     stub deploy_xdg_base_directory
     stub deploy_vim_environment
     stub deploy_tmux_environment
+    stub deploy_zsh_environment
 
     stub restore_git_personal_properties
     stub clear_git_personal_properties
@@ -55,6 +56,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 '.vim'
@@ -85,6 +87,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 '.vim'
@@ -114,6 +117,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 '.config'
@@ -144,6 +148,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 '.config'
@@ -174,6 +179,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 '.config'
@@ -211,6 +217,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 '.config'
@@ -240,6 +247,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 '.local'
@@ -265,6 +273,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 'bin'
@@ -292,6 +301,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
 
     stub_called_with_exactly_times should_it_make_deep_link_directory 1 'bin'
@@ -333,6 +343,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 0 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 0 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
 
@@ -355,6 +366,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 0 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 0 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 }
@@ -381,6 +393,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 0 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 0 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                            -eq 1 ]]
 
@@ -410,6 +423,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 0 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 0 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 0 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 0 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                            -eq 0 ]]
 
@@ -443,6 +457,7 @@ function teardown() {
     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
     [[ "$(stub_called_times logger_warn)"                           -eq 1 ]]
     [[ "$(stub_called_times logger_error)"                          -eq 0 ]]
@@ -451,27 +466,51 @@ function teardown() {
     stub_called_with_exactly_times logger_warn 1 "Failed to restore your email of git and(or) name of git.\nYou may nesessary to restore manually with \`git config --global user.name \"Your Name\"\`, \`git config --global user.email your-email@example.com\`"
 }
 
- @test '#deploy should call logger_warn if clear_git_personal_properties has failed' {
-     function get_target_dotfiles() { echo ".vim"; }
-     stub_and_eval clear_git_personal_properties '{ return 1; }'
+@test '#deploy should call logger_warn if clear_git_personal_properties has failed' {
+    function get_target_dotfiles() { echo ".vim"; }
+    stub_and_eval clear_git_personal_properties '{ return 1; }'
 
-     run deploy
+    run deploy
 
-     echo "$output"
-     [[ "$status" -eq 0 ]]
+    echo "$output"
+    [[ "$status" -eq 0 ]]
 
-     [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
-     [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
-     [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
-     [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
-     [[ "$(stub_called_times clear_git_personal_properties)"         -eq 1 ]]
-     [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
-     [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
-     [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
-     [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
-     [[ "$(stub_called_times logger_warn)"                           -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
+    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 1 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
+    [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
+    [[ "$(stub_called_times get_distribution_name)"                 -eq 1 ]]
+    [[ "$(stub_called_times logger_warn)"                           -eq 1 ]]
 
-     stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
-     stub_called_with_exactly_times logger_warn 1 "Failed to clear your temporary git data \"${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\" and \"${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\".\nYou should clear these data with...\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\`\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\`"
- }
+    stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
+    stub_called_with_exactly_times logger_warn 1 "Failed to clear your temporary git data \"${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\" and \"${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\".\nYou should clear these data with...\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_EMAIL_STORE_FILE}\`\n\`rm -f ${FULL_BACKUPDIR_PATH}/${GIT_USER_NAME_STORE_FILE}\`"
+}
+
+@test '#deploy should return 1 if deploy_zsh_environment returnd 1' {
+    function get_target_dotfiles() { echo ".vim"; }
+    stub_and_eval deploy_zsh_environment '{ return 1; }'
+
+    run deploy
+
+    [[ "$status" -eq 1 ]]
+    [[ "$(stub_called_times backup_current_dotfiles)"               -eq 1 ]]
+    [[ "$(stub_called_times should_it_make_deep_link_directory)"    -eq 1 ]]
+    [[ "$(stub_called_times files_that_should_not_be_linked)"       -eq 0 ]]
+    [[ "$(stub_called_times restore_git_personal_properties)"       -eq 1 ]]
+    [[ "$(stub_called_times clear_git_personal_properties)"         -eq 1 ]]
+    [[ "$(stub_called_times deploy_xdg_base_directory)"             -eq 1 ]]
+    [[ "$(stub_called_times deploy_vim_environment)"                -eq 1 ]]
+    [[ "$(stub_called_times deploy_tmux_environment)"               -eq 1 ]]
+    [[ "$(stub_called_times deploy_zsh_environment)"                -eq 1 ]]
+    [[ "$(stub_called_times get_distribution_name)"                 -eq 0 ]]
+    [[ "$(stub_called_times logger_warn)"                           -eq 0 ]]
+
+    stub_called_with_exactly_times should_it_make_deep_link_directory 1 ".vim"
+    stub_called_with_exactly_times logger_err 1 "Failed to deploy_zsh_environment()"
+}
 

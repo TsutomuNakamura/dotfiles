@@ -41,6 +41,9 @@ DEFAULT_XDG_DATA_HOME_FOR_LINUX="${HOME}/.local/share"
 # Default XDG_DATA_HOME for Mac
 DEFAULT_XDG_DATA_HOME_FOR_MAC="${HOME}/Library"
 
+# zsh dir
+ZSH_DIR="${HOME}/.zsh"
+
 # Temporary git user email from previous .gitconfig
 GIT_USER_EMAIL_STORE_FILE="git_tmp_user_email"
 # Full file path of temporary git user email from previous .gitconfig
@@ -1429,9 +1432,14 @@ function deploy() {
     }
 
     # TODO: Should add error handling
+
     deploy_xdg_base_directory
     deploy_vim_environment
     deploy_tmux_environment
+    deploy_zsh_environment || {
+        logger_err "Failed to deploy_zsh_environment()"
+        return 1
+    }
 
     # FIXME: On Mac, do not ready for fontconfig yet.
     #        For appropriate view, release ambi_width_double settings for vim and 
@@ -1666,6 +1674,34 @@ function deploy_tmux_environment() {
 
     return 0
 }
+
+
+# Deploy zsh environment
+function deploy_zsh_environment() {
+    deploy_zsh_antigen || return 1
+
+    return 0
+}
+
+# Deploy zsh antigen then install packages managed with antigen
+function deploy_zsh_antigen() {
+    mkdir -p "${ZSH_DIR}/antigen" || {
+        logger_err "Failed to create \"${ZSH_DIR}\""
+        return 1
+    }
+    curl -L git.io/antigen > "${ZSH_DIR}/antigen/antigen.zsh" || {
+        logger_err "Failed to create \"${ZSH_DIR}/antigen/antigen.zsh\" by downloading from git.io/antigen"
+        return 1
+    }
+    # Install packages of zsh
+    zsh -c "source \"${HOME}/.zshrc\"" || {
+        logger_err "Failed to load .zshrc to install packages with antigen"
+        return 1
+    }
+
+    return 0
+}
+
 
 # Install tmux plugins
 function _install_and_update_tmux_plugins() {
