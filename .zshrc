@@ -102,6 +102,17 @@ export GPG_PATH=$(tty)
 # Load user specific environment
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 
+if [ -f ~/.zsh/antigen/antigen.zsh ]; then
+    source ~/antigen.zsh
+
+    #antigen bundle zsh-users/zsh-syntax-highlighting
+    antigen bundle zsh-users/zsh-autosuggestions
+    antigen apply
+
+    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240,underline"
+    bindkey '^ ' autosuggest-accept
+fi
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
