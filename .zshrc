@@ -103,7 +103,7 @@ export GPG_PATH=$(tty)
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 
 if [ -f ~/.zsh/antigen/antigen.zsh ]; then
-    source ~/antigen.zsh
+    source ~/.zsh/antigen/antigen.zsh
 
     #antigen bundle zsh-users/zsh-syntax-highlighting
     antigen bundle zsh-users/zsh-autosuggestions
