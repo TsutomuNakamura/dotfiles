@@ -109,8 +109,10 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     antigen bundle zsh-users/zsh-autosuggestions
     antigen apply
 
+    # Settings for zsh-autosuggestions
     export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240,underline"
-    bindkey '^ ' autosuggest-accept
+    bindkey '^ ' autosuggest-accept     # Ctrl + Space: Accept auto suggestion
+    bindkey '^l' autosuggest-accept     # Ctrl + l: Accept auto suggestion
 fi
 
 export NVM_DIR="$HOME/.nvm"
