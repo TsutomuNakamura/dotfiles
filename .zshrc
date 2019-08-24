@@ -107,6 +107,7 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
 
     #antigen bundle zsh-users/zsh-syntax-highlighting
     antigen bundle zsh-users/zsh-autosuggestions
+    antigen bundle zsh-users/zsh-syntax-highlighting
     antigen apply
 
     # Settings for zsh-autosuggestions
