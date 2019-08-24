@@ -103,6 +103,7 @@ export GPG_PATH=$(tty)
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 
 alias -s txt='vim'
+setopt interactivecomments
 
 if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     source ~/.zsh/antigen/antigen.zsh
@@ -119,6 +120,9 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
 
     # Settings for zsh-syntax-highlight
     # See documantation: https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters.md
+    typeset -A ZSH_HIGHLIGHT_HIGHLIGHTERS
+    ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+    #ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
     typeset -A ZSH_HIGHLIGHT_STYLES
     ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=197,underline"
     #ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=255,underline"
@@ -181,8 +185,14 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     ZSH_HIGHLIGHT_STYLES[comment]="fg=243"
     ZSH_HIGHLIGHT_STYLES[named-fd]="bold"
 
-    #ZSH_HIGHLIGHT_STYLES[arg0]="fg=243"
+    ZSH_HIGHLIGHT_STYLES[arg0]="fg=243"
     #ZSH_HIGHLIGHT_STYLES[default]="fg=255"
+
+    # bracket-level
+    ZSH_HIGHLIGHT_STYLES[bracket-level-1]="fg=45"
+    ZSH_HIGHLIGHT_STYLES[bracket-level-2]='fg=197'
+    ZSH_HIGHLIGHT_STYLES[bracket-level-3]='fg=47,bold'
+    ZSH_HIGHLIGHT_STYLES[bracket-level-4]="fg=226,bold"
 fi
 
 export NVM_DIR="$HOME/.nvm"
