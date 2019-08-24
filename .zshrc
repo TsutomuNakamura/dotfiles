@@ -120,8 +120,8 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
 
     # Settings for zsh-syntax-highlight
     # See documantation: https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters.md
-    typeset -A ZSH_HIGHLIGHT_HIGHLIGHTERS
-    ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+    #typeset -A ZSH_HIGHLIGHT_HIGHLIGHTERS
+    ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
     #ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
     typeset -A ZSH_HIGHLIGHT_STYLES
     ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=197,underline"
@@ -193,6 +193,12 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     ZSH_HIGHLIGHT_STYLES[bracket-level-2]='fg=197'
     ZSH_HIGHLIGHT_STYLES[bracket-level-3]='fg=47,bold'
     ZSH_HIGHLIGHT_STYLES[bracket-level-4]="fg=226,bold"
+
+    #typeset -A ZSH_HIGHLIGHT_PATTERNS
+    #ZSH_HIGHLIGHT_PATTERNS+=('rm -rf /*/' 'fg=197,standout')
+
+    #typeset -A ZSH_HIGHLIGHT_REGEXP
+    #ZSH_HIGHLIGHT_REGEXP+=('\brm \-rf /.*\b' 'fg=197,standout')
 fi
 
 export NVM_DIR="$HOME/.nvm"
