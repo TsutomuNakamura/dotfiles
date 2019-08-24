@@ -102,6 +102,8 @@ export GPG_PATH=$(tty)
 # Load user specific environment
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 
+alias -s txt='vim'
+
 if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     source ~/.zsh/antigen/antigen.zsh
 
@@ -114,6 +116,39 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240,underline"
     bindkey '^ ' autosuggest-accept     # Ctrl + Space: Accept auto suggestion
     bindkey '^l' autosuggest-accept     # Ctrl + l: Accept auto suggestion
+
+    # Settings for zsh-syntax-highlight
+    # See documantation: https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters.md
+    typeset -A ZSH_HIGHLIGHT_STYLES
+    ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=197,underline"
+    #ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=255,underline"
+    #ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=227"
+    ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=45"
+    #ZSH_HIGHLIGHT_STYLES[alias]="fg=45"
+    ZSH_HIGHLIGHT_STYLES[alias]="fg=45,bold"
+    ZSH_HIGHLIGHT_STYLES[suffix-alias]="fg=45,standout"
+    ZSH_HIGHLIGHT_STYLES[builtin]="fg=45,bold"              # pwd, echo, shift zstyle alias etc...
+    ZSH_HIGHLIGHT_STYLES[function]="fg=45,underline"
+    ZSH_HIGHLIGHT_STYLES[command]="fg=45,bold"
+    ZSH_HIGHLIGHT_STYLES[precommand]="fg=45,underline"      # noglob builtin command etc...
+    ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=255,bold"
+    # * hashed command example
+    #     hash -d d=~/.dotfiles
+    #   Then you can change directory to ~/.dotfiles with `cd ~d`
+    #   "~d" will be highlighted by ZSH_HIGHLIGHT_STYLES[hashed-command]
+    ZSH_HIGHLIGHT_STYLES[hashed-command]="fg=45,standout"
+    #ZSH_HIGHLIGHT_STYLES[path]="fg=255,underline"
+    ZSH_HIGHLIGHT_STYLES[path]="fg=255"
+    ZSH_HIGHLIGHT_STYLES[path_pathseparator]="bold"         # Path separators in filenames(/). If unset "path" is used(default)
+    ##ZSH_HIGHLIGHT_STYLES[path_prefix]="bold"
+    ZSH_HIGHLIGHT_STYLES[globbing]="bold"
+    ZSH_HIGHLIGHT_STYLES[history-expansion]="fg=45,standout"
+    ZSH_HIGHLIGHT_STYLES[command-substitution]="fg=255"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-unquoted]="fg=255"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-quoted]="fg=255"
+    ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]="fg=47,bold"
+
+
 fi
 
 export NVM_DIR="$HOME/.nvm"
