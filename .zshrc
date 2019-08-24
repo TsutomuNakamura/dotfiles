@@ -138,17 +138,51 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     #   "~d" will be highlighted by ZSH_HIGHLIGHT_STYLES[hashed-command]
     ZSH_HIGHLIGHT_STYLES[hashed-command]="fg=45,standout"
     #ZSH_HIGHLIGHT_STYLES[path]="fg=255,underline"
-    ZSH_HIGHLIGHT_STYLES[path]="fg=255"
-    ZSH_HIGHLIGHT_STYLES[path_pathseparator]="bold"         # Path separators in filenames(/). If unset "path" is used(default)
+    #ZSH_HIGHLIGHT_STYLES[path]="fg=255"
+
+    # Path separators in filenames(/). If unset "path" is used(default)
+    ZSH_HIGHLIGHT_STYLES[path_pathseparator]="bold"
     ##ZSH_HIGHLIGHT_STYLES[path_prefix]="bold"
     ZSH_HIGHLIGHT_STYLES[globbing]="bold"
     ZSH_HIGHLIGHT_STYLES[history-expansion]="fg=45,standout"
     ZSH_HIGHLIGHT_STYLES[command-substitution]="fg=255"
     #ZSH_HIGHLIGHT_STYLES[command-substitution-unquoted]="fg=255"
     #ZSH_HIGHLIGHT_STYLES[command-substitution-quoted]="fg=255"
-    ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]="fg=47,bold"
+    ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]="fg=197"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-unquoted]="fg=197"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-quoted]="fg=197"
+    #ZSH_HIGHLIGHT_STYLES[process-substitution]="fg=255"
+    ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]="fg=197"
+    ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=226"
+    ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=226"
+    #ZSH_HIGHLIGHT_STYLES[back-quoted-argument]="fg=197,underline"
+    #ZSH_HIGHLIGHT_STYLES[back-quoted-argument-unclosed]="fg=197,underline"
+    ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]="fg=197,bold"
 
+    #ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=226"
+    ZSH_HIGHLIGHT_STYLES[single-quoted-argument-unclosed]="underline"
 
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=255"
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]="underline"
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]="underline"
+
+    ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]="fg=255,bold"
+    ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument-unclosed]="underline"
+
+    #ZSH_HIGHLIGHT_STYLES[rc-quote]="fg=226"
+
+    # parameter expansion inside double quotes ($foo inside "")
+    ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]="fg=46"
+    ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]="fg=45"
+    ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]="fg=226"
+
+    ZSH_HIGHLIGHT_STYLES[assign]="fg=45,underline"
+    ZSH_HIGHLIGHT_STYLES[redirection]="fg=226,bold"
+    ZSH_HIGHLIGHT_STYLES[comment]="fg=243"
+    ZSH_HIGHLIGHT_STYLES[named-fd]="bold"
+
+    #ZSH_HIGHLIGHT_STYLES[arg0]="fg=243"
+    #ZSH_HIGHLIGHT_STYLES[default]="fg=255"
 fi
 
 export NVM_DIR="$HOME/.nvm"
