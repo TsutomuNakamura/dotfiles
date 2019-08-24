@@ -102,17 +102,103 @@ export GPG_PATH=$(tty)
 # Load user specific environment
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 
+alias -s txt='vim'
+setopt interactivecomments
+
 if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     source ~/.zsh/antigen/antigen.zsh
 
     #antigen bundle zsh-users/zsh-syntax-highlighting
     antigen bundle zsh-users/zsh-autosuggestions
+    antigen bundle zsh-users/zsh-syntax-highlighting
     antigen apply
 
     # Settings for zsh-autosuggestions
     export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240,underline"
     bindkey '^ ' autosuggest-accept     # Ctrl + Space: Accept auto suggestion
     bindkey '^l' autosuggest-accept     # Ctrl + l: Accept auto suggestion
+
+    # Settings for zsh-syntax-highlight
+    # See documantation: https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters.md
+    #typeset -A ZSH_HIGHLIGHT_HIGHLIGHTERS
+    ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
+    #ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
+    typeset -A ZSH_HIGHLIGHT_STYLES
+    ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=197,underline"
+    #ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=255,underline"
+    #ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=227"
+    ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=45"
+    #ZSH_HIGHLIGHT_STYLES[alias]="fg=45"
+    ZSH_HIGHLIGHT_STYLES[alias]="fg=45,bold"
+    ZSH_HIGHLIGHT_STYLES[suffix-alias]="fg=45,standout"
+    ZSH_HIGHLIGHT_STYLES[builtin]="fg=45,bold"              # pwd, echo, shift zstyle alias etc...
+    ZSH_HIGHLIGHT_STYLES[function]="fg=45,underline"
+    ZSH_HIGHLIGHT_STYLES[command]="fg=45,bold"
+    ZSH_HIGHLIGHT_STYLES[precommand]="fg=45,underline"      # noglob builtin command etc...
+    ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=255,bold"
+    # * hashed command example
+    #     hash -d d=~/.dotfiles
+    #   Then you can change directory to ~/.dotfiles with `cd ~d`
+    #   "~d" will be highlighted by ZSH_HIGHLIGHT_STYLES[hashed-command]
+    ZSH_HIGHLIGHT_STYLES[hashed-command]="fg=45,standout"
+    #ZSH_HIGHLIGHT_STYLES[path]="fg=255,underline"
+    #ZSH_HIGHLIGHT_STYLES[path]="fg=255"
+
+    # Path separators in filenames(/). If unset "path" is used(default)
+    ZSH_HIGHLIGHT_STYLES[path_pathseparator]="bold"
+    ##ZSH_HIGHLIGHT_STYLES[path_prefix]="bold"
+    ZSH_HIGHLIGHT_STYLES[globbing]="bold"
+    ZSH_HIGHLIGHT_STYLES[history-expansion]="fg=45,standout"
+    ZSH_HIGHLIGHT_STYLES[command-substitution]="fg=255"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-unquoted]="fg=255"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-quoted]="fg=255"
+    ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]="fg=197"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-unquoted]="fg=197"
+    #ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-quoted]="fg=197"
+    #ZSH_HIGHLIGHT_STYLES[process-substitution]="fg=255"
+    ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]="fg=197"
+    ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=226"
+    ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=226"
+    #ZSH_HIGHLIGHT_STYLES[back-quoted-argument]="fg=197,underline"
+    #ZSH_HIGHLIGHT_STYLES[back-quoted-argument-unclosed]="fg=197,underline"
+    ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]="fg=197,bold"
+
+    #ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=226"
+    ZSH_HIGHLIGHT_STYLES[single-quoted-argument-unclosed]="underline"
+
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=255"
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]="underline"
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]="underline"
+
+    ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]="fg=255,bold"
+    ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument-unclosed]="underline"
+
+    #ZSH_HIGHLIGHT_STYLES[rc-quote]="fg=226"
+
+    # parameter expansion inside double quotes ($foo inside "")
+    ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]="fg=46"
+    ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]="fg=45"
+    ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]="fg=226"
+
+    ZSH_HIGHLIGHT_STYLES[assign]="fg=45,underline"
+    ZSH_HIGHLIGHT_STYLES[redirection]="fg=226,bold"
+    ZSH_HIGHLIGHT_STYLES[comment]="fg=243"
+    ZSH_HIGHLIGHT_STYLES[named-fd]="bold"
+
+    ZSH_HIGHLIGHT_STYLES[arg0]="fg=243"
+    #ZSH_HIGHLIGHT_STYLES[default]="fg=255"
+
+    # bracket-level
+    ZSH_HIGHLIGHT_STYLES[bracket-level-1]="fg=45"
+    ZSH_HIGHLIGHT_STYLES[bracket-level-2]='fg=197'
+    ZSH_HIGHLIGHT_STYLES[bracket-level-3]='fg=47,bold'
+    ZSH_HIGHLIGHT_STYLES[bracket-level-4]="fg=226,bold"
+
+    #typeset -A ZSH_HIGHLIGHT_PATTERNS
+    #ZSH_HIGHLIGHT_PATTERNS+=('rm -rf /*/' 'fg=197,standout')
+
+    #typeset -A ZSH_HIGHLIGHT_REGEXP
+    #ZSH_HIGHLIGHT_REGEXP+=('\brm \-rf /.*\b' 'fg=197,standout')
 fi
 
 export NVM_DIR="$HOME/.nvm"
