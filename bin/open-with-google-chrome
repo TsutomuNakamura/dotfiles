@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+main() {
+
+    [[ $# -eq 0 ]] && {
+        echo "ERROR: There are no arguments" >&2
+        return 1
+    }
+
+    command -v google-chrome && {
+        google-chrome "$@"
+        return $?
+    }
+
+    [[ -f /opt/google/chrome/google-chrome ]] || {
+        echo "ERROR: There are no command found for google-chrome" >&2
+        return 1
+    }
+
+    /opt/google/chrome/google-chrome "$@"
+
+    return $?
+}
+
+main "$@"
