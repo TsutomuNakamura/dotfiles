@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+main() {
+    for ((i=2;i<=$#;i++)); do
+        ${@[1]} ${@[$i]} &> /dev/null &
+    done
+}
+
+main "$@"
