@@ -164,11 +164,10 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     #ZSH_HIGHLIGHT_STYLES[back-quoted-argument-unclosed]="fg=197,underline"
     ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]="fg=197,bold"
 
-    #ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=226"
+    ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=255"
     ZSH_HIGHLIGHT_STYLES[single-quoted-argument-unclosed]="underline"
 
     ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=255"
-    ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]="underline"
     ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]="underline"
 
     ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]="fg=255,bold"
