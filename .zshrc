@@ -102,7 +102,7 @@ export GPG_PATH=$(tty)
 # Load user specific environment
 [[ -f ~/.user_specificrc ]] && . ~/.user_specificrc || true
 
-alias -s {txt,sh,zsh}='vim'
+alias -s {txt}='vim'
 alias -s pdf='background open-with-google-chrome'
 setopt interactivecomments
 
