@@ -49,6 +49,9 @@ set mouse=a
 " enable auto load the file (depending on your platform)
 set autoread
 
+" Disable the auto-hide feature in json-vim (https://github.com/spf13/spf13-vim/issues/375#issuecomment-18810973)
+set conceallevel=0
+
 " - Preferences of yaml file ---------------------------------------------------------------------------------
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
