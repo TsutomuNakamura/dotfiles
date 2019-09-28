@@ -3,6 +3,8 @@ scriptencoding utf-8
 set encoding=utf-8
 
 set number			" show line number
+set relativenumber	" show line number relatively
+
 set incsearch		" Enable incremental
 set hlsearch		" Enable search highlight
 "set nowrap			" Disable word wrap
@@ -38,6 +40,8 @@ set helplang=en
 " enable ex utility (:<tab>)
 set wildmenu
 set wildmode=longest:full,full
+
+" set virtualedit=block
 
 " 
 set mouse=a
