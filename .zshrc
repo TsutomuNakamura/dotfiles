@@ -89,7 +89,7 @@ setopt PUSHD_IGNORE_DUPS
 setopt NONOMATCH
 
 # Append bin just below user's home directory to PATH to execute user specific command.
-export PATH="${HOME}/bin:${PATH}"
+export PATH="${HOME}/bin:${PATH}:${HOME}/.local/bin"
 
 # Prepare golang environment
 if [[ -d "${HOME}/go/bin" ]]; then

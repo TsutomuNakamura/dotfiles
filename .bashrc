@@ -48,7 +48,7 @@ else
     export EDITOR=vim
 fi
 
-export PATH="${PATH}:${HOME}/bin"
+export PATH="${PATH}:${HOME}/bin:${HOME}/.local/bin"
 
 # Prepare golang environment
 if [[ -d "${HOME}/go/bin" ]]; then
