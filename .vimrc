@@ -41,7 +41,7 @@ set helplang=en
 set wildmenu
 set wildmode=longest:full,full
 
-" set virtualedit=block
+set virtualedit=block
 
 " 
 set mouse=a
