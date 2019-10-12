@@ -54,6 +54,7 @@ set conceallevel=0
 
 " - Preferences of yaml file ---------------------------------------------------------------------------------
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType javascript setlocal ts=2 sts=2 sw=2 expandtab
 
 " Change leader for vim plugins from '\'
 let mapleader = ";"
@@ -139,6 +140,14 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
 Plug 'junegunn/fzf.vim'
 Plug 'Yggdroot/indentLine'
 Plug 'terryma/vim-multiple-cursors'
+Plug 'pangloss/vim-javascript'
+"Plug 'maxmellon/vim-jsx-pretty'
+
+Plug 'mxw/vim-jsx'
+
+" To prevent the issue: https://github.com/Yggdroot/indentLine/issues/140
+Plug 'elzr/vim-json'
+let g:vim_json_syntax_conceal = 0
 
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
