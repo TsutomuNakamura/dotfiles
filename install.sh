@@ -1061,7 +1061,7 @@ function install_packages_with_pacman() {
             continue
         fi
 
-        if ${prefix} pacman -Q "${packages[i]}"; then
+        if ${prefix} pacman -Q "${packages[i]}" > /dev/null 2>&1; then
             already_installed_packages+="${packages[i]} "
         else
             # Packages vim and gvim may conflict each other. Install them individual not to avoid faile to install other packages.
