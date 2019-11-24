@@ -55,6 +55,8 @@ set conceallevel=0
 " - Preferences of yaml file ---------------------------------------------------------------------------------
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 autocmd FileType javascript setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType typescript setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType typescriptreact setlocal ts=2 sts=2 sw=2 expandtab
 
 " Change leader for vim plugins from '\'
 let mapleader = ";"
@@ -144,10 +146,15 @@ Plug 'pangloss/vim-javascript'
 "Plug 'maxmellon/vim-jsx-pretty'
 
 Plug 'mxw/vim-jsx'
+Plug 'leafgarland/typescript-vim'
+Plug 'peitalin/vim-jsx-typescript'
 
 " To prevent the issue: https://github.com/Yggdroot/indentLine/issues/140
+" https://vi.stackexchange.com/questions/7258/how-do-i-prevent-vim-from-hiding-symbols-in-markdown-and-json
 Plug 'elzr/vim-json'
 let g:vim_json_syntax_conceal = 0
+let g:indentLine_concealcursor = 'inc'
+let g:indentLine_conceallevel = 2
 
 " Color schemes of molokai ----
 ""Plug 'tomasr/molokai'
