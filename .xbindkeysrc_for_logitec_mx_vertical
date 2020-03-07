@@ -1,0 +1,4 @@
+"xvkbd -text '\[Page_Down]'"
+b:8
+"xvkbd -text '\[Page_Up]'"
+b:9
