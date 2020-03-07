@@ -201,7 +201,37 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     #ZSH_HIGHLIGHT_REGEXP+=('\brm \-rf /.*\b' 'fg=197,standout')
 fi
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-true
+prepare_xbindkeysrc() {
+    local xbindkeysrc_file="$1"
+    local symlink_has_created=0
+
+    if [ ! -f .xbindkeysrc ]; then
+        ln -s "$xbindkeysrc_file" .xbindkeysrc
+        symlink_has_created=1
+    fi
+    run_xbindkeys
+}
+
+run_xbindkeys() {
+    [ ! -f .xbindkeysrc ] && return
+
+    if (pgrep -u "$USER" xbindkeys > /dev/null); then
+        local age_of_file_in_sec="$(( $(date +%s) - $(stat -c %Y .xbindkeysrc) ))"
+        local age_of_ps_in_sec="$(ps -p $(pidof xbindkeys) -o etimes:1 --no-headers)"
+        echo "$age_of_file_in_sec -le $age_of_ps_in_sec"
+
+        if [ "$age_of_file_in_sec" -le "$age_of_ps_in_sec" ]; then
+            # Reload process if the age of process grater than the age of file
+            killall -HUP xbindkeys
+        fi
+    else
+        xbindkeys --poll-rc
+    fi
+}
+
+if (xinput --list | grep -E '.*Logitech MX Vertical Advanced Ergonomic Mouse\s+id=.*' > /dev/null); then
+    prepare_xbindkeysrc
+else
+    run_xbindkeys
+fi
+
