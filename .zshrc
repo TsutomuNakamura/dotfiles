@@ -218,7 +218,6 @@ run_xbindkeys() {
     if (pgrep -u "$USER" xbindkeys > /dev/null); then
         local age_of_file_in_sec="$(( $(date +%s) - $(stat -c %Y .xbindkeysrc) ))"
         local age_of_ps_in_sec="$(ps -p $(pidof xbindkeys) -o etimes:1 --no-headers)"
-        echo "$age_of_file_in_sec -le $age_of_ps_in_sec"
 
         if [ "$age_of_file_in_sec" -le "$age_of_ps_in_sec" ]; then
             # Reload process if the age of process grater than the age of file
