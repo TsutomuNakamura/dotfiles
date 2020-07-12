@@ -2326,7 +2326,7 @@ function get_linux_os_version() {
     source /etc/os-release > /dev/null 2>&1
     local result=$?
 
-    echo "$VERSION"
+    echo "$VERSION_ID"
     return $result
 }
 
