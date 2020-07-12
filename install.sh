@@ -627,6 +627,11 @@ function add_additional_repositories_for_ubuntu() {
             return 1
         }
     }
+
+    local os_version=
+    os_version=$(get_linux_os_version)
+    local ret=$?
+
     # Added ppa:neovim-ppa/stable to install neovim
     sudo add-apt-repository ppa:neovim-ppa/stable -y || {
         logger_err "Failed to add repository ppa:neovim-ppa/stable"
@@ -2299,6 +2304,16 @@ function _install_emojify() {
         return 1
     }
     chmod +x "${DOTDIR}/bin/emojify"
+}
+
+# Get version of Linux.
+# For example, if run this command on Ubuntu 20.04, it will return "20.04"
+function get_linux_os_version() {
+    source /etc/os-release > /dev/null 2>&1
+    local result=$?
+
+    echo "$VERSION"
+    return $result
 }
 
 # Get your OS distribution name
