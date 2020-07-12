@@ -446,7 +446,7 @@ function print_post_message_list() {
 
 # Output the message to stdout then push it to info message list.
 function logger_info() {
-    local message="$1"
+    local message="$@"
     message="${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: $message"
     echo -e "$message"
     push_post_message_list "$message"
@@ -454,7 +454,7 @@ function logger_info() {
 
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
-    local message="$1"
+    local message="$@"
 
     local line_no="${BASH_LINENO[0]}"
 
@@ -464,7 +464,7 @@ function logger_warn() {
 }
 
 function logger_err() {
-    local message="$1"
+    local message="$@"
 
     local line_no
     local func_name="${FUNCNAME[1]}"
