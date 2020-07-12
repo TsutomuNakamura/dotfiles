@@ -102,7 +102,7 @@ PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpe
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
 
 PACKAGES_TO_INSTALL_ON_UBUNTU="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev build-essential xclip xbindkeys"
-PACKAGES_TO_INSTALL_ON_UBUNTU+=" neovim python-dev python-pip python3-dev python3-pip"
+PACKAGES_TO_INSTALL_ON_UBUNTU+=" neovim python-dev python3-dev python3-pip"
 PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
 
 PACKAGES_TO_INSTALL_ON_CENTOS="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg cmake gcc-c++ make python3-devel xclip"
