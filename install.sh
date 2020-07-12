@@ -102,7 +102,7 @@ PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpe
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
 
 PACKAGES_TO_INSTALL_ON_UBUNTU="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev build-essential xclip xbindkeys"
-PACKAGES_TO_INSTALL_ON_UBUNTU+=" neovim python-dev python-pip python3-dev python3-pip"
+PACKAGES_TO_INSTALL_ON_UBUNTU+=" neovim python-dev python3-dev python3-pip"
 PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk fonts-noto-cjk-extra"
 
 PACKAGES_TO_INSTALL_ON_CENTOS="git vim-enhanced gvim ctags tmux zsh unzip gnome-terminal ffmpeg cmake gcc-c++ make python3-devel xclip"
@@ -446,7 +446,7 @@ function print_post_message_list() {
 
 # Output the message to stdout then push it to info message list.
 function logger_info() {
-    local message="$1"
+    local message="$@"
     message="${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: $message"
     echo -e "$message"
     push_post_message_list "$message"
@@ -454,7 +454,7 @@ function logger_info() {
 
 # Output the message to errout then push it to warn message list.
 function logger_warn() {
-    local message="$1"
+    local message="$@"
 
     local line_no="${BASH_LINENO[0]}"
 
@@ -464,7 +464,7 @@ function logger_warn() {
 }
 
 function logger_err() {
-    local message="$1"
+    local message="$@"
 
     local line_no
     local func_name="${FUNCNAME[1]}"
@@ -627,13 +627,32 @@ function add_additional_repositories_for_ubuntu() {
             return 1
         }
     }
-    # Added ppa:neovim-ppa/stable to install neovim
-    sudo add-apt-repository ppa:neovim-ppa/stable -y || {
-        logger_err "Failed to add repository ppa:neovim-ppa/stable"
-        return 1
-    }
 
-    logger_info "Added additional apt repositories. (ppa:neovim-ppa/stable)"
+    local os_version=
+    os_version=$(get_linux_os_version)
+    local ret=$?
+
+    if [[ "$ret" -ne 0 ]]; then
+        logger_err "Failed to get os version for ubuntu at add_additional_repositories_for_ubuntu()"
+        return 1
+    fi
+
+    # Ubuntu greater or equal to 18.04 does not need to add ppa repository for neovim
+    local result_of_vercomp=0
+    vercomp "18.04" "$os_version" || { result_of_vercomp=$?; true; }
+
+    if [[ "$result_of_vercomp" -eq 1 ]]; then
+        # Added ppa:neovim-ppa/stable to install neovim
+        sudo add-apt-repository ppa:neovim-ppa/stable -y || {
+            logger_err "Failed to add repository ppa:neovim-ppa/stable"
+            return 1
+        }
+
+        logger_info "Added additional apt repositories. (ppa:neovim-ppa/stable)"
+    else
+        logger_info "No need to add a repository for Neovim to Ubuntu ${os_version}. Skipped it"
+    fi
+
     return 0
 }
 
@@ -2299,6 +2318,16 @@ function _install_emojify() {
         return 1
     }
     chmod +x "${DOTDIR}/bin/emojify"
+}
+
+# Get version of Linux.
+# For example, if run this command on Ubuntu 20.04, it will return "20.04"
+function get_linux_os_version() {
+    source /etc/os-release > /dev/null 2>&1
+    local result=$?
+
+    echo "$VERSION_ID"
+    return $result
 }
 
 # Get your OS distribution name
