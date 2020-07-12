@@ -632,13 +632,27 @@ function add_additional_repositories_for_ubuntu() {
     os_version=$(get_linux_os_version)
     local ret=$?
 
-    # Added ppa:neovim-ppa/stable to install neovim
-    sudo add-apt-repository ppa:neovim-ppa/stable -y || {
-        logger_err "Failed to add repository ppa:neovim-ppa/stable"
+    if [[ "$ret" -ne 0 ]]; then
+        logger_err "Failed to get os version for ubuntu at add_additional_repositories_for_ubuntu()"
         return 1
-    }
+    fi
 
-    logger_info "Added additional apt repositories. (ppa:neovim-ppa/stable)"
+    # Ubuntu greater or equal to 18.04 does not need to add ppa repository for neovim
+    local result_of_vercomp=0
+    vercomp "18.04" "$os_version" || { result_of_vercomp=$?; true; }
+
+    if [[ "$result_of_vercomp" -eq 1 ]]; then
+        # Added ppa:neovim-ppa/stable to install neovim
+        sudo add-apt-repository ppa:neovim-ppa/stable -y || {
+            logger_err "Failed to add repository ppa:neovim-ppa/stable"
+            return 1
+        }
+
+        logger_info "Added additional apt repositories. (ppa:neovim-ppa/stable)"
+    else
+        logger_info "No need to add a repository for Neovim to Ubuntu ${os_version}. Skipped it"
+    fi
+
     return 0
 }
 
