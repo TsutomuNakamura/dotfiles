@@ -202,3 +202,9 @@ if [ -f ~/.zsh/antigen/antigen.zsh ]; then
     #typeset -A ZSH_HIGHLIGHT_REGEXP
     #ZSH_HIGHLIGHT_REGEXP+=('\brm \-rf /.*\b' 'fg=197,standout')
 fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
