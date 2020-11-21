@@ -32,6 +32,8 @@ PROMPT2="%{[22;38;05;242m%}>%{[0m%} "
 # Set aliases for commonly used command.
 if [[ "${OSTYPE}" =~ freebsd.* ]] || [[ "${OSTYPE}" =~ darwin.* ]]; then
     alias ls="ls -G -w"
+    export CLICOLOR=1
+    export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
 else
     alias ls='ls --color=auto'
 fi
