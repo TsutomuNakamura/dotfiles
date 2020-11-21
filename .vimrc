@@ -3,7 +3,7 @@ scriptencoding utf-8
 set encoding=utf-8
 
 set number			" show line number
-set relativenumber	" show line number relatively
+" set relativenumber	" show line number relatively
 
 set incsearch		" Enable incremental
 set hlsearch		" Enable search highlight
