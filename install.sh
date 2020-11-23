@@ -583,6 +583,7 @@ function install_packages() {
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
         packages="${PACKAGES_TO_INSTALL_ON_UBUNTU}"
         has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_UBUNTU_THAT_HAS_GUI}"
+        # TODO: add result++
         add_additional_repositories_for_ubuntu
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "centos" ]]; then
@@ -652,6 +653,21 @@ function add_additional_repositories_for_ubuntu() {
     else
         logger_info "No need to add a repository for Neovim to Ubuntu ${os_version}. Skipped it"
     fi
+
+    return 0
+}
+
+# Add yarn repository to debian like system
+function add_yarn_repository_to_debian_like_systems() {
+    wget -qO - https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - || {
+        logger_err "Failed to add yarn repository's gpg key from https://dl.yarnpkg.com/debian/pubkey.gpg"
+        return 1
+    }
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list || {
+        logger_err "Failed to add yarn repository to /etc/apt/sources.list.d/yarn.list"
+        return 1
+    }
+    # "sudo apt update" will be run from the another section
 
     return 0
 }
