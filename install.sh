@@ -112,7 +112,7 @@ PACKAGES_TO_INSTALL_ON_FEDORA="git vim-enhanced ctags tmux zsh unzip gnome-termi
 PACKAGES_TO_INSTALL_ON_FEDORA+=" neovim python2-neovim python3-neovim"
 PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI="google-noto-sans-fonts.noarch google-noto-serif-fonts.noarch google-noto-mono-fonts.noarch google-noto-cjk-fonts.noarch"
 
-PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip xbindkeys"
+PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip xbindkeys yarn"
 PACKAGES_TO_INSTALL_ON_ARCH+=" neovim python-neovim"
 PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
 
