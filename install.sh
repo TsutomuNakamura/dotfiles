@@ -579,6 +579,8 @@ function install_packages() {
     if [[ "$(get_distribution_name)" == "debian" ]]; then
         packages="${PACKAGES_TO_INSTALL_ON_DEBIAN}"
         has_desktop_env && packages+=" ${PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI}"
+        # TODO: add_yarn_repository_to_debian_like_systems will not be called because 
+        #       yarn will be installed to add vim-prettier and this installer for Debian does not support Neovim on Debian
         install_packages_with_apt $packages || (( result++ ))
     elif [[ "$(get_distribution_name)" == "ubuntu" ]]; then
         packages="${PACKAGES_TO_INSTALL_ON_UBUNTU}"
@@ -653,6 +655,8 @@ function add_additional_repositories_for_ubuntu() {
     else
         logger_info "No need to add a repository for Neovim to Ubuntu ${os_version}. Skipped it"
     fi
+
+    add_yarn_repository_to_debian_like_systems || return 1
 
     return 0
 }
