@@ -98,7 +98,7 @@ DISTRIBUTION=
 # Post message list
 declare -g -a POST_MESSAGES=()
 
-PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev xclip build-essential xbindkeys"
+PACKAGES_TO_INSTALL_ON_DEBIAN="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev xclip build-essential xbindkeys npm"
 PACKAGES_TO_INSTALL_ON_DEBIAN_THAT_HAS_GUI="fonts-noto fonts-noto-mono fonts-noto-cjk"
 
 PACKAGES_TO_INSTALL_ON_UBUNTU="git vim vim-gtk ctags tmux zsh unzip ranger ffmpeg cmake python3-dev libclang-dev build-essential xclip xbindkeys"
@@ -656,7 +656,7 @@ function add_additional_repositories_for_ubuntu() {
         logger_info "No need to add a repository for Neovim to Ubuntu ${os_version}. Skipped it"
     fi
 
-    add_yarn_repository_to_debian_like_systems || return 1
+    #add_yarn_repository_to_debian_like_systems || return 1
 
     return 0
 }
