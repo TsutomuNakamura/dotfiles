@@ -10,6 +10,7 @@ function setup() {
         }
         return 1
     }
+    stub add_yarn_repository_to_debian_like_systems
     stub logger_info
     stub logger_err
 }
@@ -22,14 +23,14 @@ function teardown() {
     stub_and_eval get_linux_os_version '{ builtin echo "18.04"; }'
 
     run add_additional_repositories_for_ubuntu
-
-    echo "$output"
+    builtin echo "$output"
 
     [[ "$status" -eq 0 ]]
-    [[ "$(stub_called_times sudo)"                  -eq 2 ]]
-    [[ "$(stub_called_times get_linux_os_version)"  -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"           -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"            -eq 0 ]]
+    [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
+    [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 1 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
 
     stub_called_with_exactly_times logger_info 1 'No need to add a repository for Neovim to Ubuntu 18.04. Skipped it'
 }
@@ -44,7 +45,11 @@ function teardown() {
     run add_additional_repositories_for_ubuntu
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times sudo)" -eq 1 ]]
+    [[ "$(stub_called_times sudo)"                                          -eq 1 ]]
+    [[ "$(stub_called_times get_linux_os_version)"                          -eq 0 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times logger_err 1 'Some error has occured when updating packages with apt-get update.'
 }
@@ -59,7 +64,11 @@ function teardown() {
     run add_additional_repositories_for_ubuntu
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times sudo)" -eq 2 ]]
+    [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
+    [[ "$(stub_called_times get_linux_os_version)"                          -eq 0 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times logger_err 1 'Failed to install software-properties-common'
 }
@@ -70,9 +79,11 @@ function teardown() {
     run add_additional_repositories_for_ubuntu
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times sudo)" -eq 2 ]]
-    [[ "$(stub_called_times get_linux_os_version)"  -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"            -eq 1 ]]
+    [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
+    [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times logger_err 1 'Failed to get os version for ubuntu at add_additional_repositories_for_ubuntu()'
 }
@@ -89,10 +100,26 @@ function teardown() {
     run add_additional_repositories_for_ubuntu
 
     [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times sudo)" -eq 3 ]]
-    [[ "$(stub_called_times get_linux_os_version)"  -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"            -eq 1 ]]
+    [[ "$(stub_called_times sudo)"                                          -eq 3 ]]
+    [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
+    [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times logger_err 1 'Failed to add repository ppa:neovim-ppa/stable'
 }
+
+#@test '#add_additional_repositories_for_ubuntu should return 1 if "add_yarn_repository_to_debian_like_systems" was failed' {
+#    stub_and_eval get_linux_os_version '{ builtin echo "20.04"; }'
+#    #stub_and_eval add_yarn_repository_to_debian_like_systems '{ return 1; }'
+#
+#    run add_additional_repositories_for_ubuntu
+#
+#    [[ "$status" -eq 1 ]]
+#    [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
+#    [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
+#    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 1 ]]
+#    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
+#    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
+#}
 
