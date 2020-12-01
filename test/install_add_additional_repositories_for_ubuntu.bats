@@ -28,7 +28,7 @@ function teardown() {
     [[ "$status" -eq 0 ]]
     [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
     [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
-    [[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 1 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 1 ]]
     [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
     [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
 
@@ -47,7 +47,7 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times sudo)"                                          -eq 1 ]]
     [[ "$(stub_called_times get_linux_os_version)"                          -eq 0 ]]
-    [[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
@@ -66,7 +66,7 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
     [[ "$(stub_called_times get_linux_os_version)"                          -eq 0 ]]
-    [[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
@@ -81,7 +81,7 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
     [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
-    [[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
@@ -102,24 +102,24 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times sudo)"                                          -eq 3 ]]
     [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
-    [[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
+    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 0 ]]
     [[ "$(stub_called_times logger_info)"                                   -eq 0 ]]
     [[ "$(stub_called_times logger_err)"                                    -eq 1 ]]
 
     stub_called_with_exactly_times logger_err 1 'Failed to add repository ppa:neovim-ppa/stable'
 }
 
-@test '#add_additional_repositories_for_ubuntu should return 1 if "add_yarn_repository_to_debian_like_systems" was failed' {
-    stub_and_eval get_linux_os_version '{ builtin echo "20.04"; }'
-    stub_and_eval add_yarn_repository_to_debian_like_systems '{ return 1; }'
-
-    run add_additional_repositories_for_ubuntu
-
-    [[ "$status" -eq 1 ]]
-    [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
-    [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
-    [[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 1 ]]
-    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
-    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
-}
+#@test '#add_additional_repositories_for_ubuntu should return 1 if "add_yarn_repository_to_debian_like_systems" was failed' {
+#    stub_and_eval get_linux_os_version '{ builtin echo "20.04"; }'
+#    #stub_and_eval add_yarn_repository_to_debian_like_systems '{ return 1; }'
+#
+#    run add_additional_repositories_for_ubuntu
+#
+#    [[ "$status" -eq 1 ]]
+#    [[ "$(stub_called_times sudo)"                                          -eq 2 ]]
+#    [[ "$(stub_called_times get_linux_os_version)"                          -eq 1 ]]
+#    #[[ "$(stub_called_times add_yarn_repository_to_debian_like_systems)"    -eq 1 ]]
+#    [[ "$(stub_called_times logger_info)"                                   -eq 1 ]]
+#    [[ "$(stub_called_times logger_err)"                                    -eq 0 ]]
+#}
 
