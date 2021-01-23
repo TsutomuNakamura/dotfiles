@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+
+FONT_COLOR_GREEN='\033[0;32m'
+FONT_COLOR_RED='\033[0;31m'
+FONT_COLOR_END='\033[0m'
+
+main() {
+    local domain="$1"
+    local ret=0
+
+    [[ -z "$domain" ]] && {
+        echo "Usage: $0 <domain>"
+        return 0
+    }
+
+    exist_the_domain "$domain"
+    ret=$?
+    if [[ $ret -eq 0 ]]; then
+        unset_autostart "$domain"   || return 1
+        delete_snapshots "$domain"  || return 1
+        undefine_domain "$domain"   || return 1
+    fi
+
+    exist_the_pool "$domain"
+    ret=$?
+    if [[ $ret -eq 0 ]]; then
+        delete_volumes "$domain"    || return 1
+        delete_pool "$domain"       || return 1
+    fi
+
+    return 0
+}
+
+logger_info() {
+    local message="$1"
+    echo -e "${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: $message"
+}
+
+logger_err() {
+    local message="$1"
+    echo -e "${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $message" >&2
+}
+
+exist_the_domain() {
+    local domain="$1"
+    local target=
+
+    while read _ target _; do
+        [[ "$target" == "$domain" ]] && return 0
+    done < <(virsh list --all --autostart | sed -n '/^----\+/,$p' | tail -n +2)
+
+    logger_info "The domain $domain has already deleted."
+
+    return 1
+}
+
+exist_the_pool() {
+    local pool="$1"
+    local target=
+
+    while read target _; do
+        [[ "$target" == "$pool" ]] && return 0
+    done < <(virsh pool-list --all | sed -n '/^----\+/,$p' | tail -n +2)
+
+    logger_info "The pool $domain has already deleted."
+
+    return 1
+}
+
+is_active_the_pool() {
+    local pool="$1"
+    local target=
+
+    while read target _; do
+        [[ "$target" == "$pool" ]] && return 0
+    done < <(virsh pool-list | sed -n '/^----\+/,$p' | tail -n +2)
+
+    return 1
+}
+
+unset_autostart() {
+    local domain="$1"
+    local existence=1
+    local target=
+    local ret=0
+
+    while read _ target _; do
+        [[ -z "$target" ]] && continue
+
+        if [[ "$target" == "$domain" ]]; then
+            logger_info "Trying to set no auto start the domain $domain"
+            virsh autostart "$domain" --disable
+            ret=$?
+
+            if [[ $ret -ne 0 ]]; then
+                logger_err "Failed to unset autostart of the domain $domain"
+                return 1
+            fi
+
+            return 0
+        fi
+    done < <(virsh list --all --autostart | sed -n '/^----\+/,$p' | tail -n +2)
+
+    # Finish with no error if the domain already set no autostart.
+    return 0
+}
+
+delete_snapshots() {
+    local domain="$1"
+    local snapshot=
+    local output=
+    local ret=0
+
+    while read snapshot _; do
+        [[ -z "$snapshot" ]] && continue
+
+        logger_info "Trying to delete a snapshot $snapshot in $domain"
+
+        output=$(virsh snapshot-delete "$domain" "$snapshot" 2>&1)
+        ret=$?
+
+        [[ $ret -ne 0 ]] && {
+            if (grep -qE '.* external disk snapshots not supported yet$' <<< "$output"); then
+                # Delete snapshot as an external one
+                virsh snapshot-delete "$domain" "$snapshot" --metadata || {
+                    echo "ERROR: Failed to delete an external snapshot $snapshot in the $domain" >&2
+                    return 1
+                }
+            else
+                # Failed to delete a snapshot for some reason
+                echo "$output" >&2
+                logger_err "Failed to delete a snapshot $snapshot in the $domain"
+                return 1
+            fi
+        }
+    done < <(virsh snapshot-list "$domain" | sed -n '/^----\+/,$p' | tail -n +2)
+
+    return 0
+}
+
+undefine_domain() {
+    local domain="$1"
+    local ret=
+    local output=
+
+    logger_info "Trying to delete the domain $domain"
+    output="$(virsh undefine "$domain" 2>&1)"
+    ret="$?"
+    [[ $ret -ne 0 ]] && {
+        if (grep -i 'error: failed to get domain ' <<< "$output"); then
+            echo "${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: The domain $domain has already deleted. Skip."
+            return 0
+        fi
+
+        logger_err "Failed to delete the domain $domain"
+        return $ret
+    }
+
+    return 0
+}
+
+delete_volumes() {
+    local pool="$1"
+    local volume=
+
+    while read volume _; do
+        [[ -z "$volume" ]] && continue
+
+        logger_info "Trying to delete a volume"
+
+        virsh vol-delete --pool "$pool" "$volume" || {
+            logger_err "Failed to delete a volume ${volume} in the pool ${pool}"
+            return 1
+        }
+    done < <(virsh vol-list --pool "$pool" | sed -n '/^----\+/,$p' | tail -n +2)
+
+    return 0
+}
+
+delete_pool() {
+    local pool="$1"
+
+    logger_info "Trying to delete the pool $domain"
+
+    is_active_the_pool && {
+        virsh pool-destroy "$pool" || {
+            logger_err "Failed to destroy the pool ${pool}."
+            return 1
+        }
+    }
+
+    virsh pool-delete "$pool" || {
+        logger_err "Failed to delete the pool ${pool}. Continue to try undefining it."
+        #return 1
+    }
+    virsh pool-undefine "$pool" || {
+        logger_err "Failed to undefine the pool ${pool}"
+        return 1
+    }
+
+    return 0
+}
+
+main "$@"
