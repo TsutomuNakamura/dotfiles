@@ -94,12 +94,12 @@ unset_autostart() {
         [[ -z "$target" ]] && continue
 
         if [[ "$target" == "$domain" ]]; then
-            logger_info "Trying to set no auto start the domain $domain"
+            logger_info "Trying to set no auto start the domain ${domain}."
             virsh autostart "$domain" --disable
             ret=$?
 
             if [[ $ret -ne 0 ]]; then
-                logger_err "Failed to unset autostart of the domain $domain"
+                logger_err "Failed to unset autostart of the domain ${domain}."
                 return 1
             fi
 
@@ -120,7 +120,7 @@ delete_snapshots() {
     while read snapshot _; do
         [[ -z "$snapshot" ]] && continue
 
-        logger_info "Trying to delete a snapshot $snapshot in $domain"
+        logger_info "Trying to delete a snapshot $snapshot in ${domain}."
 
         output=$(virsh snapshot-delete "$domain" "$snapshot" 2>&1)
         ret=$?
@@ -129,13 +129,13 @@ delete_snapshots() {
             if (grep -qE '.* external disk snapshots not supported yet$' <<< "$output"); then
                 # Delete snapshot as an external one
                 virsh snapshot-delete "$domain" "$snapshot" --metadata || {
-                    echo "ERROR: Failed to delete an external snapshot $snapshot in the $domain" >&2
+                    echo "ERROR: Failed to delete an external snapshot $snapshot in the ${domain}." >&2
                     return 1
                 }
             else
                 # Failed to delete a snapshot for some reason
                 echo "$output" >&2
-                logger_err "Failed to delete a snapshot $snapshot in the $domain"
+                logger_err "Failed to delete a snapshot $snapshot in the ${domain}."
                 return 1
             fi
         }
@@ -152,7 +152,7 @@ undefine_domain() {
     local ret=
     local output=
 
-    logger_info "Trying to delete the domain $domain"
+    logger_info "Trying to delete the domain ${domain}."
     output="$(virsh undefine "$domain" 2>&1)"
     ret="$?"
     [[ $ret -ne 0 ]] && {
@@ -161,7 +161,7 @@ undefine_domain() {
             return 0
         fi
 
-        logger_err "Failed to delete the domain $domain"
+        logger_err "Failed to delete the domain ${domain}."
         return $ret
     }
 
@@ -180,7 +180,7 @@ delete_volumes() {
         logger_info "Trying to delete a volume $volume in a pool ${pool}."
 
         virsh vol-delete --pool "$pool" "$volume" || {
-            logger_err "Failed to delete a volume ${volume} in the pool ${pool}"
+            logger_err "Failed to delete a volume ${volume} in the pool ${pool}."
             return 1
         }
         logger_info "-> Deleting a volume $volume has succeeded."
@@ -206,7 +206,7 @@ delete_pool() {
         #return 1
     }
     virsh pool-undefine "$pool" || {
-        logger_err "Failed to undefine the pool ${pool}"
+        logger_err "Failed to undefine the pool ${pool}."
         return 1
     }
 
