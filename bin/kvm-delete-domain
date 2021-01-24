@@ -47,7 +47,7 @@ exist_the_domain() {
 
     while read _ target _; do
         [[ "$target" == "$domain" ]] && return 0
-    done < <(virsh list --all --autostart | sed -n '/^----\+/,$p' | tail -n +2)
+    done < <(virsh list --all | sed -n '/^----\+/,$p' | tail -n +2)
 
     logger_info "The domain $domain has already deleted."
 
