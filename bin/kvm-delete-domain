@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 FONT_COLOR_GREEN='\033[0;32m'
+FONT_COLOR_YELLOW='\033[0;33m'
 FONT_COLOR_RED='\033[0;31m'
 FONT_COLOR_END='\033[0m'
 
@@ -39,6 +40,11 @@ logger_info() {
 logger_err() {
     local message="$1"
     echo -e "${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $message" >&2
+}
+
+logger_warn() {
+    local message="$1"
+    echo -e "${FONT_COLOR_YELLOW}ERROR${FONT_COLOR_END}: $message" >&2
 }
 
 exist_the_domain() {
@@ -133,6 +139,9 @@ delete_snapshots() {
                 return 1
             fi
         }
+
+        logger_info "-> Deleting a snapshot $snapshot in $domain has succeeded."
+
     done < <(virsh snapshot-list "$domain" | sed -n '/^----\+/,$p' | tail -n +2)
 
     return 0
@@ -148,13 +157,15 @@ undefine_domain() {
     ret="$?"
     [[ $ret -ne 0 ]] && {
         if (grep -i 'error: failed to get domain ' <<< "$output"); then
-            echo "${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: The domain $domain has already deleted. Skip."
+            logger_info "The domain $domain has already deleted. Skipping."
             return 0
         fi
 
         logger_err "Failed to delete the domain $domain"
         return $ret
     }
+
+    logger_info "-> Deleting a domain $domain has succeeded."
 
     return 0
 }
@@ -166,12 +177,13 @@ delete_volumes() {
     while read volume _; do
         [[ -z "$volume" ]] && continue
 
-        logger_info "Trying to delete a volume"
+        logger_info "Trying to delete a volume $volume in a pool ${pool}."
 
         virsh vol-delete --pool "$pool" "$volume" || {
             logger_err "Failed to delete a volume ${volume} in the pool ${pool}"
             return 1
         }
+        logger_info "-> Deleting a volume $volume has succeeded."
     done < <(virsh vol-list --pool "$pool" | sed -n '/^----\+/,$p' | tail -n +2)
 
     return 0
@@ -180,23 +192,25 @@ delete_volumes() {
 delete_pool() {
     local pool="$1"
 
-    logger_info "Trying to delete the pool $domain"
+    logger_info "Trying to delete a pool ${pool}."
 
     is_active_the_pool && {
         virsh pool-destroy "$pool" || {
-            logger_err "Failed to destroy the pool ${pool}."
+            logger_err "Failed to destroy a pool ${pool}."
             return 1
         }
     }
 
     virsh pool-delete "$pool" || {
-        logger_err "Failed to delete the pool ${pool}. Continue to try undefining it."
+        logger_warn "Failed to delete the pool ${pool}. Continue to try undefining it."
         #return 1
     }
     virsh pool-undefine "$pool" || {
         logger_err "Failed to undefine the pool ${pool}"
         return 1
     }
+
+    logger_info "-> Deleting a pool $pool has succeeded."
 
     return 0
 }
