@@ -1,0 +1,250 @@
+#!/usr/bin/env bash
+
+# In my strategy, I prefer to create a directory that same as domain name under the base directory.
+# New domains will be created under the directory that specified a variable DOMAIN_BASE_DIR.
+# For example: /var/kvm/distros/<domain>/<disk files...>
+DOMAIN_BASE_DIR="/var/kvm/distros"
+
+# A value of --network option that uses with virt-install command for a new domain
+DOMAIN_NETWORK_OPTION="bridge=br0,model=virtio"
+# A value of --vcpus option that uses with virt-install command for a new domain
+DOMAIN_VCPUS_OPTION="2"
+# A value of --ram option that uses with virt-install command for a new domain
+DOMAIN_RAM_OPTION="4096"
+
+# Bootable disk for new domain. This variable will be built among the instructions.
+MAIN_DISK_CLONE_FROM=
+
+declare -a DISKS_CLONE_FROM=()
+declare -a DISKS_CLONE_TO=()
+
+FONT_COLOR_GREEN='\033[0;32m'
+FONT_COLOR_YELLOW='\033[0;33m'
+FONT_COLOR_RED='\033[0;31m'
+FONT_COLOR_END='\033[0m'
+
+main() {
+
+    local domain_clone_from="$1"
+    local snapshot_clone_from="$2"
+    local domain_clone_to="$3"
+
+    exist_the_domain "$domain_clone_from" || {
+        logger_err "Domain clone-from $domain_clone_from is not existed."
+        return 1
+    }
+
+    exist_the_domain "$domain_clone_to" && {
+        logger_err "Domain clone-to $domain_clone_to is already existed."
+        return 1
+    }
+
+    exist_the_snapshot "$domain_clone_from" "$snapshot_clone_from" || {
+        logger_err "Snapshot should be clone from $snapshot_clone_from in a domain $domain_clone_from is not existed."
+        return 1
+    }
+
+    clone_domain_with_link "$domain_clone_from" "$snapshot_clone_from" "$domain_clone_to"
+}
+
+logger_info() {
+    local message="$1"
+    echo -e "${FONT_COLOR_GREEN}INFO${FONT_COLOR_END}: $message"
+}
+
+logger_err() {
+    local message="$1"
+    echo -e "${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $message" >&2
+}
+
+logger_warn() {
+    local message="$1"
+    echo -e "${FONT_COLOR_YELLOW}ERROR${FONT_COLOR_END}: $message" >&2
+}
+
+exist_the_domain() {
+    local domain="$1"
+    local target=
+
+    while read _ target _; do
+        [[ "$target" == "$domain" ]] && return 0
+    done < <(virsh list --all | sed -n '/^----\+/,$p' | tail -n +2)
+
+    return 1
+}
+
+exist_the_snapshot() {
+    local domain="$1"
+    local snapshot="$2"
+
+    while read target _; do
+        [[ "$target" == "$snapshot" ]] && return 0
+    done < <(virsh snapshot-list "$domain" | sed -n '/^----\+/,$p' | tail -n +2)
+}
+
+clone_domain_with_link() {
+    local domain_clone_from="$1"
+    local snapshot_clone_from="$2"
+    local domain_clone_to="$3"
+
+    create_linked_clone_devices "$domain_clone_from" "$snapshot_clone_from" "$domain_clone_to" || return 1
+
+    # virt-install command can not run if the primary disk could not determined.
+    if [[ -z "$MAIN_DISK_CLONE_FROM" ]]; then
+        logger_err "Could not find a bootable disk at this new domain ${domain_clone_to}. Quit."
+        return 1
+    fi
+
+    # Define new domain
+    logger_info "Creating new domain $domain_clone_to with disk ${MAIN_DISK_CLONE_FROM}"
+    virt-install \
+            --name=${domain_clone_to} \
+            --ram=${DOMAIN_RAM_OPTION} \
+            --vcpus=${DOMAIN_VCPUS_OPTION} \
+            --network "$DOMAIN_NETWORK_OPTION" \
+            --graphics vnc \
+            --os-type linux \
+            --os-variant ubuntu20.04 \
+            --arch x86_64 \
+            --wait 0 \
+            --disk "path=${MAIN_DISK_CLONE_FROM},bus=virtio" \
+            --boot=hd || {
+        logger_err "Failed to install a new domain ${domain_clone_to} with virt-install"
+        return 1
+    }
+
+    logger_info "New linked clone domain ${domain_clone_to} has been created."
+
+    return 0
+}
+
+create_linked_clone_devices() {
+    local domain_clone_from="$1"
+    local snapshot_clone_from="$2"
+    local domain_clone_to="$3"
+
+    declare -a disks_backing_snapshot=()
+    local disk_file=
+    local backing_file=
+    local message=
+    local escaped_snapshot_clone_from="$(echo "$snapshot_clone_from" | sed -e 's/[()&-]/\\&/g')"
+
+    while read disk_file; do
+        disks_backing_snapshot+=($disk_file)
+    done < <( \
+        find "${DOMAIN_BASE_DIR}/${domain_clone_from}" \
+            -maxdepth 1 -mindepth 1 -type f \
+            -regextype posix-extended -regex ".*\.${escaped_snapshot_clone_from}\$" \
+    )
+
+    [[ "${#disks_backing_snapshot[@]}" -eq 0 ]] && {
+        message="Failed to get disks that clone from in the directory"
+        message+=" ${DOMAIN_BASE_DIR}/${domain_clone_from} with an external snapshot ${snapshot_clone_from}."
+        message+=" The snapshot ${snpashot_clone_from} might be an internal one?"
+        logger_err "$message"
+        return 1
+    }
+
+    # Check disks whether they have backing files.
+    for disk_file in "${disks_backing_snapshot[@]}"; do
+        # Get the backing file from the text like "backing file: /var/kvm/distros/some-domain/vda.qcow2"
+        read _ _ backing_file < <(qemu-img info "$disk_file" | grep -E '^backing file: .*')
+        if [[ -z "$backing_file" ]]; then
+            message="Failed to get backing file ${backing_file}"
+            message+=" in the snapshot ${snapshot_clone_from} of the domain ${domain_clone_from}."
+            logger_err "$message"
+            return 1
+        fi
+
+        DISKS_CLONE_FROM+=("$backing_file")
+    done
+
+    load_ndb_module || return 1
+
+    # This assumes the file pathes in DISKS_CLONE_FROM are construct with full path.
+    # Variable "disk_file" means backing file in this loop.
+    for disk_file in "${DISKS_CLONE_FROM[@]}"; do
+        create_a_linked_clone_device "$domain_clone_to" "$disk_file" || return 1
+    done
+
+    return 0
+}
+
+load_ndb_module() {
+    local ret=0
+
+    (lsmod | grep -qE '^nbd .*') || {
+        modprobe nbd max_part=64 || {
+            logger_err "Failed to load a module nbd"
+            return 1
+        }
+    }
+
+    return 0
+}
+
+create_a_linked_clone_device() {
+    local new_domain_name="$1"
+    local backing_file="$2"
+
+    local domain_dir="${DOMAIN_BASE_DIR}/${new_domain_name}"
+    local new_disk_name=
+    local ret=0
+
+    [[ -d "$domain_dir" ]] || {
+        mkdir -p "$domain_dir" || {
+            logger_err "Failed to create a directory $domain_dir"
+            return 1
+        }
+    }
+
+    # Create new backing file name
+    new_disk_name="$(basename "$backing_file")"
+    new_disk_name="${DOMAIN_BASE_DIR}/${new_domain_name}/${new_disk_name%.*}.qcow2"
+
+    qemu-img create -f qcow2 -F qcow2 -b "$backing_file" "$new_disk_name" || {
+        logger_err "Failed to create qcow2 disk ${PWD}/${new_disk_name} with backing file ${backing_file}."
+        return 1
+    }
+
+    # Determine primary bootable disk
+    determine_main_disk "$new_disk_name" || return 1
+
+    return 0
+}
+
+determine_main_disk() {
+    local disk="$1"
+    local message=
+
+    qemu-nbd -c /dev/nbd0 "$disk"
+    sync
+
+    # This instruction assumes that the device partitioned with gpt.
+    # And print lines after "Number  Start (sector)    End (sector)  Size       Code  Name".
+    gdisk -l /dev/nbd0 | sed -n '/^Number \+Start \+/,$p' | tail -n +2 | grep -qE '.* EF02\s*$'
+    ret=$?
+
+    killall qemu-nbd
+    sleep 0.1
+    losetup -d /dev/nbd0
+
+    [[ $ret -eq 0 ]] && {
+        if [[ -n "$MAIN_DISK_CLONE_FROM" ]]; then
+            message="A variable MAIN_DISK_CLONE_FROM has already determined."
+            message+=" This program can not determine which disk should be used as a bootable disk."
+            message+=" A disk $disk was trying to be main disk"
+            message+=" instead of MAIN_DISK_CLONE_FROM=${MAIN_DISK_CLONE_FROM} that already defined."
+            logger_err "$message"
+            return 1
+        fi
+
+        # Determin a disk as a bootable one.
+        logger_info "$disk is determined as a bootable disk for the new domain."
+        MAIN_DISK_CLONE_FROM="$disk"
+    }
+
+    return 0
+}
+
+main "$@"
