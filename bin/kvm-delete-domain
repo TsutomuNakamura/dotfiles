@@ -91,23 +91,22 @@ unset_autostart() {
     local ret=0
 
     while read _ target _; do
-        [[ -z "$target" ]] && continue
+        [[ "$target" != "$domain" ]] && continue
 
-        if [[ "$target" == "$domain" ]]; then
-            logger_info "Trying to set no auto start the domain ${domain}."
-            virsh autostart "$domain" --disable
-            ret=$?
+        virsh autostart "$domain" --disable
+        ret=$?
 
-            if [[ $ret -ne 0 ]]; then
-                logger_err "Failed to unset autostart of the domain ${domain}."
-                return 1
-            fi
-
-            return 0
+        if [[ $ret -ne 0 ]]; then
+            logger_err "Failed to unset autostart of the domain ${domain}."
+            return 1
         fi
+
+        logger_info "Set no auto start the domain ${domain}."
+
+        return 0
     done < <(virsh list --all --autostart | sed -n '/^----\+/,$p' | tail -n +2)
 
-    # Finish with no error if the domain already set no autostart.
+    # Finished with no error if the domain already set no autostart.
     return 0
 }
 
@@ -119,8 +118,6 @@ delete_snapshots() {
 
     while read snapshot _; do
         [[ -z "$snapshot" ]] && continue
-
-        logger_info "Trying to delete a snapshot $snapshot in ${domain}."
 
         output=$(virsh snapshot-delete "$domain" "$snapshot" 2>&1)
         ret=$?
@@ -140,7 +137,7 @@ delete_snapshots() {
             fi
         }
 
-        logger_info "-> Deleting a snapshot $snapshot in $domain has succeeded."
+        logger_info "Deleting a snapshot $snapshot in $domain has succeeded."
 
     done < <(virsh snapshot-list "$domain" | sed -n '/^----\+/,$p' | tail -n +2)
 
@@ -152,7 +149,6 @@ undefine_domain() {
     local ret=
     local output=
 
-    logger_info "Trying to delete the domain ${domain}."
     output="$(virsh undefine "$domain" 2>&1)"
     ret="$?"
     [[ $ret -ne 0 ]] && {
@@ -165,7 +161,7 @@ undefine_domain() {
         return $ret
     }
 
-    logger_info "-> Deleting a domain $domain has succeeded."
+    logger_info "Deleting a domain $domain has succeeded."
 
     return 0
 }
@@ -177,13 +173,11 @@ delete_volumes() {
     while read volume _; do
         [[ -z "$volume" ]] && continue
 
-        logger_info "Trying to delete a volume $volume in a pool ${pool}."
-
         virsh vol-delete --pool "$pool" "$volume" || {
             logger_err "Failed to delete a volume ${volume} in the pool ${pool}."
             return 1
         }
-        logger_info "-> Deleting a volume $volume has succeeded."
+        logger_info "Deleting a volume $volume has succeeded."
     done < <(virsh vol-list --pool "$pool" | sed -n '/^----\+/,$p' | tail -n +2)
 
     return 0
@@ -191,8 +185,6 @@ delete_volumes() {
 
 delete_pool() {
     local pool="$1"
-
-    logger_info "Trying to delete a pool ${pool}."
 
     is_active_the_pool && {
         virsh pool-destroy "$pool" || {
@@ -210,7 +202,7 @@ delete_pool() {
         return 1
     }
 
-    logger_info "-> Deleting a pool $pool has succeeded."
+    logger_info "Deleting a pool $pool has succeeded."
 
     return 0
 }
