@@ -225,9 +225,9 @@ determine_main_disk() {
     gdisk -l /dev/nbd0 | sed -n '/^Number \+Start \+/,$p' | tail -n +2 | grep -qE '.* EF02\s*$'
     ret=$?
 
-    killall qemu-nbd
     sleep 0.1
-    losetup -d /dev/nbd0
+    qemu-nbd --disconnect /dev/nbd0
+    sleep 0.1
 
     [[ $ret -eq 0 ]] && {
         if [[ -n "$MAIN_DISK_CLONE_FROM" ]]; then
