@@ -100,7 +100,7 @@ clone_domain_with_link() {
     fi
 
     # Define the os variant. This function will set OS variant to OS_VARIABLE_CLONE_FROM
-    define_os_variant "$domain"
+    define_os_variant "$domain_clone_from"
 
     # Define new domain
     logger_info "Creating new domain $domain_clone_to with disk ${MAIN_DISK_CLONE_FROM}"
@@ -135,7 +135,7 @@ clone_domain_with_link() {
     fi
     ret=$?
 
-    [[ $ret -ne 0 ]] || {
+    [[ $ret -ne 0 ]] && {
         logger_err "Failed to install a new domain ${domain_clone_to} with virt-install"
         return 1
     }
@@ -156,6 +156,7 @@ define_os_variant() {
 
     while read os_name _ os_id; do
         if [[ "$source_os_id" == "$os_id" ]]; then
+            logger_info "Detected the OS that cron from is ${os_name}."
             OS_VARIABLE_CLONE_FROM="$os_name"
             return 0
         fi
