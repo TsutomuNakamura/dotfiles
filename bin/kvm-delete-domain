@@ -17,6 +17,9 @@ main() {
     exist_the_domain "$domain"
     ret=$?
     if [[ $ret -eq 0 ]]; then
+        if (is_running_domain "$domain"); then
+            destroy_domain "$domain" || return 1
+        fi
         unset_autostart "$domain"   || return 1
         delete_snapshots "$domain"  || return 1
         undefine_domain "$domain"   || return 1
@@ -80,6 +83,42 @@ is_active_the_pool() {
     while read target _; do
         [[ "$target" == "$pool" ]] && return 0
     done < <(virsh pool-list | sed -n '/^----\+/,$p' | tail -n +2)
+
+    return 1
+}
+
+is_running_domain() {
+    local domain="$1"
+    local target=
+    local state=
+
+    while read _ target state; do
+        if [[ "$target" == "$domain" ]]; then
+            if [[ "$state" == "running" ]]; then
+                return 0
+            fi
+            return 1
+        fi
+    done < <(virsh list | sed -n '/^----\+/,$p' | tail -n +2)
+
+    return 1
+}
+
+destroy_domain() {
+    local domain="$1"
+
+    virsh destroy "$domain" || {
+        logger_err "Failed to destroy(stop) domain ${domain}"
+        return 1
+    }
+
+    logger_info "Wating for stopping the domain $domain"
+    for i in {1..120}; do
+        if !(is_running_domain "$domain"); then
+            return 0
+        fi
+        sleep 0.5
+    done
 
     return 1
 }

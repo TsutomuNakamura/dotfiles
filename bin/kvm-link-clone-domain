@@ -14,6 +14,8 @@ DOMAIN_RAM_OPTION="4096"
 
 # Bootable disk for new domain. This variable will be built among the instructions.
 MAIN_DISK_CLONE_FROM=
+# OS variable for new domain. This variable will be built among the instructions.
+OS_VARIABLE_CLONE_FROM=
 
 declare -a DISKS_CLONE_FROM=()
 declare -a DISKS_CLONE_TO=()
@@ -87,6 +89,8 @@ clone_domain_with_link() {
     local snapshot_clone_from="$2"
     local domain_clone_to="$3"
 
+    local ret=0
+
     create_linked_clone_devices "$domain_clone_from" "$snapshot_clone_from" "$domain_clone_to" || return 1
 
     # virt-install command can not run if the primary disk could not determined.
@@ -95,20 +99,43 @@ clone_domain_with_link() {
         return 1
     fi
 
+    # Define the os variant. This function will set OS variant to OS_VARIABLE_CLONE_FROM
+    define_os_variant "$domain"
+
     # Define new domain
     logger_info "Creating new domain $domain_clone_to with disk ${MAIN_DISK_CLONE_FROM}"
-    virt-install \
-            --name=${domain_clone_to} \
-            --ram=${DOMAIN_RAM_OPTION} \
-            --vcpus=${DOMAIN_VCPUS_OPTION} \
-            --network "$DOMAIN_NETWORK_OPTION" \
-            --graphics vnc \
-            --os-type linux \
-            --os-variant ubuntu20.04 \
-            --arch x86_64 \
-            --wait 0 \
-            --disk "path=${MAIN_DISK_CLONE_FROM},bus=virtio" \
-            --boot=hd || {
+
+    if [[ -z "$OS_VARIABLE_CLONE_FROM" ]]; then
+        # Command if os variant could not be detected.
+        virt-install \
+                --name=${domain_clone_to} \
+                --ram=${DOMAIN_RAM_OPTION} \
+                --vcpus=${DOMAIN_VCPUS_OPTION} \
+                --network "$DOMAIN_NETWORK_OPTION" \
+                --graphics vnc \
+                --os-type linux \
+                --arch x86_64 \
+                --wait 0 \
+                --disk "path=${MAIN_DISK_CLONE_FROM},bus=virtio" \
+                --boot=hd
+    else
+        # Command if os variant could be detected.
+        virt-install \
+                --name=${domain_clone_to} \
+                --ram=${DOMAIN_RAM_OPTION} \
+                --vcpus=${DOMAIN_VCPUS_OPTION} \
+                --network "$DOMAIN_NETWORK_OPTION" \
+                --graphics vnc \
+                --os-type linux \
+                --os-variant "$OS_VARIABLE_CLONE_FROM" \
+                --arch x86_64 \
+                --wait 0 \
+                --disk "path=${MAIN_DISK_CLONE_FROM},bus=virtio" \
+                --boot=hd
+    fi
+    ret=$?
+
+    [[ $ret -ne 0 ]] || {
         logger_err "Failed to install a new domain ${domain_clone_to} with virt-install"
         return 1
     }
@@ -116,6 +143,27 @@ clone_domain_with_link() {
     logger_info "New linked clone domain ${domain_clone_to} has been created."
 
     return 0
+}
+
+define_os_variant() {
+    local domain="$1"
+    local source_os_id=
+
+    local os_name=
+    local os_id=
+
+    source_os_id="$(virsh dumpxml "$domain" | grep -F "<libosinfo:os " | sed -e 's|.*id="\(.*\)"/>|\1|')"
+
+    while read os_name _ os_id; do
+        if [[ "$source_os_id" == "$os_id" ]]; then
+            OS_VARIABLE_CLONE_FROM="$os_name"
+            return 0
+        fi
+    done < <(osinfo-query os | cut -d'|' -f1,4 | tail -n +3)
+
+    logger_warn "Failed to determine the OS that will be clone from."
+
+    return 1
 }
 
 create_linked_clone_devices() {
