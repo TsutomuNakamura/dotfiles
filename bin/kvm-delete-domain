@@ -5,6 +5,8 @@ FONT_COLOR_YELLOW='\033[0;33m'
 FONT_COLOR_RED='\033[0;31m'
 FONT_COLOR_END='\033[0m'
 
+DOMAIN_BASE_DIR="/var/kvm/distros"
+
 main() {
     local domain="$1"
     local ret=0
@@ -218,6 +220,10 @@ delete_volumes() {
         }
         logger_info "Deleting a volume $volume has succeeded."
     done < <(virsh vol-list --pool "$pool" | sed -n '/^----\+/,$p' | tail -n +2)
+
+    # Some of disks like sub volumes on the domain will not be deleted by the command "virsh vol-delete".
+    # They can be deleted by the command manually.
+    rm -rf "${DOMAIN_BASE_DIR}/${pool}"/*
 
     return 0
 }
