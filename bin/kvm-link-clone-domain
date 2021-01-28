@@ -116,6 +116,7 @@ clone_domain_with_link() {
                 --os-type linux \
                 --arch x86_64 \
                 --wait 0 \
+                --noreboot \
                 --disk "path=${MAIN_DISK_CLONE_FROM},bus=virtio" \
                 --boot=hd
     else
@@ -130,6 +131,7 @@ clone_domain_with_link() {
                 --os-variant "$OS_VARIABLE_CLONE_FROM" \
                 --arch x86_64 \
                 --wait 0 \
+                --noreboot \
                 --disk "path=${MAIN_DISK_CLONE_FROM},bus=virtio" \
                 --boot=hd
     fi
@@ -140,7 +142,56 @@ clone_domain_with_link() {
         return 1
     }
 
+    # Sub devices that cloned from source domain should be added to the new domain.
+    add_persistent_sub_disks "$domain_clone_to"
+
     logger_info "New linked clone domain ${domain_clone_to} has been created."
+
+    return 0
+}
+
+# Add subdevices to the new domain.
+# This function depends whether the variable MAIN_DISK_CLONE_FROM is assigned or not.
+# It will return failed if the variable is not assigned.
+add_persistent_sub_disks() {
+    local new_domain="$1"
+
+    local message=
+
+    [[ -z "$MAIN_DISK_CLONE_FROM" ]] && {
+        message="Failed to add disks."
+        message+=" MAIN_DISK_CLONE_FROM is not assined yet."
+        message+=" This function add_persistent_sub_disks() requires to"
+        message+=" assigne the variable MAIN_DISK_CLONE_FROM before this function has called."
+        logger_err "$message"
+
+        return 1
+    }
+
+    local disk=
+    local drive_letter=
+
+    #virsh destroy "$new_domain"
+    #sleep 10
+
+    for disk in "${DISKS_CLONE_TO[@]}"; do
+        # Skip to attach a disk as a sub devie if it is a main bootable disk.
+        [[ "$disk" == "$MAIN_DISK_CLONE_FROM" ]] && continue
+
+        drive_letter=$(basename "$disk")
+        drive_letter=${drive_letter%.*}
+        logger_info "Adding the disk ${disk} as a drive letter ${drive_letter} to the domain ${new_domain}"
+        virsh attach-disk \
+                "$new_domain" "$disk" "$drive_letter" \
+                --driver qemu --subdriver qcow2 --targetbus virtio --persistent || {
+            message="Failed to attach a disk ${disk}"
+            message+=" as a drive letter ${drive_letter}"
+            message+=" to the domain ${new_domain}"
+            logger_err "$message"
+
+            return 1
+        }
+    done
 
     return 0
 }
@@ -251,12 +302,15 @@ create_a_linked_clone_device() {
     new_disk_name="$(basename "$backing_file")"
     new_disk_name="${DOMAIN_BASE_DIR}/${new_domain_name}/${new_disk_name%.*}.qcow2"
 
+    # Add the devices to linke to.
+    DISKS_CLONE_TO+=("$new_disk_name")
+
     qemu-img create -f qcow2 -F qcow2 -b "$backing_file" "$new_disk_name" || {
         logger_err "Failed to create qcow2 disk ${PWD}/${new_disk_name} with backing file ${backing_file}."
         return 1
     }
 
-    # Determine primary bootable disk
+    # Determine primary bootable disk and assign to the variable MAIN_DISK_CLONE_FROM
     determine_main_disk "$new_disk_name" || return 1
 
     return 0
