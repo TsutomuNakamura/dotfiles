@@ -207,7 +207,7 @@ define_os_variant() {
 
     while read os_name _ os_id; do
         if [[ "$source_os_id" == "$os_id" ]]; then
-            logger_info "Detected the OS that cron from is ${os_name}."
+            logger_info "Detected the OS that clone from is ${os_name}."
             OS_VARIABLE_CLONE_FROM="$os_name"
             return 0
         fi
