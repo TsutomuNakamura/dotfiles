@@ -58,6 +58,15 @@ autocmd FileType javascript setlocal ts=2 sts=2 sw=2 expandtab
 autocmd FileType typescript setlocal ts=2 sts=2 sw=2 expandtab
 autocmd FileType typescriptreact setlocal ts=2 sts=2 sw=2 expandtab
 
+" - Stop vim from messing up indentation on comments ---------------------------------------------------------
+" https://unix.stackexchange.com/questions/106526/stop-vim-from-messing-up-my-indentation-on-comments
+set nosmartindent
+set cindent
+filetype plugin indent on
+set cinkeys-=0#
+set indentkeys-=0#
+autocmd FileType * set cindent "some file types override it
+
 " Change leader for vim plugins from '\'
 let mapleader = ";"
 " - vimdiff specifications -----------------------------------------------------------------------------------
