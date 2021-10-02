@@ -127,6 +127,7 @@ URL_OF_TMUX_PLUGIN="https://github.com/tmux-plugins/tpm.git"
 declare -g -a VIM_CONF_LINK_LIST=(
     # "<link_dest>,<link_src>"
     "../../../resources/etc/config/vim/bats.vim/after/syntax/sh.vim,${FULL_DOTDIR_PATH}/.vim/after/syntax"
+    "../../../resources/etc/config/vim/indent/after/syntax/yaml.vim,${FULL_DOTDIR_PATH}/.vim/after/syntax"
     "../../resources/etc/config/vim/bats.vim/ftdetect/bats.vim,${FULL_DOTDIR_PATH}/.vim/ftdetect"
     "../../resources/etc/config/vim/snipmate-snippets.git/snippets/bats.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
     "../../resources/etc/config/vim/snipmate-snippets.git/snippets/chef.snippets,${FULL_DOTDIR_PATH}/.vim/snippets"
