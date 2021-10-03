@@ -2410,22 +2410,28 @@ function question() {
     local message="$1"
     local max_times="${2:-3}"
     local count=0
-    local answer
 
     while [[ "$count" -lt "$max_times" ]]; do
         ((count++))
         echo -en "$message"
-        read answer
-        if [[ "${answer^^}" =~ ^Y(ES)?$ ]]; then
+        readx
+        if [[ "${__ANSWER_OF_READX__^^}" =~ ^Y(ES)?$ ]]; then
             # The user answers yes
             return 0
-        elif [[ "${answer^^}" =~ ^N(O)?$ ]]; then
+        elif [[ "${__ANSWER_OF_READX__^^}" =~ ^N(O)?$ ]]; then
             # The user answers no
             return 1
         fi
     done
 
     return 255
+}
+
+# Read function to ask to a user.
+# This function prevents to inifinit loop when "read" was stubbed.
+# Refer: https://github.com/TsutomuNakamura/dotfiles/issues/179
+readx() {
+    read __ANSWER_OF_READX__
 }
 
 # Alias of silent push
