@@ -896,12 +896,11 @@ function _install_font_migu1m() {
 #     2: Failed to install
 function _install_font_noto_emoji() {
 
-    if [[ -e "NotoColorEmoji.ttf" ]] && [[ -e "NotoEmoji-Regular.ttf" ]] && \
-            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] && [[ $(wc -c < "NotoEmoji-Regular.ttf") -ne 0 ]]; then
+    if [[ -e "NotoColorEmoji.ttf" ]]&& [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]]; then
         # Already installed
         return 0
     fi
-    rm -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
+    rm -f "NotoColorEmoji.ttf"
     local ret=0
 
     curl -fLo "NotoColorEmoji.ttf" \
@@ -909,20 +908,14 @@ function _install_font_noto_emoji() {
         logger_err "Failed to install NotoColorEmoji.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf)"
         (( ret++ ))
     }
-    curl -fLo "NotoEmoji-Regular.ttf" \
-            https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf || {
-        logger_err "Failed to install NotoEmoji-Regular.ttf (from https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoEmoji-Regular.ttf)"
-        (( ret++ ))
-    }
 
     if [[ "$ret" -eq 0 ]] && \
-            [[ -e "NotoColorEmoji.ttf" ]] && [[ -e "NotoEmoji-Regular.ttf" ]] && \
-            [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]] && [[ $(wc -c < "NotoEmoji-Regular.ttf") -ne 0 ]]; then
+            [[ -e "NotoColorEmoji.ttf" ]] && [[ $(wc -c < "NotoColorEmoji.ttf") -ne 0 ]]; then
         # Success
         return 1
     fi
 
-    rm -f "NotoColorEmoji.ttf" "NotoEmoji-Regular.ttf"
+    rm -f "NotoColorEmoji.ttf"
     return 2
 }
 

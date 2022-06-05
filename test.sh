@@ -2,6 +2,7 @@
 
 #URL_OF_BATS="https://github.com/sstephenson/bats.git"
 URL_OF_BATS="https://github.com/bats-core/bats-core.git"
+VERSION_OF_BATS_CORE="v1.5.0"
 URL_OF_STUBSH="https://github.com/TsutomuNakamura/stub4bats.sh"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -36,7 +37,7 @@ function main() {
     export PATH="${dir_of_test_lib}/bats/bin:${PATH}"
     ! (command -v bats > /dev/null 2>&1) && {
         rm -rf bats.git bats
-        git clone --depth 1 "${URL_OF_BATS}" bats.git
+        git clone --depth 1  --branch "${VERSION_OF_BATS_CORE}" "${URL_OF_BATS}" bats.git
         mkdir -p bats
         pushd bats.git
         ./install.sh "${dir_of_test_lib}/bats"
