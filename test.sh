@@ -37,7 +37,7 @@ function main() {
     export PATH="${dir_of_test_lib}/bats/bin:${PATH}"
     ! (command -v bats > /dev/null 2>&1) && {
         rm -rf bats.git bats
-        git clone --branch "${VERSION_OF_BATS_CORE}" "${URL_OF_BATS}" bats.git
+        git clone --depth 1  --branch "${VERSION_OF_BATS_CORE}" "${URL_OF_BATS}" bats.git
         mkdir -p bats
         pushd bats.git
         ./install.sh "${dir_of_test_lib}/bats"
