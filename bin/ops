@@ -27,49 +27,55 @@ main() {
     init_target_nodes || return 1
 
     #if [[ "${sub_command}" =~ ^(start|destroy|snapshot-list|snapshot-create-as|snapshot-delete)$ ]]; then
-    if [ "${sub_command}" = "start" -o "${sub_command}" = "destroy" ]; then
-        execute_start_stop "${sub_command}"
-    elif [ "${sub_command}" = "list" ]; then
-        list_domain "${sub_command}"
-    elif [ "${sub_command}" = "snapshot-create-as" -o "${sub_command}" = "snapshot-delete" ]; then
-        execute_snapshot "${sub_command}" "${arg}"
-    elif [ "${sub_command}" = "snapshot-list" ]; then
-        list_snapshot "${sub_command}"
+    if [ "${sub_command}" = "start" -o "${sub_command}" = "destroy" -o "${sub_command}" = list -o "${sub_command}" = "snapshot-list" ]; then
+        # Empty arg to ignore it
+        arg=
+    elif [ "${sub_command}" = "snapshot-delete" -o "${sub_command}" = "snapshot-revert" ]; then
+        [ -z "$arg" ] && {
+            log_err "sub_command \"snapshot-create-as\" and \"snapshot-delete\" requires additional arg \"<snapshot-name>\""
+            return 1
+        }
+    elif [ "${sub_command}" = "snapshot-create-as" ]; then
+        # sub_command "snapshot-create-as" does not require arg. But if it was not existed, this command will create a snapshot with name that based epoch dates.
+        true
     else
         log_err "Unknown sub command for virsh (sub_command=${sub_command})."
         return 1
     fi
+
+    execute_virsh "${sub_command}" "${arg}"
 }
 
-execute_start_stop() {
-    local sub_command="$1"
+execute_virsh() {
+    local sub_command="$1";   shift
+    local target_object="$1"; shift
+    local options="$@"
 
-    for instance in ${TARGET_NODES[@]}; do
-        log_info "Running a command: virsh ${sub_command} ${instance}"
-        virsh "${sub_command}" ${instance}
-    done
+    if [ "$sub_command" = "snapshot-list" ]; then
+        options="--tree"
+        TARGET_NODES=(${TARGET_NODES[0]})
+    fi
+
+    if [ "$sub_command" = "list" ]; then
+        head -n 2 <<< "${OUTPUT_VIRSH_LIST}"
+        grep -P "${REGEX_DOMAIN}" <<< "${OUTPUT_VIRSH_LIST}"
+    else
+        for instance in ${TARGET_NODES[@]}; do
+            log_info "Execute command: virsh "${sub_command}" ${options} ${instance} ${target_object}"
+            virsh "${sub_command}" ${options} ${instance} ${target_object}
+        done
+    fi
 }
 
-list_domain() {
-    head -n 2 <<< "${OUTPUT_VIRSH_LIST}"
-    grep -P "${REGEX_DOMAIN}" <<< "${OUTPUT_VIRSH_LIST}"
-}
+init_target_nodes() {
+    OUTPUT_VIRSH_LIST="$(virsh list --all)"
+    IFS=$'\n' TARGET_NODES=($(echo "${OUTPUT_VIRSH_LIST}" | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}"))
 
-execute_snapshot() {
-    local sub_command="$1"
-    local arg="$2"
-
-    for instance in ${TARGET_NODES[@]}; do
-        log_info "Running a command: virsh ${sub_command} ${instance} ${arg} "
-        virsh "${sub_command}" ${instance} ${arg} 
-    done
-}
-
-list_snapshot() {
-    local sub_command="$1"
-
-    log_info "Running a command: virsh ${sub_command} --tree ${TARGET_NODES[0]}"
-    virsh "${sub_command}" --tree ${TARGET_NODES[0]}
+    [ ${#TARGET_NODES[@]} -eq 0 ] && {
+        log_err "There are no VM nodes to execute a command, dev-controllerXX, dev-computesXX or dev-storageXX etc."
+        return 1
+    }
+    return 0
 }
 
 usage() {
@@ -84,18 +90,8 @@ ex)
   ${SCRIPT_NAME} snapshot-list    # It will list snapshot only in a controller node on behalf of all other nodes.
   ${SCRIPT_NAME} snapshot-create-as \${snapshot_name}
   ${SCRIPT_NAME} snapshot-delete \${snapshot_name}
+  ${SCRIPT_NAME} snapshot-snapshot-revert \${snapshot_name}
 EOF
-}
-
-init_target_nodes() {
-    OUTPUT_VIRSH_LIST="$(virsh list --all)"
-    IFS=$'\n' TARGET_NODES=($(echo "${OUTPUT_VIRSH_LIST}" | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}"))
-
-    [ ${#TARGET_NODES[@]} -eq 0 ] && {
-        log_err "There are no VM nodes to execute a command, dev-controllerXX, dev-computesXX or dev-storageXX etc."
-        return 1
-    }
-    return 0
 }
 
 main "$@"
