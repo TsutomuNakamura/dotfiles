@@ -6,7 +6,7 @@ declare -a TARGET_NODES=()
 
 OUTPUT_VIRSH_LIST=
 
-REGEX_DOMAIN='dev\-(controller|compute|cinder|storage)[0-9]+'
+REGEX_DOMAIN='dev\-(controller|compute|cinder|swift|storage)[0-9]+'
 
 log_info() {
     echo "$(date) - INFO: $1"
