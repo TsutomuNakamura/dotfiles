@@ -829,7 +829,7 @@ function _install_font_inconsolata_nerd() {
     if [[ ! -e "Inconsolata Nerd Font Complete.otf" ]] || [[ "$(wc -c < 'Inconsolata Nerd Font Complete.otf')" == "0" ]]; then
         rm -f "Inconsolata Nerd Font Complete.otf"
         curl -fLo "Inconsolata Nerd Font Complete.otf" \
-            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf
+            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v2.1.0/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf
         local ret_of_curl=$?
 
         if [[ "$ret_of_curl" -eq 0 ]] && [[ -e "Inconsolata Nerd Font Complete.otf" ]] && [[ "$(wc -c < 'Inconsolata Nerd Font Complete.otf')" != "0" ]]; then
