@@ -65,14 +65,66 @@ execute_virsh() {
             virsh "${sub_command}" ${options} ${instance} ${target_object}
         done
     fi
+
+    if [ "${sub_command}" = "shutdown" ]; then
+        # A command "shutdown" will shutdown instances asynchronously.
+        wait_until_all_instances_have_shutdowned
+    fi
 }
+
+wait_until_all_instances_have_shutdowned() {
+    local all_instances_shutdowned=1
+    local max_attempts=1024
+    local attempts_count=0
+    local stat_of_running_instances=
+    local ret=0
+
+    while [ ${all_instances_shutdowned} -ne 0 -o $attempts_count -lt $max_attempts ]; do
+        have_all_instances_shutdowned
+        ret=$?
+        if [ $ret -eq 0 ]; then
+            log_info "Shutting down all instances has completed."
+            return 0
+        fi
+        log_info "Not all instances have shutdowned. Continue to check status of shutting down them."
+        sleep 2
+        ((++attempts_count))
+    done
+
+    log_err "Failed to shutdown some instances due to timed out."
+    return 1
+}
+
+# This function will output which nodes are still running.
+have_all_instances_shutdowned() {
+    local instance running_status line
+    declare -a stat_of_running_instances=()
+
+    ###IFS=$'\n' TARGET_NODES=($(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${REGEX_DOMAIN}"))
+    mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${REGEX_DOMAIN}")
+
+    #while read instance running_status; do
+    for line in "${TARGET_NODES[@]}"; do
+        read instance running_status <<< "$line"
+        echo "instance -> ${instance}, running_status -> ${running_status}"
+        if [ "$running_status" = "running" ]; then
+            stat_of_running_instances+=("${instance}")
+        fi
+    done
+
+    [ ${#stat_of_running_instances[@]} -eq 0 ] && return 0
+
+    return 1
+}
+
 
 init_target_nodes() {
     OUTPUT_VIRSH_LIST="$(virsh list --all)"
-    IFS=$'\n' TARGET_NODES=($(echo "${OUTPUT_VIRSH_LIST}" | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}"))
+    #IFS=$'\n' TARGET_NODES=($(echo "${OUTPUT_VIRSH_LIST}" | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}"))
+    mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}")
 
     [ ${#TARGET_NODES[@]} -eq 0 ] && {
-        log_err "There are no VM nodes to execute a command, dev-controllerXX, dev-computesXX or dev-storageXX etc."
+        log_err "There are no VM nodes to execute a command., dev-controllerXX, dev-computesXX or dev-storageXX etc."
         return 1
     }
     return 0
