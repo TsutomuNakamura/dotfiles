@@ -106,7 +106,6 @@ have_all_instances_shutdowned() {
     #while read instance running_status; do
     for line in "${TARGET_NODES[@]}"; do
         read instance running_status <<< "$line"
-        echo "instance -> ${instance}, running_status -> ${running_status}"
         if [ "$running_status" = "running" ]; then
             stat_of_running_instances+=("${instance}")
         fi
