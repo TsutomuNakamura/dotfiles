@@ -27,7 +27,7 @@ main() {
     init_target_nodes || return 1
 
     #if [[ "${sub_command}" =~ ^(start|destroy|snapshot-list|snapshot-create-as|snapshot-delete)$ ]]; then
-    if [ "${sub_command}" = "start" -o "${sub_command}" = "destroy" -o "${sub_command}" = list -o "${sub_command}" = "snapshot-list" ]; then
+    if [ "${sub_command}" = "start" -o "${sub_command}" = "destroy" -o "${sub_command}" = list -o "${sub_command}" = "snapshot-list" -o "${sub_command}" = "shutdown" ]; then
         # Empty arg to ignore it
         arg=
     elif [ "${sub_command}" = "snapshot-delete" -o "${sub_command}" = "snapshot-revert" ]; then
