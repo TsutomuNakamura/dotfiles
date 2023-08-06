@@ -6,13 +6,18 @@ declare -a TARGET_NODES=()
 
 OUTPUT_VIRSH_LIST=
 
+# Status of instances that are running
+STATS_OF_RUNNING_INSTANCES=()
+
 REGEX_DOMAIN='dev\-(controller|compute|cinder|swift|storage)[0-9]+'
 
+FLG_RUNNING_WAIT_UNTIL_ALL_INSTANCES_HAVE_SHUTDOWNED=0
+
 log_info() {
-    echo "$(date) - INFO: $1"
+    echo "$(date) - INFO: $@"
 }
 log_err() {
-    echo "$(date) - ERROR: $1" >&2
+    echo "$(date) - ERROR: $@" >&2
 }
 
 main() {
@@ -66,7 +71,7 @@ execute_virsh() {
         done
     fi
 
-    if [ "${sub_command}" = "shutdown" ]; then
+    if [ "${sub_command}" = "shutdown" -a $FLG_RUNNING_WAIT_UNTIL_ALL_INSTANCES_HAVE_SHUTDOWNED -eq 0 ]; then
         # A command "shutdown" will shutdown instances asynchronously.
         wait_until_all_instances_have_shutdowned
     fi
@@ -75,9 +80,11 @@ execute_virsh() {
 wait_until_all_instances_have_shutdowned() {
     local all_instances_shutdowned=1
     local max_attempts=1024
-    local attempts_count=0
-    local stat_of_running_instances=
+    local attempts_count=1
+    local running_instance=
     local ret=0
+
+    FLG_RUNNING_WAIT_UNTIL_ALL_INSTANCES_HAVE_SHUTDOWNED=1
 
     while [ ${all_instances_shutdowned} -ne 0 -o $attempts_count -lt $max_attempts ]; do
         have_all_instances_shutdowned
@@ -86,7 +93,17 @@ wait_until_all_instances_have_shutdowned() {
             log_info "Shutting down all instances has completed."
             return 0
         fi
-        log_info "Not all instances have shutdowned. Continue to check status of shutting down them."
+
+        if [ $(( $attempts_count % 5 )) -eq 0 ]; then
+            # Re-send shutdown commands if there are instances which not shutting down completed after several seconds.
+            # The function `have_all_instances_shutdowned()` has already modified `STAT_OF_RUNNING_INSTANCES` then clone it to TARGET_NODES that will be used in execute_virsh().
+            TARGET_NODES=("${STAT_OF_RUNNING_INSTANCES[@]}")
+            log_info "Re-send shutdown command to \"${TARGET_NODES[@]}\""
+            execute_virsh "shutdown" "" > /dev/null 2>&1
+        else
+            log_info "Not all instances have shutdowned. Continue to check status of shutting down them."
+        fi
+
         sleep 2
         ((++attempts_count))
     done
@@ -96,9 +113,10 @@ wait_until_all_instances_have_shutdowned() {
 }
 
 # This function will output which nodes are still running.
+# This function might set a variable array `STATS_OF_RUNNING_INSTANCES` if there are any instances that are running.
 have_all_instances_shutdowned() {
     local instance running_status line
-    declare -a stat_of_running_instances=()
+    STAT_OF_RUNNING_INSTANCES=()
 
     ###IFS=$'\n' TARGET_NODES=($(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${REGEX_DOMAIN}"))
     mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${REGEX_DOMAIN}")
@@ -107,13 +125,13 @@ have_all_instances_shutdowned() {
     for line in "${TARGET_NODES[@]}"; do
         read instance running_status <<< "$line"
         if [ "$running_status" = "running" ]; then
-            stat_of_running_instances+=("${instance}")
+            STAT_OF_RUNNING_INSTANCES+=("${instance}")
         fi
     done
 
-    [ ${#stat_of_running_instances[@]} -eq 0 ] && return 0
+    [ ${#STAT_OF_RUNNING_INSTANCES[@]} -eq 0 ] && return 0
 
-    return 1
+    return ${#STAT_OF_RUNNING_INSTANCES[@]}
 }
 
 
