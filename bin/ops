@@ -101,7 +101,7 @@ wait_until_all_instances_have_shutdowned() {
             log_info "Re-send shutdown command to \"${TARGET_NODES[@]}\""
             execute_virsh "shutdown" "" > /dev/null 2>&1
         else
-            log_info "Not all instances have shutdowned. Continue to check status of shutting down them."
+            log_info "Not all instances have shutdowned. Continue to check status of \"${STAT_OF_RUNNING_INSTANCES[@]}\"."
         fi
 
         sleep 2
