@@ -116,7 +116,7 @@ wait_until_instances_have_shutdowned() {
             # The function `have_all_instances_shutdowned()` has already modified `STAT_OF_RUNNING_INSTANCES` then clone it to TARGET_NODES that will be used in execute_virsh().
             TARGET_NODES=("${STAT_OF_RUNNING_INSTANCES[@]}")
             log_info "Re-send shutdown command to \"${TARGET_NODES[@]}\""
-            for running_instance in "${TARGET_NODES}"; do
+            for running_instance in "${TARGET_NODES[@]}"; do
                 virsh shutdown $running_instance
             done
         else
