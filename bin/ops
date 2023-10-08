@@ -2,6 +2,7 @@
 
 SCRIPT_NAME="$0"
 
+declare -a ALL_TARGET_NODES=()
 declare -a TARGET_NODES=()
 
 OUTPUT_VIRSH_LIST=
@@ -9,9 +10,7 @@ OUTPUT_VIRSH_LIST=
 # Status of instances that are running
 STATS_OF_RUNNING_INSTANCES=()
 
-REGEX_DOMAIN='dev\-(controller|compute|cinder|swift|storage)[0-9]+'
-
-FLG_RUNNING_WAIT_UNTIL_ALL_INSTANCES_HAVE_SHUTDOWNED=0
+REGEX_DOMAIN='dev\-(controller|compute|cinder|swift|storage|comstorage)[0-9]+'
 
 log_info() {
     echo "$(date) - INFO: $@"
@@ -31,7 +30,6 @@ main() {
 
     init_target_nodes || return 1
 
-    #if [[ "${sub_command}" =~ ^(start|destroy|snapshot-list|snapshot-create-as|snapshot-delete)$ ]]; then
     if [ "${sub_command}" = "start" -o "${sub_command}" = "destroy" -o "${sub_command}" = list -o "${sub_command}" = "snapshot-list" -o "${sub_command}" = "shutdown" ]; then
         # Empty arg to ignore it
         arg=
@@ -64,30 +62,49 @@ execute_virsh() {
     if [ "$sub_command" = "list" ]; then
         head -n 2 <<< "${OUTPUT_VIRSH_LIST}"
         grep -P "${REGEX_DOMAIN}" <<< "${OUTPUT_VIRSH_LIST}"
+    elif [ "$sub_command" = "shutdown" ]; then
+        # Shutdown nodes with specified orders.
+        shutdown_nodes '^dev\-compute.*' '^dev\-comstorage.*' '^dev\-(cinder|swift|storage).*' 'dev\-controller.*'
     else
         for instance in ${TARGET_NODES[@]}; do
             log_info "Execute command: virsh "${sub_command}" ${options} ${instance} ${target_object}"
             virsh "${sub_command}" ${options} ${instance} ${target_object}
         done
     fi
-
-    if [ "${sub_command}" = "shutdown" -a $FLG_RUNNING_WAIT_UNTIL_ALL_INSTANCES_HAVE_SHUTDOWNED -eq 0 ]; then
-        # A command "shutdown" will shutdown instances asynchronously.
-        wait_until_all_instances_have_shutdowned
-    fi
 }
 
-wait_until_all_instances_have_shutdowned() {
+shutdown_nodes() {
+    declare -a regex_of_target_instances=("$@")
+
+    local regex instance
+    for regex in "${regex_of_target_instances[@]}"; do
+        # Create target nodes to shutdown only specified nodes.
+
+        # Create TARGET_NODES to execute shutdown command to proper nodes only.
+        for instance in "${ALL_TARGET_NODES[@]}"; do
+            if [[ "$instance" =~ ${regex} ]]; then
+                log_info "Execute command: virsh shutdown ${instance}"
+                virsh shutdown "${instance}"
+            fi
+        done
+
+        # Execute "virsh 'shutdown'" to shutdown instances in a variable ${TARGET_NODES[@]}
+
+        wait_until_instances_have_shutdowned "${regex}"
+    done
+}
+
+wait_until_instances_have_shutdowned() {
+    local regex_of_target_instances="$1"
+
     local all_instances_shutdowned=1
     local max_attempts=1024
     local attempts_count=1
     local running_instance=
     local ret=0
 
-    FLG_RUNNING_WAIT_UNTIL_ALL_INSTANCES_HAVE_SHUTDOWNED=1
-
     while [ ${all_instances_shutdowned} -ne 0 -o $attempts_count -lt $max_attempts ]; do
-        have_all_instances_shutdowned
+        have_instances_shutdowned "${regex_of_target_instances}"
         ret=$?
         if [ $ret -eq 0 ]; then
             log_info "Shutting down all instances has completed."
@@ -99,7 +116,9 @@ wait_until_all_instances_have_shutdowned() {
             # The function `have_all_instances_shutdowned()` has already modified `STAT_OF_RUNNING_INSTANCES` then clone it to TARGET_NODES that will be used in execute_virsh().
             TARGET_NODES=("${STAT_OF_RUNNING_INSTANCES[@]}")
             log_info "Re-send shutdown command to \"${TARGET_NODES[@]}\""
-            execute_virsh "shutdown" "" > /dev/null 2>&1
+            for running_instance in "${TARGET_NODES}"; do
+                virsh shutdown $running_instance
+            done
         else
             log_info "Not all instances have shutdowned. Continue to check status of \"${STAT_OF_RUNNING_INSTANCES[@]}\"."
         fi
@@ -114,16 +133,17 @@ wait_until_all_instances_have_shutdowned() {
 
 # This function will output which nodes are still running.
 # This function might set a variable array `STATS_OF_RUNNING_INSTANCES` if there are any instances that are running.
-have_all_instances_shutdowned() {
+have_instances_shutdowned() {
+    local regex_of_target_instances="$1"
+
     local instance running_status line
     STAT_OF_RUNNING_INSTANCES=()
 
-    ###IFS=$'\n' TARGET_NODES=($(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${REGEX_DOMAIN}"))
-    mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${REGEX_DOMAIN}")
+    mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${regex_of_target_instances}")
 
-    #while read instance running_status; do
     for line in "${TARGET_NODES[@]}"; do
         read instance running_status <<< "$line"
+        echo "instance: ${instance}, running_status: ${running_status}"
         if [ "$running_status" = "running" ]; then
             STAT_OF_RUNNING_INSTANCES+=("${instance}")
         fi
@@ -137,8 +157,8 @@ have_all_instances_shutdowned() {
 
 init_target_nodes() {
     OUTPUT_VIRSH_LIST="$(virsh list --all)"
-    #IFS=$'\n' TARGET_NODES=($(echo "${OUTPUT_VIRSH_LIST}" | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}"))
     mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}")
+    ALL_TARGET_NODES=("${TARGET_NODES[@]}")
 
     [ ${#TARGET_NODES[@]} -eq 0 ] && {
         log_err "There are no VM nodes to execute a command., dev-controllerXX, dev-computesXX or dev-storageXX etc."
