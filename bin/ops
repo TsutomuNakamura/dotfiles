@@ -76,6 +76,8 @@ execute_virsh() {
 shutdown_nodes() {
     declare -a regex_of_target_instances=("$@")
 
+    shutdown_openstack_instances || return 1
+
     local regex instance
     for regex in "${regex_of_target_instances[@]}"; do
         # Create target nodes to shutdown only specified nodes.
@@ -92,6 +94,30 @@ shutdown_nodes() {
 
         wait_until_instances_have_shutdowned "${regex}"
     done
+}
+
+shutdown_openstack_instances() {
+    local state_of_controller_node=
+    local ret
+
+    log_info "Shutting down all instances on the controller node first."
+
+    state_of_controller_node=$(virsh list | grep -P 'dev\-controller.*' | awk '{print $3}' | head -1)
+
+    [ ! "$state_of_controller_node" = "running" ] && {
+        log_info "No controllers are running. Skipping an instruction to shutdown OpenStack instances."
+        return 0
+    }
+
+    ssh -T dev-controller01 'sudo bash -c ". /root/admin-openrc; /opt/shutdown_all_op_instances.sh"'
+    ret=$?
+
+    if [ $ret -ne 0 ]; then
+        log_err "Failed to shutdown OpenStack instances by running ssh -T dev-controller01 'sudo bash -c \". /root/admin-openrc; /opt/shutdown_all_op_instances.sh\"'. Its return code is \"${ret}\""
+        return 1
+    fi
+
+    return 0
 }
 
 wait_until_instances_have_shutdowned() {
