@@ -10,7 +10,7 @@ OUTPUT_VIRSH_LIST=
 # Status of instances that are running
 STATS_OF_RUNNING_INSTANCES=()
 
-REGEX_DOMAIN='dev\-(controller|compute|cinder|swift|storage|comstorage)[0-9]+'
+REGEX_DOMAIN='dev\-(controller|compute|cinder|swift|storage|comstorage|k8s-node)[0-9]+'
 
 log_info() {
     echo "$(date) - INFO: $@"
@@ -64,7 +64,7 @@ execute_virsh() {
         grep -P "${REGEX_DOMAIN}" <<< "${OUTPUT_VIRSH_LIST}"
     elif [ "$sub_command" = "shutdown" ]; then
         # Shutdown nodes with specified orders.
-        shutdown_nodes '^dev\-compute.*' '^dev\-comstorage.*' '^dev\-(cinder|swift|storage).*' 'dev\-controller.*'
+        shutdown_nodes '^dev\-k8s\-node.*' '^dev\-compute.*' '^dev\-comstorage.*' '^dev\-(cinder|swift|storage).*' 'dev\-controller.*'
     else
         for instance in ${TARGET_NODES[@]}; do
             log_info "Execute command: virsh "${sub_command}" ${options} ${instance} ${target_object}"
@@ -112,10 +112,10 @@ shutdown_openstack_instances() {
     ssh -T dev-controller01 'sudo bash -c ". /root/admin-openrc; /opt/shutdown_all_op_instances.sh"'
     ret=$?
 
-    if [ $ret -ne 0 ]; then
-        log_err "Failed to shutdown OpenStack instances by running ssh -T dev-controller01 'sudo bash -c \". /root/admin-openrc; /opt/shutdown_all_op_instances.sh\"'. Its return code is \"${ret}\""
-        return 1
-    fi
+    #if [ $ret -ne 0 ]; then
+    #    log_err "Failed to shutdown OpenStack instances by running ssh -T dev-controller01 'sudo bash -c \". /root/admin-openrc; /opt/shutdown_all_op_instances.sh\"'. Its return code is \"${ret}\""
+    #    return 1
+    #fi
 
     return 0
 }
