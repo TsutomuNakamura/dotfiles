@@ -883,11 +883,11 @@ function _install_font_migu1m() {
     if [[ -e "migu-1m-bold.ttf" ]] && [[ "$(wc -c < migu-1m-bold.ttf)" != "0" ]] \
             && [[ -e "migu-1m-regular.ttf" ]] && [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
         # Downloading migu1m fonts has been successfully
-        rm -rf ${file_zipped_migu1m} ${dir_migu1m}
+        rm -rf ${dir_migu1m} ${file_zipped_migu1m}
         return 1
     fi
 
-    rm -rf ${file_zipped_migu1m} ${dir_migu1m} migu-1m-bold.ttf migu-1m-regular.ttf
+    rm -rf ${dir_migu1m} ${file_zipped_migu1m} migu-1m-bold.ttf migu-1m-regular.ttf
     return 2
 }
 
