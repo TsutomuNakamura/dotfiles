@@ -855,6 +855,8 @@ function _install_font_inconsolata_nerd() {
 #     1: Installed successfully
 #     2: Failed to install
 function _install_font_migu1m() {
+    local file_zipped_migu1m="migu-1m-20200307.zip"
+    local dir_migu1m="${file_zipped_migu1m%%.*}"
 
     # Migu 1M has already been installed?
     if [[ -e "migu-1m-bold.ttf" ]] && [[ "$(wc -c < migu-1m-bold.ttf)" != "0" ]] \
@@ -863,29 +865,29 @@ function _install_font_migu1m() {
         return 0
     fi
     # Migu 1M for Japanese font
-    curl -fLo "migu-1m-20150712.zip" \
-        https://ja.osdn.net/projects/mix-mplus-ipa/downloads/63545/migu-1m-20150712.zip
+    curl -fLo "${file_zipped_migu1m}" \
+        https://raw.githubusercontent.com/TsutomuNakamura/dotfiles/master/resources/fonts/migu1m/${file_zipped_migu1m}
     local ret_of_curl=$?
 
-    if [[ "$ret_of_curl" -eq 0 ]] && [[ -e "migu-1m-20150712.zip" ]] && [[ "$(wc -c < migu-1m-20150712.zip)" -ne 0 ]]; then
-        unzip migu-1m-20150712.zip
-        pushd migu-1m-20150712 || return 1
+    if [[ "$ret_of_curl" -eq 0 ]] && [[ -e "${file_zipped_migu1m}" ]] && [[ "$(wc -c < ${file_zipped_migu1m})" -ne 0 ]]; then
+        unzip ${file_zipped_migu1m}
+        pushd ${dir_migu1m} || return 1
         mv ./*.ttf ../
         popd
     else
         # Failed to install
-        rm -rf migu-1m-20150712.zip
+        rm -rf ${file_zipped_migu1m}
         return 2
     fi
 
     if [[ -e "migu-1m-bold.ttf" ]] && [[ "$(wc -c < migu-1m-bold.ttf)" != "0" ]] \
             && [[ -e "migu-1m-regular.ttf" ]] && [[ "$(wc -c < migu-1m-regular.ttf)" != 0 ]]; then
         # Downloading migu1m fonts has been successfully
-        rm -rf migu-1m-20150712 migu-1m-20150712.zip
+        rm -rf ${dir_migu1m} ${file_zipped_migu1m}
         return 1
     fi
 
-    rm -rf migu-1m-20150712 migu-1m-20150712.zip migu-1m-bold.ttf migu-1m-regular.ttf
+    rm -rf ${dir_migu1m} ${file_zipped_migu1m} migu-1m-bold.ttf migu-1m-regular.ttf
     return 2
 }
 

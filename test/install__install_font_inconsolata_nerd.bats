@@ -30,7 +30,7 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times curl)" = "1" ]]
     [[ "$(stub_called_times rm)" = "1" ]]
-    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
+    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v2.1.0/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
     stub_called_with_exactly_times rm 1 "-f" "Inconsolata Nerd Font Complete.otf"
 }
 
@@ -43,7 +43,7 @@ function teardown() {
     [[ "$status" -eq 1 ]]
     [[ "$(stub_called_times curl)" = "1" ]]
     [[ "$(stub_called_times rm)" = "1" ]]
-    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
+    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v2.1.0/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
     stub_called_with_exactly_times rm 1 "-f" "Inconsolata Nerd Font Complete.otf"
 }
 
@@ -54,7 +54,7 @@ function teardown() {
     [[ "$status" -eq 2 ]]
     [[ "$(stub_called_times curl)" = "1" ]]
     [[ "$(stub_called_times rm)" = "2" ]]
-    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
+    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v2.1.0/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
     stub_called_with_exactly_times rm 2 "-f" "Inconsolata Nerd Font Complete.otf"
 }
 
@@ -65,7 +65,7 @@ function teardown() {
     [[ "$status" -eq 2 ]]
     [[ "$(stub_called_times curl)" = "1" ]]
     [[ "$(stub_called_times rm)" = "2" ]]
-    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
+    stub_called_with_exactly_times curl 1 "-fLo" "Inconsolata Nerd Font Complete.otf" "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v2.1.0/patched-fonts/Inconsolata/complete/Inconsolata%20Nerd%20Font%20Complete.otf"
     stub_called_with_exactly_times rm 2 "-f" "Inconsolata Nerd Font Complete.otf"
 }
 
