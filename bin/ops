@@ -109,7 +109,7 @@ shutdown_openstack_instances() {
         return 0
     }
 
-    ssh -T dev-controller01 'sudo bash -c ". /root/admin-openrc; /opt/shutdown_all_op_instances.sh"'
+    ssh -T dev-controller01 'sudo bash -c "if [ -f /root/admin-openrc ]; then . /root/admin-openrc; else true; fi; if [ -f /opt/shutdown_all_op_instances.sh ]; then /opt/shutdown_all_op_instances.sh; else true; fi"'
     ret=$?
 
     if [ $ret -ne 0 ]; then
