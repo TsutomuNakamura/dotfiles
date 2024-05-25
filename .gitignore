@@ -25,3 +25,5 @@
 # test log
 /*.log
 
+# private git configuration that you want NOT to commit and push a repository
+.git_private_conf/
