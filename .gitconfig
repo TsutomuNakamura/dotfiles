@@ -5,3 +5,14 @@
 [include]
 	path = .globalgitconfig
 
+# # You can set indivisual configs for each push locations like below.
+#
+#[includeIf "hasconfig:remote.*.url:https://git.private.example.com/**"]
+#	path = .git_private_confg/git_private_example_com.conf
+#
+#	# And then you can fill settings in ".git_private_confg/git_private_example_com.conf" like below.
+#	# ```
+#	# email = yourname@example.com
+#	# name = Your Name
+#	# ```
+
