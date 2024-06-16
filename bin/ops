@@ -2,6 +2,9 @@
 
 SCRIPT_NAME="$0"
 
+WORK_DIR="/var/kvm/distros"
+BACKUP_DIR="/var/kvm/backup"
+
 declare -a ALL_TARGET_NODES=()
 declare -a TARGET_NODES=()
 
@@ -28,7 +31,9 @@ main() {
         return 0
     fi
 
-    init_target_nodes || return 1
+    if [ ! "${sub_command}" = "x-delete-backup" ] && [ ! "${sub_command}" = "x-restore-instances" ]; then
+        init_target_nodes "${sub_command}" || return 1
+    fi
 
     if [ "${sub_command}" = "start" -o "${sub_command}" = "destroy" -o "${sub_command}" = list -o "${sub_command}" = "snapshot-list" -o "${sub_command}" = "shutdown" ]; then
         # Empty arg to ignore it
@@ -41,6 +46,22 @@ main() {
     elif [ "${sub_command}" = "snapshot-create-as" ]; then
         # sub_command "snapshot-create-as" does not require arg. But if it was not existed, this command will create a snapshot with name that based epoch dates.
         true
+    elif [ ${sub_command} = "x-backup-list" ]; then
+        # Custome option to be conbiniently
+        x_backup_list && return 0 || return 1
+    elif [ "${sub_command}" = "x-backup-instances" -o "${sub_command}" = "x-restore-instances" -o "${sub_command}" = "x-delete-backup" ]; then
+        [ -z "$arg" ] && {
+            log_err "sub_command \"x-backup-instances\", \"x-restore-instances\", \"x-delete-backup\" requires additional arg \"<category-name>\""
+            return 1
+        }
+        case "${sub_command}" in
+            "x-backup-instances")
+                x_backup_instances "${arg}"  && return 0 || return 1 ;;
+            "x-restore-instances")
+                x_restore_instances "${arg}" && return 0 || return 1 ;;
+            "x-delete-backup")
+                x_delete_backup "${arg}"     && return 0 || return 1 ;;
+        esac
     else
         log_err "Unknown sub command for virsh (sub_command=${sub_command})."
         return 1
@@ -49,10 +70,114 @@ main() {
     execute_virsh "${sub_command}" "${arg}"
 }
 
+x_backup_list() {
+    if [ ! -d "${BACKUP_DIR}" ]; then
+        log_info "There are no backups yet. Finished."
+        return 0
+    fi
+    cd "${BACKUP_DIR}" || return 1
+    echo "List category names that already backed up are below."
+    find . -maxdepth 1 -mindepth 1 -type d -regextype posix-extended -regex "^\./${REGEX_DOMAIN}$" -printf "%f\n"
+}
+
+x_backup_instances() {
+    local category="$1"
+    local instance line
+    local backup_instance_dir="${BACKUP_DIR}/${category}"
+
+    shutdown_nodes   || return 1
+    cd "${WORK_DIR}" || return 1
+    mkdir -p "${backup_instance_dir}"
+
+    for line in "${TARGET_NODES[@]}"; do
+        read instance _ <<< "${line}"
+        log_info "Backup ${instance}"
+        virsh dumpxml ${instance} > ${instance}/domain.xml || return 1
+        tar -cf ${instance}.tar ${instance}                || return 1
+        mv ${instance}.tar "${backup_instance_dir}"        || return 1
+        log_info "Compressing ${backup_instance_dir}/${instance}.tar in the background. [XZ_DEFAULTS=\"-9 -T2\" xz ${backup_instance_dir}/${instance}.tar]"
+        XZ_DEFAULTS="-9 -T2" nohup xz ${backup_instance_dir}/${instance}.tar > /dev/null 2>&1 &
+    done
+
+    log_info "Commands for backups have been executed on the background. All instructions will finished in some minutes later. You can see processes running on the background by running a command (ps -ef | grep xz)."
+
+    return 0
+}
+
+x_restore_instances() {
+    local category="$1"
+    local line instance snapshot backup_file target_list
+    local backup_instance_dir="${BACKUP_DIR}/${category}"
+
+    if [ ! -d "${backup_instance_dir}" ]; then
+        log_err "Failed to restore instances of category \"${category}\" because its backup(${backup_instance_dir}) is not existed."
+        return 1
+    fi
+
+    execute_virsh "destroy" || return 1
+
+    mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${regex_of_target_instances}")
+
+    for line in "${TARGET_NODES[@]}"; do
+        read instance _ <<< "${line}"
+        [ -z "${instance}" ] && continue
+
+        # Delete snapshot
+        while read snapshot; do
+            if [ ! -z "${snapshot}" ]; then
+                log_info "Deleting snapshot \"${snapshot}\" from \"${instance}\"."
+                virsh snapshot-delete "${instance}" "${snapshot}" || return 1
+            fi
+        done < <(virsh snapshot-list ${instance} 2> /dev/null | tail -n +3 | awk '{print $1}')
+
+        # Undefine and delete an instances
+        log_info "Delete an existing instance \"${instance}\""
+        virsh undefine --nvram ${instance} || return 1
+        rm -rf "${WORK_DIR}/${instance}"
+        [ -d "${WORK_DIR}/${instance}" ] && {
+            log_err "Failed to delete an instance \"${instance}\". A directory \"${WORK_DIR}/${instance}\" still be existing."
+            return 1
+        }
+    done
+
+    # Restore instances from backup
+    cd "${backup_instance_dir}" || return 1
+
+    target_list="$(ls -1)"
+
+    while read backup_file; do
+
+        log_info "Restoring a domain \"${backup_file}\""
+
+        cp "${backup_file}" "${WORK_DIR}"                      || return 1
+    done <<< "${target_list}"
+
+    export -f log_info
+    export -f log_err
+    export WORK_DIR
+
+    decompress() {
+        local target="$1"
+        log_info "Decompressing a file of an instance \"${target}\""
+        tar -C "${WORK_DIR}" -Jxf "${WORK_DIR}/${target}"
+    }
+    export -f decompress
+
+    echo "${target_list}" | xargs -P 2 -I {} bash -c 'decompress "$@"' _ {}
+
+    while read backup_file; do
+        backup_file="${backup_file%%.*}"
+        virsh define "${WORK_DIR}/${backup_file}/domain.xml"   || return 1
+    done <<< "${target_list}"
+
+    return 0
+}
+
 execute_virsh() {
     local sub_command="$1";   shift
     local target_object="$1"; shift
     local options="$@"
+    local line instance
 
     if [ "$sub_command" = "snapshot-list" ]; then
         options="--tree"
@@ -64,36 +189,60 @@ execute_virsh() {
         grep -P "${REGEX_DOMAIN}" <<< "${OUTPUT_VIRSH_LIST}"
     elif [ "$sub_command" = "shutdown" ]; then
         # Shutdown nodes with specified orders.
-        shutdown_nodes '^(dev|stg)\-k8s\-node.*' '^(dev|stg)\-compute.*' '^(dev|stg)\-comstorage.*' '^(dev|stg)\-(cinder|swift|storage).*' '(dev|stg)\-controller.*'
+        shutdown_nodes
     else
-        for instance in ${TARGET_NODES[@]}; do
-            log_info "Execute command: virsh "${sub_command}" ${options} ${instance} ${target_object}"
-            virsh "${sub_command}" ${options} ${instance} ${target_object}
+        for line in ${TARGET_NODES[@]}; do
+            read instance _ <<< "${line}"
+            if [ "${sub_command}" = "destroy" ]; then
+                is_instance_running "${instance}" && {
+                    log_info "Execute command: virsh "${sub_command}" ${options} ${instance} ${target_object}"
+                    virsh "${sub_command}" ${options} ${instance} ${target_object} || return 1
+                }
+            else
+                log_info "Execute command: virsh "${sub_command}" ${options} ${instance} ${target_object}"
+                virsh "${sub_command}" ${options} ${instance} ${target_object} || return 1
+            fi
         done
     fi
+
+    return 0
 }
 
 shutdown_nodes() {
+    do_shutdown_nodes '^(dev|stg)\-k8s\-node.*' '^(dev|stg)\-compute.*' '^(dev|stg)\-comstorage.*' '^(dev|stg)\-(cinder|swift|storage).*' '(dev|stg)\-controller.*'
+}
+
+do_shutdown_nodes() {
     declare -a regex_of_target_instances=("$@")
 
     shutdown_openstack_instances || return 1
 
-    local regex instance
+    local regex line instance ret
+    local doing_shutdown=1
+
     for regex in "${regex_of_target_instances[@]}"; do
         # Create target nodes to shutdown only specified nodes.
 
         # Create TARGET_NODES to execute shutdown command to proper nodes only.
-        for instance in "${ALL_TARGET_NODES[@]}"; do
-            if [[ "$instance" =~ ${regex} ]]; then
-                log_info "Execute command: virsh shutdown ${instance}"
-                virsh shutdown "${instance}"
+        for line in "${ALL_TARGET_NODES[@]}"; do
+            read instance _ <<< "${line}"
+            if [[ "${instance}" =~ ${regex} ]]; then
+                is_instance_running "${instance}" && {
+                    log_info "Execute command: virsh shutdown ${instance}"
+                    virsh shutdown "${instance}" || return 1
+                    doing_shutdown=0
+                }
             fi
         done
 
         # Execute "virsh 'shutdown'" to shutdown instances in a variable ${TARGET_NODES[@]}
 
-        wait_until_instances_have_shutdowned "${regex}"
+        if [ ${doing_shutdown} -eq 0 ]; then
+            wait_until_instances_have_shutdowned "${regex}" || return 1
+        fi
     done
+
+    return 0
 }
 
 shutdown_openstack_instances() {
@@ -179,8 +328,40 @@ have_instances_shutdowned() {
     return ${#STAT_OF_RUNNING_INSTANCES[@]}
 }
 
+# Check whether an instance is stopped or not
+# @return 0: The instans is running.
+# @return 1: The instans has stopped.
+# @return 2: The instans is not existed.
+# @return 3: Something went wrong.
+is_instance_running() {
+    local target="$1"
+    local instance running_status line
+    mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2 " " $3 $4}' | grep -P "${REGEX_DOMAIN}")
+
+    local loop_count=0
+
+    for line in "${TARGET_NODES[@]}"; do
+        read instance running_status <<< "$line"
+        if [ "${instance}" = "${target}" ]; then
+            if [ "${running_status}" = "running" ]; then
+                return 0
+            elif [ "${running_status}" = "shutoff" ]; then
+                return 1
+            fi
+        fi
+    done
+
+    if [ ${loop_count} -eq ${#TARGET_NODES[@]} ]; then
+        return 2
+    fi
+
+    # This section is not reachable.
+    return 3
+}
 
 init_target_nodes() {
+    local sub_command="$1"
+
     OUTPUT_VIRSH_LIST="$(virsh list --all)"
     mapfile -t TARGET_NODES < <(virsh list --all | tail -n +3 | awk '{print $2}' | grep -P "${REGEX_DOMAIN}")
     ALL_TARGET_NODES=("${TARGET_NODES[@]}")
@@ -205,6 +386,10 @@ ex)
   ${SCRIPT_NAME} snapshot-create-as \${snapshot_name}
   ${SCRIPT_NAME} snapshot-delete \${snapshot_name}
   ${SCRIPT_NAME} snapshot-snapshot-revert \${snapshot_name}
+  ${SCRIPT_NAME} x-backup-instances \${category-name-as-you-want-to-do-it}
+  ${SCRIPT_NAME} x-backup-list
+  ${SCRIPT_NAME} x-restore-instances \${category-name}
+  ${SCRIPT_NAME} x-delete-backup \${category-name}
 EOF
 }
 
