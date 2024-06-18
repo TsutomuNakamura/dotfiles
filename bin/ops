@@ -167,7 +167,8 @@ x_restore_instances() {
 
     while read backup_file; do
         backup_file="${backup_file%%.*}"
-        virsh define "${WORK_DIR}/${backup_file}/domain.xml"   || return 1
+        virsh define "${WORK_DIR}/${backup_file}/domain.xml" || return 1
+        virsh snapshot-create-as ${backup_file} restored     || return 1
     done <<< "${target_list}"
 
     return 0
