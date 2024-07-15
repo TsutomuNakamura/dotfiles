@@ -31,7 +31,7 @@ main() {
         return 0
     fi
 
-    if [ ! "${sub_command}" = "x-delete-backup" ] && [ ! "${sub_command}" = "x-restore-instances" ]; then
+    if [ ! "${sub_command}" = "x-delete-backup" ] && [ ! "${sub_command}" = "x-restore-instances" ] && [ ! "${sub_command}" = "x-backup-list" ]; then
         init_target_nodes "${sub_command}" || return 1
     fi
 
@@ -70,14 +70,35 @@ main() {
     execute_virsh "${sub_command}" "${arg}"
 }
 
+x_delete_backup() {
+    local backup="$1"
+
+    if [ ! -d "${BACKUP_DIR}" ]; then
+        log_info "There are no backups directory \"${BACKUP_DIR}\"."
+        return 0
+    fi
+
+    local backup_dir="${BACKUP_DIR}/${backup}"
+    if [ ! -d "${backup_dir}" ]; then
+        log_err "A backup \"${backup}\" and its directory \"${backup_dir}\" was not existed."
+        return 1
+    fi
+
+    log_info "Deleting backup \"${backup}\" (and its directory \"${backup_dir}\")."
+    rm -rf "${backup_dir}"
+
+    return 0
+}
+
 x_backup_list() {
     if [ ! -d "${BACKUP_DIR}" ]; then
         log_info "There are no backups yet. Finished."
         return 0
     fi
     cd "${BACKUP_DIR}" || return 1
-    echo "List category names that already backed up are below."
-    find . -maxdepth 1 -mindepth 1 -type d -regextype posix-extended -regex "^\./${REGEX_DOMAIN}$" -printf "%f\n"
+    echo "--- List category names that already backed up are below. ---"
+    #find . -maxdepth 1 -mindepth 1 -type d -regextype posix-extended -regex "^\./${REGEX_DOMAIN}$" -printf "%f\n"
+    find . -maxdepth 1 -mindepth 1 -type d -printf "%f\n"
 }
 
 x_backup_instances() {
@@ -163,7 +184,7 @@ x_restore_instances() {
     }
     export -f decompress
 
-    echo "${target_list}" | xargs -P 2 -I {} bash -c 'decompress "$@"' _ {}
+    echo "${target_list}" | xargs -P 4 -I {} bash -c 'decompress "$@"' _ {}
 
     while read backup_file; do
         backup_file="${backup_file%%.*}"
