@@ -55,9 +55,25 @@ vim.o.conceallevel = 0
 -- t[nore]map     |  -   |  -  |  -  |  -  |  -  |  -  | yes  |  -   |
 -- l[nore]map     |  -   | yes | yes |  -  |  -  |  -  |  -   | yes  |
 --
-vim.keymap.set({"n", "v"}     , "<leader>h", "0", {noremap = true, silent = true})
-vim.keymap.set({"n", "v"}     , "<leader>l", "$", {noremap = true, silent = true})
---vim.keymap.set({"n"})
+vim.keymap.set({"n", "v"}     , "<leader>h", "0",     {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}     , "<leader>l", "$",     {noremap = true, silent = true})
+
+local vscode = require('vscode')
+
+function get_vscode_function(ftype, operation)
+  if ftype == "action" then
+    return function()
+      vscode.action(operation)
+    end
+  end
+  error("Unknown ftype \"" .. tostring(ftype) .. "\" (with operation" .. tostring(operation) .. "). Supported ftype are \"action\".")
+end
+
+function get_vscode_action(name)
+  return get_vscode_function("action", name)
+end
+
+vim.keymap.set({"n", "v"}, "<leader>ff", get_vscode_action('workbench.action.quickOpen'), {noremap = true, silent = true})
 
 -- Set indent of each file types.
 --
