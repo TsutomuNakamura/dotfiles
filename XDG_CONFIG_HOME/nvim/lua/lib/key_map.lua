@@ -69,13 +69,15 @@ function get_vscode_action(name)
   return get_vscode_function("action", name)
 end
 
-
 vim.keymap.set({"n", "v"}, "<leader>w", get_vscode_action('workbench.action.files.save'),               {noremap = true, silent = true})
 vim.keymap.set({"n", "v"}, "<leader>q", get_vscode_action('workbench.action.closeActiveEditor'),        {noremap = true, silent = true})
 vim.keymap.set({"n", "v"}, "<leader>t", get_vscode_action('workbench.action.terminal.toggleTerminal'),  {noremap = true, silent = true})
 vim.keymap.set({"n", "v"}, "<leader>b", get_vscode_action('editor.debug.action.toggleBreakpoint'),      {noremap = true, silent = true})
 
+-- Keymaps based on nikmas_dev's one. Thanks for publishing greate journals.
+-- https://medium.com/@nikmas_dev/vscode-neovim-setup-keyboard-centric-powerful-reliable-clean-and-aesthetic-development-582d34297985
 
+-- general keymaps
 vim.keymap.set({"n", "v"}, "<leader>d",  get_vscode_action('editor.action.showHover'),          {noremap = true, silent = true})
 vim.keymap.set({"n", "v"}, "<leader>i",  get_vscode_action('editor.action.quickFix'),           {noremap = true, silent = true})
 vim.keymap.set({"n", "v"}, "<leader>sp", get_vscode_action('workbench.actions.view.problems'),  {noremap = true, silent = true})
@@ -85,6 +87,19 @@ vim.keymap.set({"n", "v"}, "<leader>cp", get_vscode_action('workbench.action.sho
 vim.keymap.set({"n", "v"}, "<leader>pr", get_vscode_action('code-runner.run'),                  {noremap = true, silent = true})    -- Is it existed?
 vim.keymap.set({"n", "v"}, "<leader>fd", get_vscode_action('editor.action.formatDocument'),     {noremap = true, silent = true})
 
+---- harpoon keymaps
+--vim.keymap.set({"n", "v"}, "<leader>ha", get_vscode_action('vscode-harpoon.addEditor'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>ho", get_vscode_action('vscode-harpoon.editorQuickPick'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>he", get_vscode_action('vscode-harpoon.editEditors'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h1", get_vscode_action('vscode-harpoon.gotoEditor1'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h2", get_vscode_action('vscode-harpoon.gotoEditor2'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h3", get_vscode_action('vscode-harpoon.gotoEditor3'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h4", get_vscode_action('vscode-harpoon.gotoEditor4'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h5", get_vscode_action('vscode-harpoon.gotoEditor5'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h6", get_vscode_action('vscode-harpoon.gotoEditor6'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h7", get_vscode_action('vscode-harpoon.gotoEditor7'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h8", get_vscode_action('vscode-harpoon.gotoEditor8'), {noremap = true, silent = true})
+--vim.keymap.set({"n", "v"}, "<leader>h9", get_vscode_action('vscode-harpoon.gotoEditor9'), {noremap = true, silent = true})
 
 vim.keymap.set({"n", "v"}, "s|", get_vscode_action('workbench.action.splitEditor'),      {noremap = true, silent = true})
 vim.keymap.set({"n", "v"}, "s-", get_vscode_action('workbench.action.splitEditorDown'),  {noremap = true, silent = true})
