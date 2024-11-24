@@ -69,12 +69,53 @@ function get_vscode_action(name)
   return get_vscode_function("action", name)
 end
 
-vim.keymap.set({"n", "v"}     , "<leader>h", "0",     {noremap = true, silent = true})
-vim.keymap.set({"n", "v"}     , "<leader>l", "$",     {noremap = true, silent = true})
 
-vim.keymap.set({"n", "v"}, "<leader>ff", get_vscode_action('workbench.action.quickOpen'), {noremap = true, silent = true})
-vim.keymap.set({"n", "v"}, "<leader>w",  get_vscode_action('workbench.action.files.save'), {noremap = true, silent = true})
-vim.keymap.set({"n", "v"}, "<leader>q",  get_vscode_action('workbench.action.closeActiveEditor'), {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>w", get_vscode_action('workbench.action.files.save'),               {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>q", get_vscode_action('workbench.action.closeActiveEditor'),        {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>t", get_vscode_action('workbench.action.terminal.toggleTerminal'),  {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>b", get_vscode_action('editor.debug.action.toggleBreakpoint'),      {noremap = true, silent = true})
+
+
+vim.keymap.set({"n", "v"}, "<leader>d",  get_vscode_action('editor.action.showHover'),          {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>i",  get_vscode_action('editor.action.quickFix'),           {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>sp", get_vscode_action('workbench.actions.view.problems'),  {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>cn", get_vscode_action('notifications.clearAll'),           {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>ff", get_vscode_action('workbench.action.quickOpen'),       {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>cp", get_vscode_action('workbench.action.showCommands'),    {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>pr", get_vscode_action('code-runner.run'),                  {noremap = true, silent = true})    -- Is it existed?
+vim.keymap.set({"n", "v"}, "<leader>fd", get_vscode_action('editor.action.formatDocument'),     {noremap = true, silent = true})
+
+
+vim.keymap.set({"n", "v"}, "s|", get_vscode_action('workbench.action.splitEditor'),      {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "s-", get_vscode_action('workbench.action.splitEditorDown'),  {noremap = true, silent = true})
+-- Jump another editors splitted
+vim.keymap.set({"n", "v"}, "sh", get_vscode_action('workbench.action.navigateLeft'),      {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "sl", get_vscode_action('workbench.action.navigateRight'),      {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "sk", get_vscode_action('workbench.action.navigateUp'),      {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "sj", get_vscode_action('workbench.action.navigateDown'),      {noremap = true, silent = true})
+
+
+vim.keymap.set({"n", "v"}, "<leader>a",  "ggVG", {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>h", "0",     {noremap = true, silent = true})
+vim.keymap.set({"n", "v"}, "<leader>l", "$",     {noremap = true, silent = true})
+
+
+-- better indent handling
+vim.keymap.set({"v"}, "<", "<gv", {noremap = true, silent = true})
+vim.keymap.set({"v"}, ">", ">gv", {noremap = true, silent = true})
+
+-- move text up and down
+vim.keymap.set({"v"}, "J", ":m .+1<CR>==",          {noremap = true, silent = true})
+vim.keymap.set({"v"}, "K", ":m .+1<CR>==",          {noremap = true, silent = true})
+vim.keymap.set({"x"}, "J", ":move '>+1<CR>gv-gv",   {noremap = true, silent = true})
+vim.keymap.set({"x"}, "K", ":move '<-2<CR>gv-gv",   {noremap = true, silent = true})
+
+-- paste preserves primal yanked piece
+vim.keymap.set({"v"}, "p", '"_dP', {noremap = true, silent = true})
+
+-- removes highlighting after escaping vim search
+vim.keymap.set({"n"}, "<Esc>", "<Esc>:noh<CR>",     {noremap = true, silent = true})
+
 
 -- Set indent of each file types.
 --
