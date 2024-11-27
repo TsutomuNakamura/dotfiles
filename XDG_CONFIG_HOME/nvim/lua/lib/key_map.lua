@@ -170,7 +170,6 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
-
 vim.opt.diffopt:prepend {
     'filler',
     'context:1000000'

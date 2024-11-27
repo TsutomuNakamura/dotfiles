@@ -1,18 +1,14 @@
-vim.keymap.set("n", "<Space>", "", {noremap = true, silent = true})
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+if vim.g.vscode then
+    vim.keymap.set("n", "<Space>", "", {noremap = true, silent = true})
+    vim.g.mapleader = " "
+    vim.g.maplocalleader = " "
 
--- Please refer to 
--- * Lua-guide - Mappings
--- https://neovim.io/doc/user/lua-guide.html#_mappings
--- * Map - Mapping and modes
--- https://neovim.io/doc/user/map.html#%3Amap-modes
---
---
--- set("n", ...)      -> n[nore]map - No recursive mapping
--- set("v", ...)      -> v[nore]map - Visual and select mode
-
-
--- noremap <Space>h  ^
-require("lib/key_map")
-
+    require("lib/key_map")
+else
+    function script_path()
+       local str = debug.getinfo(2, "S").source:sub(2)
+       return str:match("(.*/)")
+    end
+    local path = tostring(script_path()) .. "init_non_vscode.vim"
+    vim.cmd("source " .. path)
+end
