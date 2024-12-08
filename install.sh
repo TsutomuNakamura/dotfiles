@@ -566,6 +566,11 @@ function init() {
         return 1
     }
 
+    prepare_vscode || {
+        logger_err "Failed to inizializing VSCode's environment. Remaining installation process will be aborted."
+        return 1
+    }
+
     return 0
 }
 
@@ -2325,6 +2330,11 @@ function prepare_neovim_environment() {
 # Install command utilities in "${DOTDIR}/bin/emojify"
 function install_bin_utils() {
     _install_emojify || return 1
+    return 0
+}
+
+function prepare_vscode() {
+    # TODO:
     return 0
 }
 
