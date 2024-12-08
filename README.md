@@ -111,8 +111,10 @@ If you want to login the container without running tests.
 $ docker run --rm --volume ${PWD}:/home/foo/dotfiles -ti tsutomu/ubuntu-dot-test su - foo -l
 $ cd /home/foo/dotfiles
 $ make test
+```
 
-$ # Or if you want to run only specific cases, you can specify scripts to test like below.
+Or if you want to run only specific cases, you can specify scripts to test like below.
+```
 $ ./test.sh ./test/install_check_environment.bats
 ```
 
