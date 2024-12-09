@@ -2333,9 +2333,67 @@ function install_bin_utils() {
     return 0
 }
 
+# Prepare Visual Studio Code.
+# refer: https://code.visualstudio.com/docs/setup/linux
 function prepare_vscode() {
+    if [[ "$(get_distribution_name)" == "debian" ]] || [[ "$(get_distribution_name)" == "ubuntu" ]]; then
+        prepare_vscode_debian || return 1
+    elif [[ "$(get_distribution_name)" == "fedora" ]] || [[ "$(get_distribution_name)" == "centos" ]] then
+        prepare_vscode_fedora || return 1
+    elif [[ "$(get_distribution_name)" == "arch" ]]; then
+        prepare_vscode_arch || return 1
+    elif [[ "$(get_distribution_name)" == "mac" ]]; then
+        prepare_vscode_mac || return 1
+    else
+        msg="Sorry, this dotfiles installer only supports to install Visual Studio Code on Debian, Ubuntu, Fedora, CentOS, Arch Linux and Mac OS X."
+        msg+="If you want to install Visual Studio Code on other distributions, please install it manually."
+        logger_info "${msg}"
+    fi
+
     # TODO:
     return 0
+}
+
+function prepare_vscode_debian() {
+    logger_info "Installing Visual Studio Code on \"$(get_distribution_name)\"..."
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg || {
+        logger_err "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"$(get_distribution_name)\""
+        return 1
+    }
+    sudo install -o root -g root -m 644 /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg || {
+        logger_err "Failed to install /tmp/microsoft.gpg to /etc/apt/trusted.gpg.d/microsoft.gpg on \"$(get_distribution_name)\""
+        return 1
+    }
+    rm /tmp/microsoft.gpg
+
+    sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list' || {
+        logger_err "Failed to add a repository of Visual Studio Code to /etc/apt/sources.list.d/vscode.list on \"$(get_distribution_name)\""
+        return 1
+    }
+
+    sudo apt-get update || {
+        logger_err "Failed to update apt-get on \"$(get_distribution_name)\""
+        return 1
+    }
+
+    sudo apt-get install -y code || {
+        logger_err "Failed to install Visual Studio Code with apt-get on \"$(get_distribution_name)\""
+        return 1
+    }
+
+    return 0
+}
+
+function prepare_vscode_fedore() {
+    true
+}
+
+function prepare_vscode_arch() {
+    true
+}
+
+function prepare_vscode_mac() {
+    true
 }
 
 function _install_emojify() {
