@@ -2338,7 +2338,7 @@ function install_bin_utils() {
 function prepare_vscode() {
     if [[ "$(get_distribution_name)" == "debian" ]] || [[ "$(get_distribution_name)" == "ubuntu" ]]; then
         prepare_vscode_debian || return 1
-    elif [[ "$(get_distribution_name)" == "fedora" ]] || [[ "$(get_distribution_name)" == "centos" ]] then
+    elif [[ "$(get_distribution_name)" == "fedora" ]] || [[ "$(get_distribution_name)" == "centos" ]]; then
         prepare_vscode_fedora || return 1
     elif [[ "$(get_distribution_name)" == "arch" ]]; then
         prepare_vscode_arch || return 1
