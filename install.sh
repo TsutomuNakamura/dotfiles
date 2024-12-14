@@ -2356,10 +2356,13 @@ function prepare_vscode() {
 
 function prepare_vscode_debian() {
     logger_info "Installing Visual Studio Code on \"$(get_distribution_name)\"..."
+    set -o pipefail
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg || {
         logger_err "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"$(get_distribution_name)\""
+        set +o pipefail
         return 1
     }
+    set +o pipefail
     sudo install -o root -g root -m 644 /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg || {
         logger_err "Failed to install /tmp/microsoft.gpg to /etc/apt/trusted.gpg.d/microsoft.gpg on \"$(get_distribution_name)\""
         return 1
