@@ -2436,6 +2436,30 @@ function prepare_vscode_arch() {
 
 function install_package_from_aur() {
     local url="$1"
+    local directory=$(basename "${url}")
+    directory="${directory%.*}"
+
+    logger_info "Cloning git repository to install AUR package \"${url}\""
+    git clone "${url}" || {
+        logger_err "Failed to clone git repository \"${url}\""
+        rm -rf "${directory}"
+        return 1
+    }
+
+    pushd "${directory}" || {
+        logger_err "Failed to change directory \"${directory}\""
+        rm -rf "${directory}"
+        return 1
+    }
+    makepkg -sri --noconfirm || {
+        logger_err "Failed to install an AUR package with command \"makepkg -sri --noconfirm\""
+        rm -rf "${directory}"
+        return 1
+    }
+    popd
+    rm -rf "${directory}"
+
+    return 0
 }
 
 function prepare_vscode_mac() {
