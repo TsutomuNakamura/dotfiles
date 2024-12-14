@@ -2430,7 +2430,12 @@ function prepare_vscode_fedora() {
 }
 
 function prepare_vscode_arch() {
-    true
+    install_package_from_aur "https://aur.archlinux.org/visual-studio-code-bin.git" || return 1
+    return 0
+}
+
+function install_package_from_aur() {
+    local url="$1"
 }
 
 function prepare_vscode_mac() {
