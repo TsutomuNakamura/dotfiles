@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers "install.sh"
+load helpers
 
 function setup() {
     __backup_dir__="${HOME}/${BACKUPDIR}/19700101000000"

@@ -1,6 +1,5 @@
 #!/usr/bin/env bats
-
-load helpers "install.sh"
+load helpers
 
 function setup() {
     stub_and_eval dnf '{

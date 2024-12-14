@@ -1,6 +1,5 @@
 #!/usr/bin/env bats
-
-load helpers "install.sh"
+load helpers
 
 setup() {
     stub curl

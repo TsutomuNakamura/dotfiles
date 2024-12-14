@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers "install.sh"
+load helpers
 
 function setup() {
     stub _install_tmux_plugin_manager

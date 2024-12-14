@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers "install.sh"
+load helpers
 
 function setup() {
     declare -g -a array=(".config" "foo bar")
