@@ -2463,6 +2463,11 @@ function install_package_from_aur() {
 }
 
 function prepare_vscode_mac() {
+    # TODO:
+    # Installing VSCode on Mac is not implemented yet.
+    # Because there are some options to install VSCode, downloading VSCode's package from a web
+    # https://code.visualstudio.com/download and install it from GUI, installing VSCode written in .BrewfileOfDotfiles from
+    # a command brew on your CLI and both of them are not nececarry to write in this function.
     true
 }
 
