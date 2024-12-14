@@ -2387,8 +2387,46 @@ function prepare_vscode_debian() {
     return 0
 }
 
-function prepare_vscode_fedore() {
-    true
+function prepare_vscode_fedora() {
+    logger_info "Installing Visual Studio Code on \"$(get_distribution_name)\"..."
+
+    sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc || {
+        logger_err "Failed to import a key with a command \"sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc\""
+        return 1
+    }
+
+    set -o pipefail
+    echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" \
+        | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
+    local ret=$?
+    set +o pipefail
+
+    if [ $ret -ne 0 ]; then
+        logger_err "Failed to import a repository in a file \"/etc/yum.repos.d/vscode.repo\""
+        return 1
+    fi
+
+    if [ "$(get_distribution_name)" = "centos" ]; then
+        yum check-update || {
+            logger_err "Failed to run \"yum check-update\""
+            return 1
+        }
+        sudo yum install -y code || {
+            logger_err "Failed to run \"sudo yum install -y code\""
+            return 1
+        }
+    else
+        dnf check-update || {
+            logger_err "Failed to run \"dnf check-update\""
+            return 1
+        }
+        sudo dnf install -y code || {
+            logger_err "Failed to run \"sudo dnf install -y code\""
+            return 1
+        }
+    fi
+
+    return 0
 }
 
 function prepare_vscode_arch() {
