@@ -1,6 +1,5 @@
 #!/usr/bin/env bats
-
-load helpers "install.sh"
+load helpers
 
 function setup() {
     command rm -f /tmp/.*BrewfileOfDotfiles

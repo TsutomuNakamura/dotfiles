@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers "install.sh"
+load helpers
 
 function setup() {
     # determin_update_type_of_repository returns 0 mean GIT_UPDATE_TYPE_JUST_CLONE

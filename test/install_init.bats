@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
-load helpers "install.sh"
+load helpers
 
-function setup() {
+setup() {
     stub do_i_have_admin_privileges
     stub install_packages
     stub backup_current_dotfiles

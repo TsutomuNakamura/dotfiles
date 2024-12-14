@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers "install.sh"
+load helpers
 
 function setup() {
     mkdir -p "${FULL_BACKUPDIR_PATH}"

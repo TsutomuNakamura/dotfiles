@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load helpers "install.sh"
+load helpers
 
 # TODO: This test cases for both older than bash 4.4 and 4.4.
 

@@ -2,7 +2,7 @@
 
 #URL_OF_BATS="https://github.com/sstephenson/bats.git"
 URL_OF_BATS="https://github.com/bats-core/bats-core.git"
-VERSION_OF_BATS_CORE="v1.5.0"
+VERSION_OF_BATS_CORE="v1.11.1"
 URL_OF_STUBSH="https://github.com/TsutomuNakamura/stub4bats.sh"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
