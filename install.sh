@@ -2346,7 +2346,7 @@ function prepare_vscode() {
         prepare_vscode_mac || return 1
     else
         msg="Sorry, this dotfiles installer only supports to install Visual Studio Code on Debian, Ubuntu, Fedora, CentOS, Arch Linux and Mac OS X."
-        msg+="If you want to install Visual Studio Code on other distributions, please install it manually."
+        msg+=" If you want to install Visual Studio Code on other distributions, please install it manually."
         logger_info "${msg}"
     fi
 
