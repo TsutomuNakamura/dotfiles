@@ -17,8 +17,7 @@ function setup() {
     stub_and_eval install_package_from_aur '{ return 1; }'
     run prepare_vscode_arch
 
-    [ "$status" -eq 1 ]
+    [ "$status" -ne 0 ]
     [ "$(stub_called_times install_package_from_aur)"   -eq 1 ]
     stub_called_with_exactly_times install_package_from_aur 1 "https://aur.archlinux.org/visual-studio-code-bin.git"
 }
-

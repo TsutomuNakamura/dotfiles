@@ -7,6 +7,7 @@ function setup() {
     stub prepare_vscode_arch
     stub prepare_vscode_mac
     stub logger_info
+    stub logger_err
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "debian" and prepare_vscode_debian has succeeded' {
@@ -19,7 +20,10 @@ function setup() {
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
-    [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_info)"                        -eq 1 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
+
+    stub_called_with_exactly_times logger_info 1 "Visual Studio Code has installed on \"debian\""
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "ubuntu" and prepare_vscode_debian has succeeded' {
@@ -27,12 +31,15 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 0 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 2 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
-    [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_info)"                        -eq 1 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
+
+    stub_called_with_exactly_times logger_info 1 "Visual Studio Code has installed on \"ubuntu\""
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "debian" and prepare_vscode_debian has failed' {
@@ -47,6 +54,7 @@ function setup() {
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
     [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "fedora" and prepare_vscode_fedora has succeeded' {
@@ -54,12 +62,15 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 0 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 3 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
-    [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_info)"                        -eq 1 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
+
+    stub_called_with_exactly_times logger_info 1 "Visual Studio Code has installed on \"fedora\""
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "centos" and prepare_vscode_fedora has succeeded' {
@@ -67,12 +78,15 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 0 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 4 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
-    [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_info)"                        -eq 1 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
+
+    stub_called_with_exactly_times logger_info 1 "Visual Studio Code has installed on \"centos\""
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "fedora" and prepare_vscode_fedora has failed' {
@@ -81,12 +95,13 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 3 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
     [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "arch" and prepare_vscode_arch has succeeded' {
@@ -94,12 +109,13 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 0 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 5 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 1 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
-    [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_info)"                        -eq 1 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "arch" and prepare_vscode_arch has failed' {
@@ -108,12 +124,13 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 5 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 1 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
     [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "mac" and prepare_vscode_mac has succeeded' {
@@ -121,12 +138,13 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 0 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 6 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 1 ]
-    [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_info)"                        -eq 1 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
 }
 
 @test '#prepare_vscode should return 0 if the distribution is "mac" and prepare_vscode_mac has failed' {
@@ -135,26 +153,28 @@ function setup() {
     run prepare_vscode
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 6 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 1 ]
     [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_err)"                         -eq 0 ]
 }
 
 @test '#prepare_vscode should return 0 and print message if the distribution is unknown' {
     stub_and_eval get_distribution_name '{ command echo "unknown"; }'
     run prepare_vscode
 
-    [ "$status" -eq 0 ]
-    [ "$(stub_called_times get_distribution_name)"              -eq 6 ]
+    [ "$status" -eq 1 ]
+    [ "$(stub_called_times get_distribution_name)"              -eq 1 ]
     [ "$(stub_called_times prepare_vscode_debian)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_fedora)"              -eq 0 ]
     [ "$(stub_called_times prepare_vscode_arch)"                -eq 0 ]
     [ "$(stub_called_times prepare_vscode_mac)"                 -eq 0 ]
-    [ "$(stub_called_times logger_info)"                        -eq 1 ]
+    [ "$(stub_called_times logger_info)"                        -eq 0 ]
+    [ "$(stub_called_times logger_err)"                         -eq 1 ]
 
-    stub_called_with_exactly_times logger_info 1 "Sorry, this dotfiles installer only supports to install Visual Studio Code on Debian, Ubuntu, Fedora, CentOS, Arch Linux and Mac OS X. If you want to install Visual Studio Code on other distributions, please install it manually."
+    stub_called_with_exactly_times logger_err 1 "Sorry, this dotfiles installer only supports to install Visual Studio Code on Debian, Ubuntu, Fedora, CentOS, Arch Linux and Mac OS X. If you want to install Visual Studio Code on other distributions, please install it manually."
 }
 

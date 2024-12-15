@@ -2336,26 +2336,29 @@ function install_bin_utils() {
 # Prepare Visual Studio Code.
 # refer: https://code.visualstudio.com/docs/setup/linux
 function prepare_vscode() {
-    if [[ "$(get_distribution_name)" == "debian" ]] || [[ "$(get_distribution_name)" == "ubuntu" ]]; then
+    local distribution_name="$(get_distribution_name)"
+
+    if [[ "${distribution_name}" == "debian" ]] || [[ "${distribution_name}" == "ubuntu" ]]; then
         prepare_vscode_debian || return 1
-    elif [[ "$(get_distribution_name)" == "fedora" ]] || [[ "$(get_distribution_name)" == "centos" ]]; then
+    elif [[ "${distribution_name}" == "fedora" ]] || [[ "${distribution_name}" == "centos" ]]; then
         prepare_vscode_fedora || return 1
-    elif [[ "$(get_distribution_name)" == "arch" ]]; then
+    elif [[ "${distribution_name}" == "arch" ]]; then
         prepare_vscode_arch || return 1
-    elif [[ "$(get_distribution_name)" == "mac" ]]; then
+    elif [[ "${distribution_name}" == "mac" ]]; then
         prepare_vscode_mac || return 1
     else
         msg="Sorry, this dotfiles installer only supports to install Visual Studio Code on Debian, Ubuntu, Fedora, CentOS, Arch Linux and Mac OS X."
         msg+=" If you want to install Visual Studio Code on other distributions, please install it manually."
-        logger_info "${msg}"
+        logger_err "${msg}"
+        return 1
     fi
 
-    # TODO:
+    logger_info "Visual Studio Code has installed on \"${distribution_name}\""
+
     return 0
 }
 
 function prepare_vscode_debian() {
-    logger_info "Installing Visual Studio Code on \"$(get_distribution_name)\"..."
     set -o pipefail
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg || {
         logger_err "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"$(get_distribution_name)\""
@@ -2388,8 +2391,6 @@ function prepare_vscode_debian() {
 }
 
 function prepare_vscode_fedora() {
-    logger_info "Installing Visual Studio Code on \"$(get_distribution_name)\"..."
-
     sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc || {
         logger_err "Failed to import a key with a command \"sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc\""
         return 1
@@ -2430,8 +2431,7 @@ function prepare_vscode_fedora() {
 }
 
 function prepare_vscode_arch() {
-    install_package_from_aur "https://aur.archlinux.org/visual-studio-code-bin.git" || return 1
-    return 0
+    install_package_from_aur "https://aur.archlinux.org/visual-studio-code-bin.git"
 }
 
 function install_package_from_aur() {

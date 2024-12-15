@@ -2,7 +2,6 @@
 load helpers
 
 function setup() {
-    stub logger_info
     stub logger_err
     stub curl
     stub gpg
@@ -19,14 +18,12 @@ function teardown() {
     run prepare_vscode_debian
 
     [ "$status" -eq 0 ]
-    [ "$(stub_called_times logger_info)"              -eq 1 ]
     [ "$(stub_called_times logger_err)"               -eq 0 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
     [ "$(stub_called_times gpg)"                      -eq 1 ]
     [ "$(stub_called_times sudo)"                     -eq 4 ]
     [ "$(stub_called_times rm)"                       -eq 1 ]
 
-    stub_called_with_exactly_times logger_info 1 "Installing Visual Studio Code on \"debian\"..."
     stub_called_with_exactly_times curl 1 "https://packages.microsoft.com/keys/microsoft.asc"
     stub_called_with_exactly_times gpg 1 "--dearmor"
     stub_called_with_exactly_times sudo 1 "install" "-o" "root" "-g" "root" "-m" "644" "/tmp/microsoft.gpg" "/etc/apt/trusted.gpg.d/microsoft.gpg"
@@ -42,14 +39,12 @@ function teardown() {
     run prepare_vscode_debian
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times logger_info)"              -eq 1 ]
     [ "$(stub_called_times logger_err)"               -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
     [ "$(stub_called_times gpg)"                      -eq 1 ]
     [ "$(stub_called_times sudo)"                     -eq 0 ]
     [ "$(stub_called_times rm)"                       -eq 0 ]
 
-    stub_called_with_exactly_times logger_info 1 "Installing Visual Studio Code on \"debian\"..."
     stub_called_with_exactly_times curl 1 "https://packages.microsoft.com/keys/microsoft.asc"
     stub_called_with_exactly_times gpg 1 "--dearmor"
     stub_called_with_exactly_times logger_err 1 "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"debian\""
@@ -61,14 +56,12 @@ function teardown() {
     run prepare_vscode_debian
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times logger_info)"              -eq 1 ]
     [ "$(stub_called_times logger_err)"               -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
     [ "$(stub_called_times gpg)"                      -eq 1 ]
     [ "$(stub_called_times sudo)"                     -eq 0 ]
     [ "$(stub_called_times rm)"                       -eq 0 ]
 
-    stub_called_with_exactly_times logger_info 1 "Installing Visual Studio Code on \"debian\"..."
     stub_called_with_exactly_times curl 1 "https://packages.microsoft.com/keys/microsoft.asc"
     stub_called_with_exactly_times gpg 1 "--dearmor"
     stub_called_with_exactly_times logger_err 1 "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"debian\""
@@ -85,13 +78,12 @@ function teardown() {
     run prepare_vscode_debian
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times logger_info)"              -eq 1 ]
+    [ "$(stub_called_times logger_err)"               -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
     [ "$(stub_called_times gpg)"                      -eq 1 ]
     [ "$(stub_called_times sudo)"                     -eq 1 ]
     [ "$(stub_called_times rm)"                       -eq 0 ]
 
-    stub_called_with_exactly_times logger_info 1 "Installing Visual Studio Code on \"debian\"..."
     stub_called_with_exactly_times curl 1 "https://packages.microsoft.com/keys/microsoft.asc"
     stub_called_with_exactly_times gpg 1 "--dearmor"
     stub_called_with_exactly_times sudo 1 "install" "-o" "root" "-g" "root" "-m" "644" "/tmp/microsoft.gpg" "/etc/apt/trusted.gpg.d/microsoft.gpg"
@@ -109,13 +101,11 @@ function teardown() {
     run prepare_vscode_debian
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times logger_info)"              -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
     [ "$(stub_called_times gpg)"                      -eq 1 ]
     [ "$(stub_called_times sudo)"                     -eq 2 ]
     [ "$(stub_called_times rm)"                       -eq 1 ]
 
-    stub_called_with_exactly_times logger_info 1 "Installing Visual Studio Code on \"debian\"..."
     stub_called_with_exactly_times curl 1 "https://packages.microsoft.com/keys/microsoft.asc"
     stub_called_with_exactly_times gpg 1 "--dearmor"
     stub_called_with_exactly_times sudo 1 "install" "-o" "root" "-g" "root" "-m" "644" "/tmp/microsoft.gpg" "/etc/apt/trusted.gpg.d/microsoft.gpg"
@@ -135,13 +125,11 @@ function teardown() {
     run prepare_vscode_debian
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times logger_info)"              -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
     [ "$(stub_called_times gpg)"                      -eq 1 ]
     [ "$(stub_called_times sudo)"                     -eq 3 ]
     [ "$(stub_called_times rm)"                       -eq 1 ]
 
-    stub_called_with_exactly_times logger_info 1 "Installing Visual Studio Code on \"debian\"..."
     stub_called_with_exactly_times curl 1 "https://packages.microsoft.com/keys/microsoft.asc"
     stub_called_with_exactly_times gpg 1 "--dearmor"
     stub_called_with_exactly_times sudo 1 "install" "-o" "root" "-g" "root" "-m" "644" "/tmp/microsoft.gpg" "/etc/apt/trusted.gpg.d/microsoft.gpg"
@@ -162,13 +150,11 @@ function teardown() {
     run prepare_vscode_debian
 
     [ "$status" -eq 1 ]
-    [ "$(stub_called_times logger_info)"              -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
     [ "$(stub_called_times gpg)"                      -eq 1 ]
     [ "$(stub_called_times sudo)"                     -eq 4 ]
     [ "$(stub_called_times rm)"                       -eq 1 ]
 
-    stub_called_with_exactly_times logger_info 1 "Installing Visual Studio Code on \"debian\"..."
     stub_called_with_exactly_times curl 1 "https://packages.microsoft.com/keys/microsoft.asc"
     stub_called_with_exactly_times gpg 1 "--dearmor"
     stub_called_with_exactly_times sudo 1 "install" "-o" "root" "-g" "root" "-m" "644" "/tmp/microsoft.gpg" "/etc/apt/trusted.gpg.d/microsoft.gpg"
