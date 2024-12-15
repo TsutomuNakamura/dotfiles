@@ -2339,13 +2339,13 @@ function prepare_vscode() {
     local distribution_name="$(get_distribution_name)"
 
     if [[ "${distribution_name}" == "debian" ]] || [[ "${distribution_name}" == "ubuntu" ]]; then
-        prepare_vscode_debian || return 1
+        prepare_vscode_debian "${distribution_name}"    || return 1
     elif [[ "${distribution_name}" == "fedora" ]] || [[ "${distribution_name}" == "centos" ]]; then
-        prepare_vscode_fedora || return 1
+        prepare_vscode_fedora "${distribution_name}"    || return 1
     elif [[ "${distribution_name}" == "arch" ]]; then
-        prepare_vscode_arch || return 1
+        prepare_vscode_arch "${distribution_name}"      || return 1
     elif [[ "${distribution_name}" == "mac" ]]; then
-        prepare_vscode_mac || return 1
+        prepare_vscode_mac "${distribution_name}"       || return 1
     else
         msg="Sorry, this dotfiles installer only supports to install Visual Studio Code on Debian, Ubuntu, Fedora, CentOS, Arch Linux and Mac OS X."
         msg+=" If you want to install Visual Studio Code on other distributions, please install it manually."
@@ -2359,31 +2359,33 @@ function prepare_vscode() {
 }
 
 function prepare_vscode_debian() {
+    local distribution_name="$1"
+
     set -o pipefail
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg || {
-        logger_err "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"$(get_distribution_name)\""
+        logger_err "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"${distribution_name}\""
         set +o pipefail
         return 1
     }
     set +o pipefail
     sudo install -o root -g root -m 644 /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg || {
-        logger_err "Failed to install /tmp/microsoft.gpg to /etc/apt/trusted.gpg.d/microsoft.gpg on \"$(get_distribution_name)\""
+        logger_err "Failed to install /tmp/microsoft.gpg to /etc/apt/trusted.gpg.d/microsoft.gpg on \"${distribution_name}\""
         return 1
     }
     rm /tmp/microsoft.gpg
 
     sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list' || {
-        logger_err "Failed to add a repository of Visual Studio Code to /etc/apt/sources.list.d/vscode.list on \"$(get_distribution_name)\""
+        logger_err "Failed to add a repository of Visual Studio Code to /etc/apt/sources.list.d/vscode.list on \"${distribution_name}\""
         return 1
     }
 
     sudo apt-get update || {
-        logger_err "Failed to update apt-get on \"$(get_distribution_name)\""
+        logger_err "Failed to update apt-get on \"${distribution_name}\""
         return 1
     }
 
     sudo apt-get install -y code || {
-        logger_err "Failed to install Visual Studio Code with apt-get on \"$(get_distribution_name)\""
+        logger_err "Failed to install Visual Studio Code with apt-get on \"${distribution_name}\""
         return 1
     }
 
@@ -2391,6 +2393,8 @@ function prepare_vscode_debian() {
 }
 
 function prepare_vscode_fedora() {
+    local distribution_name="$1"
+
     sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc || {
         logger_err "Failed to import a key with a command \"sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc\""
         return 1
@@ -2407,7 +2411,7 @@ function prepare_vscode_fedora() {
         return 1
     fi
 
-    if [ "$(get_distribution_name)" = "centos" ]; then
+    if [ "${distribution_name}" = "centos" ]; then
         yum check-update || {
             logger_err "Failed to run \"yum check-update\""
             return 1

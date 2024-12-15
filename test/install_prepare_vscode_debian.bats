@@ -7,7 +7,6 @@ function setup() {
     stub gpg
     stub sudo
     stub rm
-    stub_and_eval get_distribution_name '{ command echo "debian"; }'
 }
 
 function teardown() {
@@ -15,7 +14,7 @@ function teardown() {
 }
 
 @test '#prepare_vscode_debian should return 0 if all instructions have succeeded' {
-    run prepare_vscode_debian
+    run prepare_vscode_debian "debian"
 
     [ "$status" -eq 0 ]
     [ "$(stub_called_times logger_err)"               -eq 0 ]
@@ -36,7 +35,8 @@ function teardown() {
 
 @test '#prepare_vscode_debian should return 1 if curl to download a key has failed' {
     stub_and_eval curl '{ return 1; }'
-    run prepare_vscode_debian
+
+    run prepare_vscode_debian "debian"
 
     [ "$status" -eq 1 ]
     [ "$(stub_called_times logger_err)"               -eq 1 ]
@@ -53,7 +53,8 @@ function teardown() {
 
 @test '#prepare_vscode_debian should return 1 if gpg to store a key has failed' {
     stub_and_eval gpg '{ return 1; }'
-    run prepare_vscode_debian
+
+    run prepare_vscode_debian "debian"
 
     [ "$status" -eq 1 ]
     [ "$(stub_called_times logger_err)"               -eq 1 ]
@@ -75,7 +76,8 @@ function teardown() {
         fi
         return 0
     }'
-    run prepare_vscode_debian
+
+    run prepare_vscode_debian "debian"
 
     [ "$status" -eq 1 ]
     [ "$(stub_called_times logger_err)"               -eq 1 ]
@@ -98,7 +100,8 @@ function teardown() {
         fi
         return 0
     }'
-    run prepare_vscode_debian
+
+    run prepare_vscode_debian "debian"
 
     [ "$status" -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
@@ -122,7 +125,8 @@ function teardown() {
         fi
         return 0
     }'
-    run prepare_vscode_debian
+
+    run prepare_vscode_debian "debian"
 
     [ "$status" -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
@@ -147,7 +151,8 @@ function teardown() {
         fi
         return 0
     }'
-    run prepare_vscode_debian
+
+    run prepare_vscode_debian "debian"
 
     [ "$status" -eq 1 ]
     [ "$(stub_called_times curl)"                     -eq 1 ]
