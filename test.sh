@@ -19,9 +19,9 @@ function main() {
     }
 
     # Is this container environment
-    if [[ ! -e "/.dockerenv" ]] && [[ "${TRAVIS}" != "true" ]]; then
-        echo "ERROR: This sciprt can run only on docker environment." >&2
-        echo "       If you want to run except the docker environment, specifi --no-docker-environment "
+    #if [[ ! -e "/.dockerenv" ]] && [[ "${TRAVIS}" != "true" ]]; then
+    if [[ ! -e "/.dockerenv" ]] && [[ "${CIRCLECI}" != "true" ]]; then
+        echo "ERROR: This sciprt can run only on docker environment or Circle CI environment." >&2
         exit 1
     fi
 

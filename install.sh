@@ -566,6 +566,11 @@ function init() {
         return 1
     }
 
+    prepare_vscode || {
+        logger_err "Failed to inizializing VSCode's environment. Remaining installation process will be aborted."
+        return 1
+    }
+
     return 0
 }
 
@@ -1015,7 +1020,7 @@ function install_packages_on_redhat() {
     }
 
     echo "Getting the list of available packages..."
-    local available_packages="$(${command_name} list available 2> /dev/null | tail -n +3 | cut -f1 -d' ' | sed -e 's/\(.*\)\.\(noarch\|x86_64\|i.86\)/\1/')"
+    local available_packages="$(${command_name} list --available 2> /dev/null | tail -n +3 | cut -f1 -d' ' | sed -e 's/\(.*\)\.\(noarch\|x86_64\|i.86\)/\1/')"
     [[ -z "$available_packages" ]] && {
         logger_err "Failed to get available packages at install_packages_on_redhat()"
         return 1
@@ -2326,6 +2331,148 @@ function prepare_neovim_environment() {
 function install_bin_utils() {
     _install_emojify || return 1
     return 0
+}
+
+# Prepare Visual Studio Code.
+# refer: https://code.visualstudio.com/docs/setup/linux
+function prepare_vscode() {
+    local distribution_name="$(get_distribution_name)"
+
+    if [[ "${distribution_name}" == "debian" ]] || [[ "${distribution_name}" == "ubuntu" ]]; then
+        prepare_vscode_debian "${distribution_name}"    || return 1
+    elif [[ "${distribution_name}" == "fedora" ]] || [[ "${distribution_name}" == "centos" ]]; then
+        prepare_vscode_fedora "${distribution_name}"    || return 1
+    elif [[ "${distribution_name}" == "arch" ]]; then
+        prepare_vscode_arch "${distribution_name}"      || return 1
+    elif [[ "${distribution_name}" == "mac" ]]; then
+        prepare_vscode_mac "${distribution_name}"       || return 1
+    else
+        msg="Sorry, this dotfiles installer only supports to install Visual Studio Code on Debian, Ubuntu, Fedora, CentOS, Arch Linux and Mac OS X."
+        msg+=" If you want to install Visual Studio Code on other distributions, please install it manually."
+        logger_err "${msg}"
+        return 1
+    fi
+
+    logger_info "Visual Studio Code has installed on \"${distribution_name}\""
+
+    return 0
+}
+
+function prepare_vscode_debian() {
+    local distribution_name="$1"
+
+    set -o pipefail
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg || {
+        logger_err "Failed to download microsoft.asc from https://packages.microsoft.com/keys/microsoft.asc on \"${distribution_name}\""
+        set +o pipefail
+        return 1
+    }
+    set +o pipefail
+    sudo install -o root -g root -m 644 /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg || {
+        logger_err "Failed to install /tmp/microsoft.gpg to /etc/apt/trusted.gpg.d/microsoft.gpg on \"${distribution_name}\""
+        return 1
+    }
+    rm /tmp/microsoft.gpg
+
+    sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list' || {
+        logger_err "Failed to add a repository of Visual Studio Code to /etc/apt/sources.list.d/vscode.list on \"${distribution_name}\""
+        return 1
+    }
+
+    sudo apt-get update || {
+        logger_err "Failed to update apt-get on \"${distribution_name}\""
+        return 1
+    }
+
+    sudo apt-get install -y code || {
+        logger_err "Failed to install Visual Studio Code with apt-get on \"${distribution_name}\""
+        return 1
+    }
+
+    return 0
+}
+
+function prepare_vscode_fedora() {
+    local distribution_name="$1"
+
+    sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc || {
+        logger_err "Failed to import a key with a command \"sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc\""
+        return 1
+    }
+
+    set -o pipefail
+    echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" \
+        | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
+    local ret=$?
+    set +o pipefail
+
+    if [ $ret -ne 0 ]; then
+        logger_err "Failed to import a repository in a file \"/etc/yum.repos.d/vscode.repo\""
+        return 1
+    fi
+
+    if [ "${distribution_name}" = "centos" ]; then
+        yum check-update || {
+            logger_err "Failed to run \"yum check-update\""
+            return 1
+        }
+        sudo yum install -y code || {
+            logger_err "Failed to run \"sudo yum install -y code\""
+            return 1
+        }
+    else
+        dnf check-update || {
+            logger_err "Failed to run \"dnf check-update\""
+            return 1
+        }
+        sudo dnf install -y code || {
+            logger_err "Failed to run \"sudo dnf install -y code\""
+            return 1
+        }
+    fi
+
+    return 0
+}
+
+function prepare_vscode_arch() {
+    install_package_from_aur "https://aur.archlinux.org/visual-studio-code-bin.git"
+}
+
+function install_package_from_aur() {
+    local url="$1"
+    local directory=$(basename "${url}")
+    directory="${directory%.*}"
+
+    logger_info "Cloning git repository to install AUR package \"${url}\""
+    git clone "${url}" || {
+        logger_err "Failed to clone git repository \"${url}\""
+        rm -rf "${directory}"
+        return 1
+    }
+
+    pushd "${directory}" || {
+        logger_err "Failed to change directory \"${directory}\""
+        rm -rf "${directory}"
+        return 1
+    }
+    makepkg -sri --noconfirm || {
+        logger_err "Failed to install an AUR package with command \"makepkg -sri --noconfirm\""
+        rm -rf "${directory}"
+        return 1
+    }
+    popd
+    rm -rf "${directory}"
+
+    return 0
+}
+
+function prepare_vscode_mac() {
+    # TODO:
+    # Installing VSCode on Mac is not implemented yet.
+    # Because there are some options to install VSCode, downloading VSCode's package from a web
+    # https://code.visualstudio.com/download and install it from GUI, installing VSCode written in .BrewfileOfDotfiles from
+    # a command brew on your CLI and both of them are not nececarry to write in this function.
+    true
 }
 
 function _install_emojify() {
