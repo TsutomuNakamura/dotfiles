@@ -7,4 +7,25 @@
     "markdown.extension.orderedList.autoRenumber": false,
     "markdown.extension.syntax.decorations": false,
     "markdown.extension.tableFormatter.enabled": false,
+    "editor.minimap.enabled": false,
+    "vscode-neovim.compositeKeys": {
+        "jk": {
+            "command": "vscode-neovim.escape"
+        }
+    },
+    "vscode-neovim.compositeKeys": {
+        "jk": {
+            "command": "vscode-neovim.escape"
+        }
+    },
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": true,
+        "markdown": true,
+        "scminput": false,
+        "palintext": true
+    },
+    "extensions.experimental.affinity": {
+        "asvetliakov.vscode-neovim": 1
+    }
 }
