@@ -402,7 +402,8 @@ This script will execute command to all of them at all once for example start, s
 
 ex)
   ${SCRIPT_NAME} start
-  ${SCRIPT_NAME} destroy
+  ${SCRIPT_NAME} shutdown         # Stop instance gracefully
+  ${SCRIPT_NAME} destroy          # Stop instance forcefully
   ${SCRIPT_NAME} list
   ${SCRIPT_NAME} snapshot-list    # It will list snapshot only in a controller node on behalf of all other nodes.
   ${SCRIPT_NAME} snapshot-create-as \${snapshot_name}
