@@ -187,11 +187,18 @@ delete_snapshots() {
 
 undefine_domain() {
     local domain="$1"
-    local ret=
-    local output=
+    local ret output get_os_startup_interface
 
-    output="$(virsh undefine "$domain" 2>&1)"
-    ret="$?"
+    os_startup_interface=$(get_os_startup_interface "${domain}")
+
+    if [[ "$os_startup_interface" == "UEFI" ]]; then
+        output="$(virsh undefine "$domain" --nvram 2>&1)"
+        ret="$?"
+    else
+        output="$(virsh undefine "$domain" 2>&1)"
+        ret="$?"
+    fi
+
     [[ $ret -ne 0 ]] && {
         if (grep -i 'error: failed to get domain ' <<< "$output"); then
             logger_info "The domain $domain has already deleted. Skipping."
@@ -203,6 +210,24 @@ undefine_domain() {
     }
 
     logger_info "Deleting a domain $domain has succeeded."
+
+    return 0
+}
+
+# Determine whether the domain uses UEFI or BIOS startup interface.
+# Output: "UEFI" or "BIOS"
+get_os_startup_interface() {
+    local domain="$1"
+    local dump_xml
+
+    dump_xml="$(virsh dumpxml "$domain" 2> /dev/null)"
+    [[ -z "$dump_xml" ]] && {
+        logger_err "Failed to dump XML of the domain ${domain}."
+        echo "UNKNOWN"
+        return 1
+    }
+
+    echo "$dump_xml" | grep -qP '^ *<nvram +' && echo "UEFI" || echo "BIOS"
 
     return 0
 }
