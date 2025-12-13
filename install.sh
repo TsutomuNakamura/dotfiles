@@ -2444,6 +2444,11 @@ function install_package_from_aur() {
     directory="${directory%.*}"
 
     logger_info "Cloning git repository to install AUR package \"${url}\""
+
+    if [ -d "${directory}" ]; then
+        rm -rf "${directory}"
+    fi
+
     git clone "${url}" || {
         logger_err "Failed to clone git repository \"${url}\""
         rm -rf "${directory}"
