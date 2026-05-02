@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+# drawio-build — Build draw.io Desktop and install it to the Arch Linux desktop environment.
+#
+# Usage (run from inside the drawio-desktop repository, or from anywhere):
+#   drawio-build              # build latest tagged version
+#   drawio-build v29.7.9     # build a specific version
+#
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# 1. Prerequisite checks — node and npm must already be available
+# ---------------------------------------------------------------------------
+if ! command -v node &>/dev/null; then
+    echo "Error: 'node' is not found in PATH." >&2
+    echo "Please install Node.js (>=20) before running this script (e.g. via nvm or pacman)." >&2
+    exit 1
+fi
+
+if ! command -v npm &>/dev/null; then
+    echo "Error: 'npm' is not found in PATH." >&2
+    echo "Please install npm before running this script." >&2
+    exit 1
+fi
+
+NODE_MAJOR=$(node --version | sed 's/v\([0-9]*\).*/\1/')
+if [ "$NODE_MAJOR" -lt 20 ]; then
+    echo "Error: Node.js >=20 is required. Current version: $(node --version)" >&2
+    exit 1
+fi
+
+echo "✓ node $(node --version)  npm $(npm --version)"
+
+# ---------------------------------------------------------------------------
+# 2. Ensure we are inside the drawio-desktop repository.
+#    If not, clone it into a temporary directory and work from there.
+# ---------------------------------------------------------------------------
+TMPDIR=""
+cleanup() {
+    if [ -n "$TMPDIR" ]; then
+        echo "Cleaning up temporary directory: $TMPDIR"
+        rm -rf "$TMPDIR"
+    fi
+}
+trap cleanup EXIT
+
+is_drawio_repo() {
+    [ -f "package.json" ] && grep -q '"name": "draw.io"' package.json 2>/dev/null
+}
+
+if ! is_drawio_repo; then
+    echo "Current directory is not the drawio-desktop repository."
+    echo "Cloning https://github.com/jgraph/drawio-desktop.git into a temporary directory..."
+    TMPDIR="$(mktemp -d)"
+    git clone https://github.com/jgraph/drawio-desktop.git "$TMPDIR"
+    cd "$TMPDIR"
+fi
+
+# ---------------------------------------------------------------------------
+# 3. Determine version to build
+# ---------------------------------------------------------------------------
+if [ $# -ge 1 ]; then
+    VERSION="$1"
+    # Accept both "29.7.9" and "v29.7.9"
+    [[ "$VERSION" != v* ]] && VERSION="v${VERSION}"
+else
+    echo "No version specified — fetching latest tag..."
+    git fetch --tags --quiet
+    VERSION=$(git tag --sort=-v:refname | grep '^v[0-9]' | head -1)
+    if [ -z "$VERSION" ]; then
+        echo "Error: Could not determine the latest version tag from the repository." >&2
+        exit 1
+    fi
+fi
+
+echo "Building draw.io $VERSION"
+
+# ---------------------------------------------------------------------------
+# 4. Checkout the requested version
+# ---------------------------------------------------------------------------
+if ! git rev-parse "$VERSION" &>/dev/null; then
+    echo "Error: Tag '$VERSION' not found. Run 'git fetch --tags' and try again." >&2
+    exit 1
+fi
+
+git checkout "$VERSION"
+
+# ---------------------------------------------------------------------------
+# 5. Initialise / update the drawio submodule
+# ---------------------------------------------------------------------------
+git submodule update --init --recursive
+
+# ---------------------------------------------------------------------------
+# 6. Install dependencies and sync version
+# ---------------------------------------------------------------------------
+npm install
+npm run sync
+
+# ---------------------------------------------------------------------------
+# 7. Build AppImage (local only — no GitHub publish)
+# ---------------------------------------------------------------------------
+npx electron-builder --config electron-builder-linux-mac.json --publish never --linux AppImage
+
+APPIMAGE=$(ls dist/draw.io-x86_64-*.AppImage 2>/dev/null | head -1)
+if [ -z "$APPIMAGE" ]; then
+    echo "Error: Build finished but no AppImage was found in dist/." >&2
+    exit 1
+fi
+
+echo "✓ Built: $APPIMAGE"
+
+# ---------------------------------------------------------------------------
+# 8. Install to the user's desktop environment
+# ---------------------------------------------------------------------------
+mkdir -p ~/.local/bin
+cp "$APPIMAGE" ~/.local/bin/drawio.AppImage.new
+chmod +x ~/.local/bin/drawio.AppImage.new
+mv -f ~/.local/bin/drawio.AppImage.new ~/.local/bin/drawio.AppImage
+
+mkdir -p ~/.local/share/icons/hicolor/512x512/apps
+cp build/512x512.png ~/.local/share/icons/hicolor/512x512/apps/drawio.png
+
+mkdir -p ~/.local/share/applications
+cat > ~/.local/share/applications/drawio.desktop << EOF
+[Desktop Entry]
+Name=draw.io
+Comment=draw.io Desktop Diagramming
+Exec=$HOME/.local/bin/drawio.AppImage %F
+Icon=drawio
+Terminal=false
+Type=Application
+Categories=Graphics;
+MimeType=application/vnd.jgraph.mxfile;application/vnd.visio;
+StartupWMClass=draw.io
+Keywords=diagram;flowchart;uml;
+EOF
+
+update-desktop-database ~/.local/share/applications
+gtk-update-icon-cache -f -t ~/.local/share/icons/hicolor 2>/dev/null || true
+
+echo "✓ draw.io $VERSION installed. Search for 'drawio' in the application menu to launch it."
