@@ -158,6 +158,10 @@ Plug 'mxw/vim-jsx'
 Plug 'leafgarland/typescript-vim'
 Plug 'peitalin/vim-jsx-typescript'
 
+" Plugin for GitHub Copilot.
+" After open nvim, run command ':Copilot setup' to set up GitHub Copilot.
+Plug 'github/copilot.vim'
+
 " - markdown-preview.nvim --------------------------------------------------------
 " If you don't have nodejs and yarn
 " use pre build, add 'vim-plug' to the filetype list so vim-plug can update this plugin
