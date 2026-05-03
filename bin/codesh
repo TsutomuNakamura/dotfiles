@@ -1,0 +1,6 @@
+#!/bin/bash
+# codesh — VS Code terminal launcher.
+# Uses a separate rc file so VS Code terminals get a clean, minimal
+# bash config instead of the full interactive ~/.bashrc.
+export CODESH_DIR="${HOME}/.config/codesh"
+exec bash --rcfile "${CODESH_DIR}/.bashrc" "$@"
