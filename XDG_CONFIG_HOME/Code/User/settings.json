@@ -32,5 +32,7 @@
             "path": "${env:HOME}/bin/codesh"
         }
     },
-    "terminal.integrated.defaultProfile.linux": "codesh"
+    "terminal.integrated.defaultProfile.linux": "codesh",
+    "accessibility.voice.keywordActivation": "chatInContext",
+    "workbench.colorTheme": "Dark Modern"
 }
