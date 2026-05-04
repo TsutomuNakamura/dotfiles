@@ -114,7 +114,8 @@ PACKAGES_TO_INSTALL_ON_FEDORA_THAT_HAS_GUI="google-noto-sans-fonts.noarch google
 
 PACKAGES_TO_INSTALL_ON_ARCH="gvim git ctags tmux zsh unzip gnome-terminal ranger ffmpeg cmake gcc make python3 clang xclip xbindkeys npm"
 PACKAGES_TO_INSTALL_ON_ARCH+=" neovim python-neovim"
-PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk"
+# pipewire-alsa alsa-utils are for using microphone on Arch Linux.
+PACKAGES_TO_INSTALL_ON_ARCH_THAT_HAS_GUI="noto-fonts noto-fonts-cjk pipewire-alsa alsa-utils"
 
 # Packages will be installed on Mac
 ##PACKAGES_TO_INSTALL_ON_MAC="vim ctags tmux zsh unzip cmake python3 llvm"
